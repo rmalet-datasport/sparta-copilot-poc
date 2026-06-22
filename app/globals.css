@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+/* ─── Saans Font Family ─────────────────────────────────────────── */
+@font-face {
+  font-family: 'Saans';
+  src: url('/fonts/Saans-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Saans';
+  src: url('/fonts/Saans-Medium.woff2') format('woff2');
+  font-weight: 570;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SaansMono';
+  src: url('/fonts/SaansMono-Regular.woff2') format('woff2');
+  font-weight: 380;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ─── Color Palette ─────────────────────────────────────────────── */
+:root {
+  --color-red-700: #D6001D;
+  --color-grey-900: #141414;
+  --color-grey-800: #1F1F1F;
+  --color-grey-700: #3A3A3A;
+  --color-grey-600: #555555;
+  --color-grey-500: #7A7A7A;
+  --color-grey-400: #9E9E9E;
+  --color-grey-300: #C4C4C4;
+  --color-grey-200: #E0E0E0;
+  --color-grey-100: #F0F0F0;
+  --color-grey-50: #F8F8F8;
+  --color-white: #FFFFFF;
+
+  /* Semantic tokens */
+  --primary: var(--color-red-700);
+  --secondary: var(--color-grey-900);
+
+  --fg-1: var(--color-grey-900);
+  --fg-2: var(--color-grey-700);
+  --fg-3: var(--color-grey-500);
+  --fg-inverse: var(--color-white);
+
+  --bg-1: var(--color-white);
+  --bg-2: var(--color-grey-50);
+  --bg-3: var(--color-grey-100);
+
+  --border-1: var(--color-grey-200);
+  --border-2: var(--color-grey-300);
+
+  /* Segment badge colors */
+  --badge-green: #16A34A;
+  --badge-green-bg: #F0FDF4;
+  --badge-orange: #EA580C;
+  --badge-orange-bg: #FFF7ED;
+  --badge-blue: #2563EB;
+  --badge-blue-bg: #EFF6FF;
+  --badge-grey: #6B7280;
+  --badge-grey-bg: #F9FAFB;
+  --badge-yellow: #CA8A04;
+  --badge-yellow-bg: #FEFCE8;
+  --badge-red: #DC2626;
+  --badge-red-bg: #FEF2F2;
+  --badge-red-dark: var(--color-red-700);
+  --badge-dark: #1E293B;
+  --badge-dark-bg: #F1F5F9;
+
+  /* Typography */
+  --font-sans: 'Saans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-mono: 'SaansMono', 'Courier New', Courier, monospace;
+
+  /* Shape */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-full: 9999px;
+}
+
+/* ─── Base Reset ────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--fg-1);
+  background: var(--bg-2);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--fg-3); }

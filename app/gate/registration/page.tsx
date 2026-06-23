@@ -130,7 +130,7 @@ export default function RegistrationPage() {
       <GateTimeline activeGate="registration" />
 
       {/* KPI strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, margin: '20px 0' }}>
+      <div className="sparta-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, margin: '20px 0' }}>
         {[
           { label: 'Total Applications', value: kpi.totalApplications.toLocaleString(), sub: '2026 ballot' },
           { label: 'Avg Candidacy Score', value: `${kpi.avgCandidacyScore}/100`, sub: 'Composite score' },

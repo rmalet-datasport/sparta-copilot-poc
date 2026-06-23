@@ -103,7 +103,7 @@ export default function CreationPage() {
       <GateTimeline activeGate="creation" />
 
       {/* KPI strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, margin: '20px 0' }}>
+      <div className="sparta-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, margin: '20px 0' }}>
         {[
           { label: '2026 Capacity', value: EVENT.capacity.toLocaleString(), sub: 'Marathon + Half' },
           { label: 'Target Applicants', value: EVENT.totalApplicants.toLocaleString(), sub: `vs ${kpi.historicalAvgApplicants.toLocaleString()} avg` },

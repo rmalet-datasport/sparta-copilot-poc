@@ -132,7 +132,7 @@ export default function LotteryPage() {
       <GateTimeline activeGate="lottery" />
 
       {/* KPI strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, margin: '20px 0' }}>
+      <div className="sparta-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, margin: '20px 0' }}>
         {[
           { label: 'Total Confirmed', value: kpi.totalConfirmed.toLocaleString(), sub: 'Registered for 2026' },
           { label: 'On Waitlist', value: kpi.totalWaitlist.toLocaleString(), sub: 'Awaiting spot' },

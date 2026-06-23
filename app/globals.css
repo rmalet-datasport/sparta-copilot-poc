@@ -139,6 +139,11 @@ body {
 }
 
 @media (max-width: 767px) {
+  /* KPI grid: 2 columns instead of 4 */
+  .sparta-kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
   /* Sidebar becomes a slide-in drawer */
   .sparta-sidebar {
     position: fixed;

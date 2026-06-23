@@ -123,7 +123,7 @@ export default function FinishPage() {
       <GateTimeline activeGate="finish" />
 
       {/* KPI strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, margin: '20px 0' }}>
+      <div className="sparta-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, margin: '20px 0' }}>
         {[
           { label: 'Total Finishers', value: kpi.totalFinishers.toLocaleString(), sub: 'May 17, 2026' },
           { label: 'Avg Finish Time', value: kpi.avgFinishTime, sub: 'All distances' },

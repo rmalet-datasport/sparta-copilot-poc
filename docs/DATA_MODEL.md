@@ -6,43 +6,62 @@ Une seule base de données d'athletes, enrichie progressivement à chaque gate.
 Les types TypeScript sont distincts par gate pour refléter les champs disponibles
 à ce stade du lifecycle. Aucune donnée n'est supprimée entre les gates — elle s'accumule.
 
-La DB est un fichier statique : `lib/db/athletes.ts`
-Les types par gate sont dans : `lib/types/`
+```
+lib/db/athletes.ts         → 500 athletes statiques (source unique de vérité)
+lib/db/segment-filter.ts   → filtrage dynamique + dérivation gate0Segment
+lib/db/segment-stats.ts    → calcul percentiles / distributions pour l'IA
+lib/types/athlete.ts       → type Athlete complet
+lib/types/gates.ts         → types par gate (Gate1Athlete, Gate2Athlete, Gate3Athlete)
+lib/types/segments.ts      → types segments personnalisés + constantes UI
+```
 
 ---
 
-## Paramètres généraux de l'événement
+## Paramètres généraux de l'événement (`lib/constants.ts`)
 
 ```ts
-// lib/db/event.ts
 export const EVENT = {
   name: "Copenhagen Marathon",
   edition: 2026,
   date: "2026-05-17",
   city: "Copenhagen",
   country: "Denmark",
-  capacity: 15000,           // places disponibles
+  capacity: 15000,
   ballotOpenDate: "2025-11-01",
   ballotCloseDate: "2025-12-15",
   lotteryDate: "2026-01-10",
-  waitlistDeadline: "2026-03-01",  // date limite waitlist — après cette date, un refusé est définitivement out
+  waitlistDeadline: "2026-03-01",
   distances: ["Marathon 42K", "Half Marathon 21K"],
-  historicalReturnRate: 0.65,      // 65% des finishers reviennent naturellement l'édition suivante
-  totalApplicants: 20000,          // candidats au ballot 2026
+  historicalReturnRate: 0.65,
+  totalApplicants: 20000,
+}
+
+export const SEGMENT_SIZES = {
+  gate0: { past_finishers: 5200, past_refused: 8400, international_targets: 12000, external_prospects: 1600 },
+  gate1: { ambassador: 3200, to_reactivate: 2800, opportunist: 7500, cold_prospect: 6500 },
+  gate2: { confirmed_engaged: 8200, confirmed_passive: 3800, waitlist_hot: 800, waitlist_cold: 1200, refused_reactivatable: 2400, refused_lost: 3600 },
+  gate3: { loyal_finisher: 6800, champion_ambassador: 1400, at_risk_returner: 2100, lost_dns: 1200, reconquest_dnf: 500 },
+}
+
+export const REREGISTRATION_RATES = {
+  naturalReturnRate: 0.65,
+  aiTargetedReturnRate: 0.82,
+  incrementalAthletes: 1950,
+  incrementalRevenue: 97500,
 }
 ```
 
 ---
 
-## Historique des éditions (pour chaque athlete)
+## Historique des éditions (par athlete)
 
 ```ts
 type PastEdition = {
-  year: number                          // 2021 | 2022 | 2023 | 2024 | 2025
+  year: number                            // 2021–2025
   applied: boolean
   status: 'registered' | 'waitlist' | 'refused' | 'not_applied'
-  raceStatus?: 'finisher' | 'dns' | 'dnf'  // si registered
-  finishTime?: string                   // ex: "3:42:15"
+  raceStatus?: 'finisher' | 'dns' | 'dnf'
+  finishTime?: string                     // ex: "3:42:15"
   upsellsPurchased?: string[]
 }
 ```
@@ -51,19 +70,196 @@ type PastEdition = {
 
 ## Engagement score
 
-Score composite 0–100 calculé à partir de 4 signaux.
-Valeur hardcodée par athlete dans la DB statique.
+Score composite 0–100, hardcodé par athlete dans la DB statique.
 
 ```ts
 type EngagementData = {
-  score: number                  // 0–100, score composite
-  emailOpenRate: number          // 0–1, ex: 0.72
-  appOpens: number               // nombre d'ouvertures app sur 90 jours
-  smsClickRate: number           // 0–1, ex: 0.45
-  instagramFollow: boolean       // suit le compte officiel
-  websiteVisits: number          // visites page event sur 90 jours
+  score: number           // 0–100, score composite
+  emailOpenRate: number   // 0–1
+  appOpens: number        // ouvertures app sur 90 jours
+  smsClickRate: number    // 0–1
+  instagramFollow: boolean
+  websiteVisits: number   // visites page event sur 90 jours
 }
 ```
+
+Distributions dans la DB (500 athletes) :
+- p25 ≈ 35, médiane ≈ 55, p75 ≈ 72, p90 ≈ 83
+
+---
+
+## Profil athlete complet (`lib/types/athlete.ts`)
+
+```ts
+export type Athlete = {
+
+  // ─── IDENTITÉ ───────────────────────────────────────────────────────────
+  id: string                  // "ATH-0001"
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  nationality: string         // 'DK' | 'SE' | 'DE' | 'UK' | 'NL' | 'NO' | 'FR' | ...
+  city: string
+  zipCode: string
+  age: number
+  gender: 'M' | 'F'
+  acquisitionSource: AcquisitionSource
+
+  // ─── HISTORIQUE ─────────────────────────────────────────────────────────
+  pastEditions: PastEdition[]
+  totalEditionsApplied: number
+  totalEditionsRaced: number
+  isReturningAthlete: boolean
+
+  // ─── ENGAGEMENT ─────────────────────────────────────────────────────────
+  engagement: EngagementData
+
+  // ─── GATE 1 — Registration opens ────────────────────────────────────────
+  registrationDate?: string
+  distance?: 'Marathon 42K' | 'Half Marathon 21K'
+  estimatedFinishTime?: string
+  externalProspect?: boolean
+  externalProspectSource?: string
+  candidacyScore?: number           // 0–100
+  anticipatedValue?: number         // €
+  selectionProbability?: number     // 0–1
+  preLotterySegment?: 'ambassador' | 'to_reactivate' | 'opportunist' | 'cold_prospect'
+
+  // ─── GATE 2 — Lottery result ─────────────────────────────────────────────
+  registrationStatus?: 'registered' | 'waitlist' | 'refused'
+  lotteryDate?: string
+  waitlistPosition?: number
+  upsellsPurchased?: UpsellItem[]
+  upsellRevenue?: number
+  paymentStatus?: 'paid' | 'pending' | 'failed'
+  postLotterySegment?: 'confirmed_engaged' | 'confirmed_passive' | 'waitlist_hot' | 'waitlist_cold' | 'refused_reactivatable' | 'refused_lost'
+
+  // ─── GATE 3 — Race finish ────────────────────────────────────────────────
+  raceStatus?: 'finisher' | 'dns' | 'dnf'
+  finishTime?: string
+  finishCategory?: string
+  finishRank?: number
+  personalBest?: boolean
+  reRegistrationProbability?: number  // 0–1
+  postRaceSegment?: 'loyal_finisher' | 'champion_ambassador' | 'at_risk_returner' | 'lost_dns' | 'reconquest_dnf'
+}
+```
+
+> **Note Gate 0** : il n'existe pas de champ `gate0Segment` dans le type Athlete.
+> Le segment est dérivé à la volée par `getGate0Segment(athlete)` dans `segment-filter.ts`.
+
+---
+
+## Filtrage athletes (`lib/db/segment-filter.ts`)
+
+```ts
+export function filterAthletes(
+  filters: FilterCondition[],
+  baseSegmentIds?: string[],
+  segmentField?: string
+): Athlete[]
+```
+
+**Cas spécial Gate 0** : quand `segmentField === 'gate0Segment'`, le pool est filtré
+via `getGate0Segment()` plutôt que via un champ direct de l'athlete.
+
+```ts
+function getGate0Segment(a: Athlete): string {
+  if (a.externalProspect) return 'external_prospects'
+  if (['DE', 'UK', 'NL', 'NO'].includes(a.nationality)) return 'international_targets'
+  if (a.isReturningAthlete && a.totalEditionsRaced > 0) return 'past_finishers'
+  return 'past_refused'
+}
+```
+
+**Champs filtrables (9 champs)** :
+
+| FilterField | Type | Description |
+|---|---|---|
+| `gender` | select | 'M' \| 'F' |
+| `age_min` | number | âge ≥ valeur |
+| `age_max` | number | âge ≤ valeur |
+| `nationality` | select | code pays 2 lettres |
+| `isReturningAthlete` | boolean | 'true' \| 'false' |
+| `total_editions_min` | number | totalEditionsRaced ≥ valeur |
+| `total_editions_max` | number | totalEditionsRaced ≤ valeur |
+| `engagement_min` | number | engagement.score ≥ valeur |
+| `city_contains` | text | city.includes(valeur) |
+
+---
+
+## Statistiques DB (`lib/db/segment-stats.ts`)
+
+Utilisé par `/api/ai/suggest-segment` pour calibrer intelligemment les filtres.
+
+```ts
+export function formatStatsForPrompt(): string
+// Retourne une string avec :
+// - Engagement : p25, médiane, p75, p90
+// - Âge : p25, médiane, p75
+// - Éditions courues : distribution 0 / 1 / 2-3 / 4+
+// - % athletes retournants
+// - % femmes / hommes
+// - Distribution nationalités (top pays)
+```
+
+---
+
+## Types segments personnalisés (`lib/types/segments.ts`)
+
+```ts
+export type FilterField =
+  | 'gender' | 'age_min' | 'age_max' | 'nationality' | 'isReturningAthlete'
+  | 'total_editions_min' | 'total_editions_max' | 'engagement_min' | 'city_contains'
+
+export interface FilterCondition {
+  id: string
+  field: FilterField
+  value: string
+}
+
+export interface CustomSegment {
+  id: string
+  name: string
+  color: string           // couleur principale (hex)
+  colorBg: string         // couleur de fond (hex clair)
+  filters: FilterCondition[]
+  baseSegmentIds: string[]    // vide = tous les athletes
+  baseSegmentLabels: string[] // labels lisibles pour l'affichage
+  objective?: string          // texte libre injecté dans le prompt IA
+}
+
+// Palette de 5 couleurs pour les segments personnalisés
+export const CUSTOM_SEGMENT_COLORS = [
+  { color: '#7C3AED', colorBg: '#F5F3FF' },  // violet
+  { color: '#0891B2', colorBg: '#ECFEFF' },  // cyan
+  { color: '#DB2777', colorBg: '#FDF2F8' },  // rose
+  { color: '#059669', colorBg: '#ECFDF5' },  // vert
+  { color: '#D97706', colorBg: '#FFFBEB' },  // ambre
+]
+
+// Génère une description textuelle du segment pour le prompt IA
+export function buildSegmentDescription(segment: CustomSegment): string
+// Retourne : "Segment personnalisé : \"Nom\"\nScope : ...\nCritères : ...\nObjectif : ..."
+```
+
+---
+
+## Distribution nationalités (DB statique — 500 athletes)
+
+| Nationalité | % | Nb athletes |
+|---|---|---|
+| DK | 38% | 190 |
+| SE | 14% | 70 |
+| DE | 12% | 60 |
+| UK | 10% | 50 |
+| NL | 8% | 40 |
+| NO | 7% | 35 |
+| FR | 5% | 25 |
+| Autres | 6% | 30 |
+
+Ces proportions se reflètent dans les chiffres UI via `SEGMENT_SIZES`.
 
 ---
 
@@ -71,214 +267,16 @@ type EngagementData = {
 
 ```ts
 type AcquisitionSource =
-  | 'organic_search'      // trouvé via Google
-  | 'social_instagram'    // pub ou post Instagram
-  | 'partner_event'       // via un événement partenaire (ex: autre marathon)
-  | 'contest'             // via un concours / jeu externe
-  | 'word_of_mouth'       // recommandation d'un autre athlete
-  | 'returning_athlete'   // a déjà participé à une édition précédente
-  | 'external_prospect'   // prospect externe importé (partenaire, liste tierce)
+  | 'organic_search'
+  | 'social_instagram'
+  | 'partner_event'
+  | 'contest'
+  | 'word_of_mouth'
+  | 'returning_athlete'
+  | 'external_prospect'   // ~40 athletes avec externalProspect: true
 ```
 
----
-
-## Upsells disponibles (Gate 2 — post-lottery)
-
-```ts
-type UpsellItem =
-  | 'accommodation_package'   // hôtel partenaire 2 nuits, ~€180
-  | 'charity_bib'             // dossard caritatif, donation €50+
-  | 'vip_finish_line'         // zone VIP à l'arrivée, €75
-  | 'race_photo_pack'         // pack photos officielles, €35
-  | 'pace_group_access'       // accès groupe de pace dédié, €25
-  | 'finisher_tshirt_premium' // t-shirt finisher premium, €40
-```
-
----
-
-## Profil athlete complet (type unifié)
-
-```ts
-// lib/types/athlete.ts
-
-export type Athlete = {
-
-  // ─── IDENTITÉ (disponible dès Gate 0) ───────────────────────────────
-  id: string                        // ex: "ATH-0001"
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  nationality: string               // 'DK' | 'SE' | 'DE' | 'UK' | 'NL' | 'NO' | 'FR' | 'US' | ...
-  city: string
-  zipCode: string
-  age: number
-  gender: 'M' | 'F'
-  acquisitionSource: AcquisitionSource
-  
-  // ─── HISTORIQUE (disponible dès Gate 0) ─────────────────────────────
-  pastEditions: PastEdition[]       // éditions 2021–2025
-  totalEditionsApplied: number      // calculé
-  totalEditionsRaced: number        // calculé
-  isReturningAthlete: boolean       // a participé au moins 1 fois
-  
-  // ─── ENGAGEMENT (disponible dès Gate 0) ─────────────────────────────
-  engagement: EngagementData
-  
-  // ─── GATE 1 — Registration opens ────────────────────────────────────
-  registrationDate?: string         // date de dépôt de candidature 2026
-  distance?: 'Marathon 42K' | 'Half Marathon 21K'
-  estimatedFinishTime?: string      // temps estimé déclaré
-  externalProspect?: boolean        // vient d'une source externe (contest, partenaire)
-  externalProspectSource?: string   // ex: "Nike Running Contest 2025"
-  
-  // Score pré-calculé (statique dans la DB)
-  candidacyScore?: number           // 0–100, valeur lifetime + probabilité sélection
-  anticipatedValue?: number         // €, valeur estimée si sélectionné (upsells + fidélité)
-  selectionProbability?: number     // 0–1, probabilité d'être sélectionné historiquement
-  
-  // Segment pre-lottery (statique)
-  preLotterySegment?: 'ambassador' | 'to_reactivate' | 'opportunist' | 'cold_prospect'
-  
-  // ─── GATE 2 — Lottery result ─────────────────────────────────────────
-  registrationStatus?: 'registered' | 'waitlist' | 'refused'
-  lotteryDate?: string
-  waitlistPosition?: number         // si waitlist, position dans la file
-  upsellsPurchased?: UpsellItem[]   // upsells achetés post-sélection
-  upsellRevenue?: number            // € total upsells
-  paymentStatus?: 'paid' | 'pending' | 'failed'
-  
-  // Segment post-lottery (statique)
-  postLotterySegment?: 'confirmed_engaged' | 'confirmed_passive' | 'waitlist_hot' | 'waitlist_cold' | 'refused_reactivatable' | 'refused_lost'
-  
-  // ─── GATE 3 — Race finish ────────────────────────────────────────────
-  raceStatus?: 'finisher' | 'dns' | 'dnf'
-  finishTime?: string               // ex: "3:42:15"
-  finishCategory?: string           // ex: "M40-44"
-  finishRank?: number               // classement général
-  personalBest?: boolean            // nouveau record personnel
-  
-  // Probabilité de retour édition suivante (statique, calculée sur historique)
-  reRegistrationProbability?: number  // 0–1
-  
-  // Segment post-race (statique)
-  postRaceSegment?: 'loyal_finisher' | 'champion_ambassador' | 'at_risk_returner' | 'lost_dns' | 'reconquest_dnf'
-}
-```
-
----
-
-## Types par gate (ce que chaque gate "voit")
-
-```ts
-// lib/types/gates.ts
-
-// Gate 0 — création event : pas d'athletes individuels
-// Vue agrégée uniquement (stats historiques par nationalité, source, etc.)
-
-// Gate 1 — Registration opens
-export type Gate1Athlete = Pick<Athlete,
-  'id' | 'firstName' | 'lastName' | 'nationality' | 'acquisitionSource' |
-  'pastEditions' | 'isReturningAthlete' | 'engagement' |
-  'registrationDate' | 'distance' | 'candidacyScore' |
-  'anticipatedValue' | 'selectionProbability' | 'preLotterySegment' |
-  'externalProspect' | 'externalProspectSource'
->
-
-// Gate 2 — Lottery result
-export type Gate2Athlete = Gate1Athlete & Pick<Athlete,
-  'registrationStatus' | 'waitlistPosition' | 'upsellsPurchased' |
-  'upsellRevenue' | 'paymentStatus' | 'postLotterySegment'
->
-
-// Gate 3 — Race finish
-export type Gate3Athlete = Gate2Athlete & Pick<Athlete,
-  'raceStatus' | 'finishTime' | 'finishCategory' | 'finishRank' |
-  'personalBest' | 'reRegistrationProbability' | 'postRaceSegment'
->
-```
-
----
-
-## Segments par gate (valeurs statiques hardcodées)
-
-### Gate 0 — Event Creation
-Pas de segments individuels. Vue agrégée uniquement :
-- Distribution historique par nationalité
-- Taux de conversion ballot → course par édition
-- Revenus upsells par édition
-
-### Gate 1 — Pre-lottery (matrice 4 quadrants)
-
-| Segment | Critère | Taille estimée | Couleur UI |
-|---|---|---|---|
-| `ambassador` | haute valeur × haute probabilité | ~3,200 athletes | vert |
-| `to_reactivate` | haute valeur × faible probabilité | ~2,800 athletes | orange |
-| `opportunist` | faible valeur × haute probabilité | ~7,500 athletes | bleu |
-| `cold_prospect` | faible valeur × faible probabilité | ~6,500 athletes | gris |
-
-### Gate 2 — Post-lottery
-
-| Segment | Statut | Taille estimée | Couleur UI |
-|---|---|---|---|
-| `confirmed_engaged` | registered + engagement score > 60 | ~8,200 athletes | vert |
-| `confirmed_passive` | registered + engagement score ≤ 60 | ~3,800 athletes | jaune |
-| `waitlist_hot` | waitlist + position ≤ 200 | ~800 athletes | orange |
-| `waitlist_cold` | waitlist + position > 200 | ~1,200 athletes | gris |
-| `refused_reactivatable` | refused + isReturningAthlete | ~2,400 athletes | rouge clair |
-| `refused_lost` | refused + première candidature | ~3,600 athletes | gris |
-
-### Gate 3 — Post-race
-
-| Segment | Critère | Taille estimée | Couleur UI |
-|---|---|---|---|
-| `loyal_finisher` | finisher + reRegistrationProbability > 0.7 | ~6,800 athletes | vert |
-| `champion_ambassador` | finisher + personalBest + engagement > 75 | ~1,400 athletes | rouge |
-| `at_risk_returner` | finisher + reRegistrationProbability ≤ 0.4 | ~2,100 athletes | orange |
-| `lost_dns` | dns | ~1,200 athletes | gris |
-| `reconquest_dnf` | dnf | ~500 athletes | jaune |
-
----
-
-## Distribution nationalités (DB statique)
-
-| Nationalité | % du total | Nb athletes |
-|---|---|---|
-| DK (Danemark) | 38% | 7,600 |
-| SE (Suède) | 14% | 2,800 |
-| DE (Allemagne) | 12% | 2,400 |
-| UK (Royaume-Uni) | 10% | 2,000 |
-| NL (Pays-Bas) | 8% | 1,600 |
-| NO (Norvège) | 7% | 1,400 |
-| FR (France) | 5% | 1,000 |
-| Autres | 6% | 1,200 |
-
----
-
-## Taux de ré-inscription historique (point 11)
-
-```ts
-// Utilisé pour calculer reRegistrationProbability par athlete
-// et justifier la valeur du module post-race
-
-export const REREGISTRATION_RATES = {
-  naturalReturnRate: 0.65,        // 65% reviennent sans intervention
-  aiTargetedReturnRate: 0.82,     // 82% avec campagne AI ciblée (projeté)
-  incrementalAthletes: 1950,      // ~1,950 athletes supplémentaires récupérés
-  incrementalRevenue: 97500,      // € (1,950 × ~€50 entry fee moyen)
-}
-```
-
----
-
-## Note sur les données externes (Gate 1)
-
-Les prospects externes représentent ~8% du total (1,600 athletes).
-Sources simulées :
-- `"Nike Running Club Copenhagen Contest"` — 600 prospects
-- `"Intersport Partner Program"` — 500 prospects
-- `"Parkrun Denmark Partnership"` — 500 prospects
-
-Ces athletes ont `externalProspect: true` et n'ont pas forcément d'historique
-sur les éditions précédentes. Leur `selectionProbability` est plus faible
-et leur segment pre-lottery est majoritairement `cold_prospect` ou `opportunist`.
+Prospects externes (~40 athletes) :
+- Nike Running Club Copenhagen Contest — ~15 athletes
+- Intersport Partner Program — ~13 athletes
+- Parkrun Denmark Partnership — ~12 athletes

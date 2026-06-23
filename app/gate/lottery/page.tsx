@@ -1,13 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import GateTimeline from '@/components/gates/GateTimeline';
 import SegmentCard from '@/components/gates/SegmentCard';
 import ChannelSelector from '@/components/gates/ChannelSelector';
 import CampaignGenerator from '@/components/campaign/CampaignGenerator';
+import SegmentBuilder, { type GateSegmentDef } from '@/components/gates/SegmentBuilder';
 import { SEGMENT_SIZES, DEFAULT_CHANNELS, KPI } from '@/lib/constants';
 import type { Channel } from '@/lib/constants';
 import { getAthletesByPostLotterySegment } from '@/lib/db/athletes';
+import { filterAthletes } from '@/lib/db/segment-filter';
+import type { CustomSegment } from '@/lib/types/segments';
+import { buildSegmentDescription, FILTER_FIELD_LABELS, FILTER_VALUE_OPTIONS } from '@/lib/types/segments';
 
 const SEGMENTS = [
   {
@@ -69,19 +73,52 @@ const SEGMENTS = [
 export default function LotteryPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [channels, setChannels] = useState<Channel[]>([]);
+  const [customSegments, setCustomSegments] = useState<CustomSegment[]>([]);
+  const [showBuilder, setShowBuilder] = useState(false);
 
-  const selected = SEGMENTS.find(s => s.id === selectedId);
+  const selectedStatic = SEGMENTS.find(s => s.id === selectedId);
+  const selectedCustom = customSegments.find(s => s.id === selectedId);
   const sizes = SEGMENT_SIZES.gate2;
   const kpi = KPI.gate2;
+  const GATE_TOTAL = Object.values(sizes).reduce((a, b) => a + b, 0);
+  const SEGMENT_FIELD = 'postLotterySegment';
+  const GATE_SEGMENTS: GateSegmentDef[] = SEGMENTS.map(s => ({ id: s.id, label: s.label, color: s.color }));
+
+  const getScaledCount = (seg: CustomSegment) => {
+    const base = seg.baseSegmentIds.length > 0 ? seg.baseSegmentIds : undefined;
+    const raw = filterAthletes(seg.filters, base, SEGMENT_FIELD).length;
+    if (seg.baseSegmentIds.length === 0) return Math.round(raw / 500 * GATE_TOTAL);
+    const baseTotal = seg.baseSegmentIds.reduce((sum, id) => sum + (sizes[id as keyof typeof sizes] ?? 0), 0);
+    const baseRaw = filterAthletes([], seg.baseSegmentIds, SEGMENT_FIELD).length;
+    return baseRaw > 0 ? Math.round(raw / baseRaw * baseTotal) : 0;
+  };
+
+  const customMatchedAthletes = useMemo(() => {
+    if (!selectedCustom) return [];
+    const base = selectedCustom.baseSegmentIds.length > 0 ? selectedCustom.baseSegmentIds : undefined;
+    return filterAthletes(selectedCustom.filters, base, SEGMENT_FIELD);
+  }, [selectedCustom]);
 
   const handleSelect = (id: string) => {
-    if (selectedId === id) {
-      setSelectedId(null);
-      setChannels([]);
-      return;
-    }
+    if (selectedId === id) { setSelectedId(null); setChannels([]); return; }
     setSelectedId(id);
-    setChannels((DEFAULT_CHANNELS[id] ?? ['email']) as Channel[]);
+    const isCustom = customSegments.some(s => s.id === id);
+    if (isCustom) {
+      setChannels(['email']);
+    } else {
+      setChannels((DEFAULT_CHANNELS[id] ?? ['email']) as Channel[]);
+    }
+  };
+
+  const handleSaveCustom = (seg: CustomSegment) => {
+    setCustomSegments(prev => [...prev, seg]);
+    setShowBuilder(false);
+    handleSelect(seg.id);
+  };
+
+  const handleDeleteCustom = (id: string) => {
+    setCustomSegments(prev => prev.filter(s => s.id !== id));
+    if (selectedId === id) { setSelectedId(null); setChannels([]); }
   };
 
   return (
@@ -104,16 +141,24 @@ export default function LotteryPage() {
         ))}
       </div>
 
-      <div style={{ marginBottom: 16 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 570, color: 'var(--fg-1)', margin: 0 }}>Post-lottery Segments</h2>
-        <p style={{ fontSize: 13, color: 'var(--fg-3)', margin: '4px 0 0' }}>
-          Lottery results: Jan 10, 2026 · Waitlist deadline: Mar 1, 2026
-        </p>
-      </div>
-
       <div style={{ display: 'flex', gap: 20 }}>
         {/* Left: segment list */}
         <div style={{ flex: '0 0 380px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {/* Section header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+            <div>
+              <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Post-lottery Segments</span>
+              <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--fg-3)' }}>{GATE_TOTAL.toLocaleString()} total athletes in this gate</span>
+            </div>
+            <button
+              onClick={() => setShowBuilder(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-1)', background: 'var(--bg-1)', color: 'var(--fg-2)', fontSize: 11, cursor: 'pointer', flexShrink: 0 }}
+            >
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
+              Créer un segment
+            </button>
+          </div>
+
           {SEGMENTS.map(seg => (
             <SegmentCard
               key={seg.id}
@@ -129,61 +174,140 @@ export default function LotteryPage() {
             />
           ))}
 
+          {/* Custom segments */}
+          {customSegments.length > 0 && customSegments.map(seg => (
+            <div
+              key={seg.id}
+              onClick={() => handleSelect(seg.id)}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: selectedId === seg.id ? seg.colorBg : 'var(--bg-1)', border: `1.5px solid ${selectedId === seg.id ? seg.color : 'var(--border-1)'}`, borderRadius: 'var(--radius-lg)', cursor: 'pointer', transition: 'all 0.15s' }}
+            >
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: seg.color, flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 13, fontWeight: 570, color: 'var(--fg-1)' }}>{seg.name}</span>
+                  <span style={{ fontSize: 13, fontWeight: 570, fontFamily: 'var(--font-mono)', color: selectedId === seg.id ? seg.color : 'var(--fg-1)' }}>{getScaledCount(seg).toLocaleString()}</span>
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--fg-3)', marginTop: 1 }}>Segment personnalisé</div>
+              </div>
+              <button onClick={e => { e.stopPropagation(); handleDeleteCustom(seg.id); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-3)', padding: 4, display: 'flex', alignItems: 'center' }}>
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M3 3l7 7M10 3l-7 7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
+              </button>
+            </div>
+          ))}
+
           {/* Sample athletes */}
-          {selected && (
+          {(selectedStatic || selectedCustom) && (
             <div style={{ marginTop: 8 }}>
               <div style={{ fontSize: 11, color: 'var(--fg-3)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 Sample athletes
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 140, overflowY: 'auto' }}>
-                {getAthletesByPostLotterySegment(selected.id as any).slice(0, 6).map(a => (
-                  <div key={a.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 10px', background: 'var(--bg-1)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-1)' }}>
-                    <span style={{ fontSize: 12, color: 'var(--fg-1)' }}>{a.firstName} {a.lastName}</span>
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>{a.nationality}</span>
-                      {a.upsellRevenue !== undefined && (
-                        <span style={{ fontSize: 11, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>€{a.upsellRevenue}</span>
-                      )}
+                {selectedStatic
+                  ? getAthletesByPostLotterySegment(selectedStatic.id as any).slice(0, 6).map(a => (
+                    <div key={a.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 10px', background: 'var(--bg-1)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-1)' }}>
+                      <span style={{ fontSize: 12, color: 'var(--fg-1)' }}>{a.firstName} {a.lastName}</span>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>{a.nationality}</span>
+                        {a.upsellRevenue !== undefined && <span style={{ fontSize: 11, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>€{a.upsellRevenue}</span>}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                  : customMatchedAthletes.slice(0, 6).map(a => (
+                    <div key={a.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 10px', background: 'var(--bg-1)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-1)' }}>
+                      <span style={{ fontSize: 12, color: 'var(--fg-1)' }}>{a.firstName} {a.lastName}</span>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>{a.nationality}</span>
+                        <span style={{ fontSize: 11, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>{a.age} ans</span>
+                      </div>
+                    </div>
+                  ))
+                }
               </div>
             </div>
           )}
         </div>
 
         {/* Right: campaign panel */}
-        {selected ? (
+        {selectedStatic ? (
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ background: 'var(--bg-1)', border: '1px solid var(--border-1)', borderRadius: 'var(--radius-xl)', padding: '20px' }}>
               <div style={{ marginBottom: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: selected.color, display: 'inline-block' }} />
-                  <h3 style={{ fontSize: 15, fontWeight: 570, margin: 0 }}>{selected.label}</h3>
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: selectedStatic.color, display: 'inline-block' }} />
+                  <h3 style={{ fontSize: 15, fontWeight: 570, margin: 0 }}>{selectedStatic.label}</h3>
                   <span style={{ fontSize: 13, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>
-                    {sizes[selected.id as keyof typeof sizes].toLocaleString()} athletes
+                    {sizes[selectedStatic.id as keyof typeof sizes].toLocaleString()} athletes
                   </span>
                 </div>
-                <p style={{ margin: 0, fontSize: 12, color: 'var(--fg-3)' }}>{selected.objective}</p>
+                <p style={{ margin: 0, fontSize: 12, color: 'var(--fg-3)' }}>{selectedStatic.objective}</p>
               </div>
               <div style={{ borderBottom: '1px solid var(--border-1)', marginBottom: 20 }} />
               <div style={{ marginBottom: 20 }}>
                 <ChannelSelector
-                  available={(DEFAULT_CHANNELS[selected.id] ?? ['email']) as Channel[]}
+                  available={(DEFAULT_CHANNELS[selectedStatic.id] ?? ['email']) as Channel[]}
                   selected={channels}
                   onChange={setChannels}
-                  rationale={selected.rationale}
+                  rationale={selectedStatic.rationale}
                 />
               </div>
               <div style={{ borderBottom: '1px solid var(--border-1)', marginBottom: 20 }} />
-              <CampaignGenerator gate="gate2" segment={selected.id} channels={channels} />
+              <CampaignGenerator gate="gate2" segment={selectedStatic.id} channels={channels} />
+            </div>
+          </div>
+        ) : selectedCustom ? (
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ background: 'var(--bg-1)', border: '1px solid var(--border-1)', borderRadius: 'var(--radius-xl)', padding: '20px' }}>
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: selectedCustom.color, display: 'inline-block' }} />
+                  <h3 style={{ fontSize: 15, fontWeight: 570, margin: 0 }}>{selectedCustom.name}</h3>
+                  <span style={{ fontSize: 13, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>
+                    {getScaledCount(selectedCustom).toLocaleString()} athletes
+                  </span>
+                  <span style={{ fontSize: 10, color: selectedCustom.color, background: selectedCustom.colorBg, padding: '2px 7px', borderRadius: 'var(--radius-full)', fontWeight: 570, letterSpacing: '0.04em' }}>
+                    CUSTOM
+                  </span>
+                </div>
+                <p style={{ margin: 0, fontSize: 12, color: 'var(--fg-3)', lineHeight: 1.6 }}>
+                  {selectedCustom.baseSegmentIds.length > 0 && (
+                    <span style={{ display: 'block' }}>
+                      <span style={{ color: 'var(--fg-2)', fontWeight: 570 }}>Scope:</span>{' '}
+                      {selectedCustom.baseSegmentLabels.join(', ')}
+                    </span>
+                  )}
+                  {selectedCustom.filters.length > 0 && (
+                    <span style={{ display: 'block' }}>
+                      {selectedCustom.filters.map(f => {
+                        const val = FILTER_VALUE_OPTIONS[f.field]?.find(o => o.value === f.value)?.label ?? f.value;
+                        return `${FILTER_FIELD_LABELS[f.field]}: ${val}`;
+                      }).join(' · ')}
+                    </span>
+                  )}
+                  {selectedCustom.baseSegmentIds.length === 0 && selectedCustom.filters.length === 0 && 'Tous les athletes, aucun filtre'}
+                </p>
+              </div>
+              <div style={{ borderBottom: '1px solid var(--border-1)', marginBottom: 20 }} />
+              <div style={{ marginBottom: 20 }}>
+                <ChannelSelector
+                  available={['email', 'sms', 'push', 'instagram']}
+                  selected={channels}
+                  onChange={setChannels}
+                />
+              </div>
+              <div style={{ borderBottom: '1px solid var(--border-1)', marginBottom: 20 }} />
+              <CampaignGenerator
+                gate="gate2"
+                segment="custom_segment"
+                channels={channels}
+                segmentDescription={buildSegmentDescription(selectedCustom)}
+              />
             </div>
           </div>
         ) : (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12, color: 'var(--fg-3)', padding: 40 }}>
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none" opacity="0.3">
-              <rect x="8" y="8" width="24" height="24" rx="6" stroke="currentColor" strokeWidth="2"/>
-              <path d="M20 16v8M16 20h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <rect x="8" y="8" width="24" height="24" rx="6" stroke="currentColor" strokeWidth="2" />
+              <path d="M20 16v8M16 20h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
             <p style={{ fontSize: 13, textAlign: 'center', maxWidth: 240, margin: 0 }}>
               Select a segment to generate your post-lottery campaign
@@ -191,6 +315,18 @@ export default function LotteryPage() {
           </div>
         )}
       </div>
+
+      {showBuilder && (
+        <SegmentBuilder
+          existingCount={customSegments.length}
+          gateTotal={GATE_TOTAL}
+          segmentSizes={sizes}
+          gateSegments={GATE_SEGMENTS}
+          athleteSegmentField={SEGMENT_FIELD}
+          onClose={() => setShowBuilder(false)}
+          onSave={handleSaveCustom}
+        />
+      )}
     </div>
   );
 }

@@ -17,6 +17,7 @@ interface CampaignGeneratorProps {
   gate: string;
   segment: string;
   channels: string[];
+  segmentDescription?: string;
 }
 
 function LoadingDots() {
@@ -45,7 +46,7 @@ function LoadingDots() {
   );
 }
 
-export default function CampaignGenerator({ gate, segment, channels }: CampaignGeneratorProps) {
+export default function CampaignGenerator({ gate, segment, channels, segmentDescription }: CampaignGeneratorProps) {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [status, setStatus] = useState<'idle' | 'generating' | 'done' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -68,6 +69,7 @@ export default function CampaignGenerator({ gate, segment, channels }: CampaignG
           channels: opts?.channelToRegenerate ? [opts.channelToRegenerate] : channels,
           customInstructions: opts?.customPrompt ?? customInstructions,
           channelToRegenerate: opts?.channelToRegenerate,
+          segmentDescription,
         }),
       });
 

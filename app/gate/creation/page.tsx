@@ -4,8 +4,12 @@ import { useState } from 'react';
 import GateTimeline from '@/components/gates/GateTimeline';
 import ChannelSelector from '@/components/gates/ChannelSelector';
 import CampaignGenerator from '@/components/campaign/CampaignGenerator';
+import SegmentBuilder from '@/components/gates/SegmentBuilder';
 import { SEGMENT_SIZES, DEFAULT_CHANNELS, KPI, EVENT } from '@/lib/constants';
 import type { Channel } from '@/lib/constants';
+import { filterAthletes } from '@/lib/db/segment-filter';
+import type { CustomSegment } from '@/lib/types/segments';
+import { buildSegmentDescription } from '@/lib/types/segments';
 
 const SEGMENTS = [
   {
@@ -62,17 +66,35 @@ const HISTORICAL = [
   { year: 2021, applicants: 11500, finishers: 7200, upsellRevenue: 176000 },
 ];
 
+const GATE_TOTAL = Object.values(SEGMENT_SIZES.gate0).reduce((a, b) => a + b, 0);
+const sizes = SEGMENT_SIZES.gate0;
+const DB_SIZE = 500;
+const SEGMENT_FIELD = 'gate0Segment';
+const GATE_SEGMENTS = SEGMENTS.map(s => ({ id: s.id, label: s.label, color: s.color }));
+
 export default function CreationPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [channels, setChannels] = useState<Channel[]>([]);
+  const [customSegments, setCustomSegments] = useState<CustomSegment[]>([]);
+  const [showBuilder, setShowBuilder] = useState(false);
 
   const selected = SEGMENTS.find(s => s.id === selectedId);
+  const selectedCustom = customSegments.find(s => s.id === selectedId);
   const kpi = KPI.gate0;
 
   const handleSelect = (id: string) => {
     if (selectedId === id) { setSelectedId(null); setChannels([]); return; }
     setSelectedId(id);
     setChannels((DEFAULT_CHANNELS[id] ?? ['email']) as Channel[]);
+  };
+
+  const getScaledCount = (seg: CustomSegment) => {
+    const base = seg.baseSegmentIds.length > 0 ? seg.baseSegmentIds : undefined;
+    const raw = filterAthletes(seg.filters, base, SEGMENT_FIELD).length;
+    if (seg.baseSegmentIds.length === 0) return Math.round(raw / DB_SIZE * GATE_TOTAL);
+    const baseTotal = seg.baseSegmentIds.reduce((sum, id) => sum + (sizes[id as keyof typeof sizes] ?? 0), 0);
+    const baseRaw = filterAthletes([], seg.baseSegmentIds, SEGMENT_FIELD).length;
+    return baseRaw > 0 ? Math.round(raw / baseRaw * baseTotal) : 0;
   };
 
   return (
@@ -98,39 +120,19 @@ export default function CreationPage() {
       <div style={{ display: 'flex', gap: 20 }}>
         {/* Left */}
         <div style={{ flex: '0 0 360px' }}>
-          {/* Historical data */}
-          <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Historical Performance
-            </div>
-            <div style={{ background: 'var(--bg-1)', border: '1px solid var(--border-1)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid var(--border-1)' }}>
-                    {['Year', 'Applicants', 'Finishers', 'Upsells'].map(h => (
-                      <th key={h} style={{ padding: '8px 12px', textAlign: 'right', color: 'var(--fg-3)', fontWeight: 570, fontSize: 11, letterSpacing: '0.04em' }}>
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {HISTORICAL.map((row, i) => (
-                    <tr key={row.year} style={{ borderBottom: i < HISTORICAL.length - 1 ? '1px solid var(--border-1)' : 'none', background: i % 2 === 0 ? 'transparent' : 'var(--bg-2)' }}>
-                      <td style={{ padding: '7px 12px', fontFamily: 'var(--font-mono)', color: 'var(--fg-1)', fontWeight: 570 }}>{row.year}</td>
-                      <td style={{ padding: '7px 12px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--fg-2)' }}>{row.applicants.toLocaleString()}</td>
-                      <td style={{ padding: '7px 12px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--fg-2)' }}>{row.finishers.toLocaleString()}</td>
-                      <td style={{ padding: '7px 12px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--fg-2)' }}>€{(row.upsellRevenue / 1000).toFixed(0)}k</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
           {/* Segment cards */}
-          <div style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            Pre-ballot Segments
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div>
+              <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Pre-ballot Segments</span>
+              <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--fg-3)' }}>{GATE_TOTAL.toLocaleString()} total prospects in this gate</span>
+            </div>
+            <button
+              onClick={() => setShowBuilder(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-1)', background: 'var(--bg-1)', color: 'var(--fg-2)', fontSize: 11, cursor: 'pointer' }}
+            >
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
+              Créer un segment
+            </button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {SEGMENTS.map(seg => (
@@ -162,11 +164,87 @@ export default function CreationPage() {
                 </div>
               </button>
             ))}
+
+            {customSegments.map(seg => (
+              <div
+                key={seg.id}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: selectedId === seg.id ? seg.colorBg : 'var(--bg-1)', border: `1.5px solid ${selectedId === seg.id ? seg.color : 'var(--border-1)'}`, borderRadius: 'var(--radius-lg)', cursor: 'pointer', transition: 'all 0.15s' }}
+                onClick={() => handleSelect(seg.id)}
+              >
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: seg.color, flexShrink: 0 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: 13, fontWeight: 570, color: 'var(--fg-1)' }}>{seg.name}</span>
+                    <span style={{ fontSize: 13, fontWeight: 570, fontFamily: 'var(--font-mono)', color: selectedId === seg.id ? seg.color : 'var(--fg-1)' }}>
+                      {getScaledCount(seg).toLocaleString()}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--fg-3)', marginTop: 1 }}>Segment personnalisé</div>
+                </div>
+                <button
+                  onClick={e => { e.stopPropagation(); setCustomSegments(p => p.filter(s => s.id !== seg.id)); if (selectedId === seg.id) { setSelectedId(null); setChannels([]); } }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-3)', padding: 4, display: 'flex', alignItems: 'center' }}
+                >
+                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M3 3l7 7M10 3l-7 7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Historical data */}
+          <div style={{ marginTop: 20 }}>
+            <div style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Historical Performance
+            </div>
+            <div style={{ background: 'var(--bg-1)', border: '1px solid var(--border-1)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border-1)' }}>
+                    {['Year', 'Applicants', 'Finishers', 'Upsells'].map(h => (
+                      <th key={h} style={{ padding: '8px 12px', textAlign: 'right', color: 'var(--fg-3)', fontWeight: 570, fontSize: 11, letterSpacing: '0.04em' }}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {HISTORICAL.map((row, i) => (
+                    <tr key={row.year} style={{ borderBottom: i < HISTORICAL.length - 1 ? '1px solid var(--border-1)' : 'none', background: i % 2 === 0 ? 'transparent' : 'var(--bg-2)' }}>
+                      <td style={{ padding: '7px 12px', fontFamily: 'var(--font-mono)', color: 'var(--fg-1)', fontWeight: 570 }}>{row.year}</td>
+                      <td style={{ padding: '7px 12px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--fg-2)' }}>{row.applicants.toLocaleString()}</td>
+                      <td style={{ padding: '7px 12px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--fg-2)' }}>{row.finishers.toLocaleString()}</td>
+                      <td style={{ padding: '7px 12px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--fg-2)' }}>€{(row.upsellRevenue / 1000).toFixed(0)}k</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
         {/* Right: campaign panel */}
-        {selected ? (
+        {selectedCustom ? (
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ background: 'var(--bg-1)', border: '1px solid var(--border-1)', borderRadius: 'var(--radius-xl)', padding: '20px' }}>
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <span style={{ padding: '2px 7px', borderRadius: 'var(--radius-sm)', background: selectedCustom.colorBg, color: selectedCustom.color, fontSize: 10, fontWeight: 570, letterSpacing: '0.06em' }}>CUSTOM</span>
+                  <h3 style={{ fontSize: 15, fontWeight: 570, margin: 0 }}>{selectedCustom.name}</h3>
+                  <span style={{ fontSize: 13, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>
+                    {getScaledCount(selectedCustom).toLocaleString()} athletes
+                  </span>
+                </div>
+                {selectedCustom.objective && <p style={{ margin: 0, fontSize: 12, color: 'var(--fg-3)' }}>{selectedCustom.objective}</p>}
+              </div>
+              <div style={{ borderBottom: '1px solid var(--border-1)', marginBottom: 20 }} />
+              <div style={{ marginBottom: 20 }}>
+                <ChannelSelector available={['email', 'sms', 'push', 'instagram']} selected={channels} onChange={setChannels} rationale={{}} />
+              </div>
+              <div style={{ borderBottom: '1px solid var(--border-1)', marginBottom: 20 }} />
+              <CampaignGenerator gate="gate0" segment="custom_segment" channels={channels} segmentDescription={buildSegmentDescription(selectedCustom)} />
+            </div>
+          </div>
+        ) : selected ? (
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ background: 'var(--bg-1)', border: '1px solid var(--border-1)', borderRadius: 'var(--radius-xl)', padding: '20px' }}>
               <div style={{ marginBottom: 20 }}>
@@ -205,6 +283,18 @@ export default function CreationPage() {
           </div>
         )}
       </div>
+
+      {showBuilder && (
+        <SegmentBuilder
+          existingCount={customSegments.length}
+          gateTotal={GATE_TOTAL}
+          segmentSizes={sizes}
+          gateSegments={GATE_SEGMENTS}
+          athleteSegmentField={SEGMENT_FIELD}
+          onClose={() => setShowBuilder(false)}
+          onSave={seg => { setCustomSegments(p => [...p, seg]); setShowBuilder(false); setSelectedId(seg.id); setChannels(['email']); }}
+        />
+      )}
     </div>
   );
 }

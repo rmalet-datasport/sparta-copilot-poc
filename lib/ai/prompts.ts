@@ -47,6 +47,15 @@ Le champ "meta" décrit en une ligne le contexte ou l'intention de l'asset.`;
 
 export const SYSTEM_PROMPTS: Record<string, Record<string, string>> = {
   gate0: {
+    custom_segment: `${BASE_PROMPT}
+
+Contexte du segment :
+Ce segment a été créé manuellement par l'organisateur de l'événement. Les caractéristiques précises (nom, filtres démographiques) sont décrites dans le message utilisateur.
+
+Ton objectif : générer des assets marketing parfaitement adaptés aux caractéristiques de ce segment. Utilise les informations fournies pour personnaliser le ton, le message et les arguments. Adapte ton approche en fonction du profil démographique décrit.
+
+${FORMAT_INSTRUCTION}`,
+
     past_finishers: `${BASE_PROMPT}
 
 Contexte du segment :
@@ -113,6 +122,15 @@ ${FORMAT_INSTRUCTION}`,
   },
 
   gate1: {
+    custom_segment: `${BASE_PROMPT}
+
+Contexte du segment :
+Ce segment a été créé manuellement par l'organisateur de l'événement. Les caractéristiques précises (nom, filtres démographiques) sont décrites dans le message utilisateur.
+
+Ton objectif : générer des assets marketing parfaitement adaptés aux caractéristiques de ce segment. Utilise les informations fournies pour personnaliser le ton, le message et les arguments. Adapte ton approche en fonction du profil démographique décrit.
+
+${FORMAT_INSTRUCTION}`,
+
     ambassador: `${BASE_PROMPT}
 
 Contexte du segment :
@@ -183,6 +201,15 @@ ${FORMAT_INSTRUCTION}`,
   },
 
   gate2: {
+    custom_segment: `${BASE_PROMPT}
+
+Contexte du segment :
+Ce segment a été créé manuellement par l'organisateur de l'événement. Les caractéristiques précises (nom, filtres démographiques) sont décrites dans le message utilisateur.
+
+Ton objectif : générer des assets marketing parfaitement adaptés aux caractéristiques de ce segment. Utilise les informations fournies pour personnaliser le ton, le message et les arguments. Adapte ton approche en fonction du profil démographique décrit.
+
+${FORMAT_INSTRUCTION}`,
+
     confirmed_engaged: `${BASE_PROMPT}
 
 Contexte du segment :
@@ -277,6 +304,15 @@ ${FORMAT_INSTRUCTION}`,
   },
 
   gate3: {
+    custom_segment: `${BASE_PROMPT}
+
+Contexte du segment :
+Ce segment a été créé manuellement par l'organisateur de l'événement. Les caractéristiques précises (nom, filtres démographiques) sont décrites dans le message utilisateur.
+
+Ton objectif : générer des assets marketing parfaitement adaptés aux caractéristiques de ce segment. Utilise les informations fournies pour personnaliser le ton, le message et les arguments. Adapte ton approche en fonction du profil démographique décrit.
+
+${FORMAT_INSTRUCTION}`,
+
     loyal_finisher: `${BASE_PROMPT}
 
 Contexte du segment :
@@ -360,16 +396,21 @@ ${FORMAT_INSTRUCTION}`,
 export function buildUserPrompt(params: {
   channels: string[];
   customInstructions?: string;
+  segmentDescription?: string;
   segmentStats?: {
     size: number;
     nationality?: string;
     avgEngagement?: number;
   };
 }): string {
-  const { channels, customInstructions, segmentStats } = params;
+  const { channels, customInstructions, segmentDescription, segmentStats } = params;
   const parts: string[] = [];
 
   parts.push(`Génère des assets marketing pour les channels suivants : ${channels.join(', ')}.`);
+
+  if (segmentDescription) {
+    parts.push(`\n${segmentDescription}`);
+  }
 
   if (segmentStats) {
     parts.push(`\nStatistiques du segment :`);

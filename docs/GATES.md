@@ -5,7 +5,28 @@
 Le lifecycle Copenhagen Marathon 2026 est découpé en 4 gates fixes.
 La navigation entre les gates se fait via la timeline en haut de page.
 Chaque gate affiche ses propres segments, channels recommandés et campagnes générées.
-La segmentation est statique (hardcodée dans la DB).
+
+**Segmentation hybride** : chaque gate dispose de segments prédéfinis statiques
+ET d'un bouton "Créer un segment" permettant de créer des segments personnalisés
+dynamiquement via filtres manuels ou IA.
+
+---
+
+## Layout commun à toutes les gates
+
+```
+[KPI strip — 4 métriques clés]
+
+Colonne gauche (380px fixe)                   Colonne droite (flex 1)
+─────────────────────────────                 ──────────────────────
+[LABEL] [total athletes] [+ Créer]            [Panel campagne du segment sélectionné]
+[Segment Card 1]                              ou
+[Segment Card 2]                              [Empty state si aucun sélectionné]
+[...]
+[Segment custom 1] (si créé)
+[Segment custom 2] (si créé)
+[Sample athletes du segment sélectionné]
+```
 
 ---
 
@@ -15,41 +36,39 @@ La segmentation est statique (hardcodée dans la DB).
 Avant l'ouverture du ballot. L'organisateur crée l'édition 2026 et prépare
 ses premières communications pour générer des candidatures.
 
-### Données disponibles
-Pas d'athletes individuels à ce stade. Vue agrégée uniquement :
-- Historique des éditions 2021–2025 (taux de conversion, revenus, nationalités)
-- Capacité cible 2026 : 15,000 places
-- Objectif candidatures : 20,000 applicants
-
 ### Objectif marketing
 Maximiser le volume et la qualité des candidatures avant la fermeture du ballot.
-Cibler les audiences les plus susceptibles de s'inscrire ET de participer.
 
-### Segments (vue agrégée, pas individuelle)
+### Segments prédéfinis (vue agrégée)
 
-| Segment | Description | Taille cible | Action |
+| Segment | Description | Taille UI | Dérivation depuis la DB |
 |---|---|---|---|
-| `past_finishers` | Finishers éditions précédentes non réinscrits | ~5,200 | Réactivation prioritaire |
-| `past_refused` | Refusés éditions précédentes | ~8,400 | Encouragement candidature |
-| `international_targets` | Audiences DE, UK, NL, NO à développer | ~marché externe | Acquisition |
-| `external_prospects` | Prospects partenaires / contests | ~1,600 importés | First touch |
+| `past_finishers` | Finishers éditions précédentes non réinscrits | 5,200 | `isReturningAthlete && totalEditionsRaced > 0` |
+| `past_refused` | Refusés éditions précédentes | 8,400 | fallback (ni finisher, ni prospect, ni international) |
+| `international_targets` | Audiences DE, UK, NL, NO | 12,000 | `nationality in ['DE','UK','NL','NO']` |
+| `external_prospects` | Prospects partenaires importés | 1,600 | `externalProspect === true` |
+
+**Total gate 0** : 27,200 prospects (somme des 4 segments)
+
+> Note : Gate 0 n'a pas de champ `gate0Segment` dans la DB.
+> Le segment est dérivé dynamiquement dans `filterAthletes()` via `getGate0Segment(athlete)`.
+> Priorité de dérivation : external_prospects > international_targets > past_finishers > past_refused.
+
+### Contenu spécifique
+- Tableau **Historical Performance** (2021–2025) affiché sous la liste des segments
+- KPIs : capacité 2026, objectif candidatures, revenu moyen / édition, taux retour naturel
 
 ### Channels recommandés
 - Email (campagne teaser + early bird)
 - Instagram (acquisition internationale)
 - Push notification (athletes avec app)
 
-### KPIs affichés sur cette gate
-- Taux de retour historique par nationalité
-- Revenus moyens par édition (entry fees + upsells)
-- Objectif candidatures 2026 vs historique
-
 ---
 
 ## Gate 1 — Registration Opens (Pre-lottery)
 
 ### Quand
-Ballot ouvert : 1 novembre 2025 → 15 décembre 2025 (45 jours).
+Ballot ouvert : 1 novembre 2025 → 15 décembre 2025.
 20,000 candidatures reçues. Le tirage n'a pas encore eu lieu.
 
 ### Données disponibles
@@ -59,47 +78,28 @@ selectionProbability, preLotterySegment, externalProspect.
 
 ### Objectif marketing
 Maintenir l'engagement des candidats pendant l'attente du tirage.
-Différencier le message selon la valeur et la probabilité de sélection.
 
-### Segments (matrice 4 quadrants)
+### Segments prédéfinis
 
-Axes : `anticipatedValue` (axe Y) × `selectionProbability` (axe X)
+Champ DB : `preLotterySegment`
 
-| Segment | Badge | Taille | Description | Objectif campagne |
-|---|---|---|---|---|
-| `ambassador` | 🟢 Ambassadors | ~160 athletes | Haute valeur × haute probabilité | Fidéliser, faire parrainer |
-| `to_reactivate` | 🟠 To Reactivate | ~140 athletes | Haute valeur × faible probabilité | Ré-engager, lever les freins |
-| `opportunist` | 🔵 Opportunists | ~125 athletes | Faible valeur × haute probabilité | Encourager, upsell anticipé |
-| `cold_prospect` | ⚪ Cold Prospects | ~75 athletes | Faible valeur × faible probabilité | Message léger, coût minimal |
+| Segment | Taille UI | Description | Objectif campagne |
+|---|---|---|---|
+| `ambassador` | 3,200 | Haute valeur × haute probabilité | Fidéliser, faire parrainer |
+| `to_reactivate` | 2,800 | Haute valeur × faible probabilité | Ré-engager, lever les freins |
+| `opportunist` | 7,500 | Faible valeur × haute probabilité | Encourager, upsell anticipé |
+| `cold_prospect` | 6,500 | Faible valeur × faible probabilité | Message léger, coût minimal |
 
-Note : les 500 athletes de la DB couvrent tous les segments.
-Les chiffres UI (3,200 / 2,800 / 7,500 / 6,500) sont des constantes
-affichées pour représenter la DB complète de 20,000 candidats.
+**Total gate 1** : 20,000 athletes
 
 ### Channels recommandés par segment
 
-**Ambassadors**
-- Email (personnalisé, ton premium)
-- Push notification
-- Rationale : haute valeur justifie un contact multicanal soigné
-
-**To Reactivate**
-- Email (contenu émotionnel, storytelling)
-- SMS (urgence douce)
-- Rationale : besoin de recréer un lien fort avant le tirage
-
-**Opportunists**
-- Email (informatif, pratique)
-- Rationale : valeur modérée, pas de surcharge de channels
-
-**Cold Prospects**
-- Email uniquement (coût minimal)
-- Rationale : ROI incertain, on limite l'investissement
-
-### Trigger spécial
-**Waitlist drop-in** : si un athlete sélectionné se désiste après le tirage,
-la place est proposée en temps réel au premier de la waitlist.
-Ce trigger est le seul qui opère hors gate.
+| Segment | Channels | Rationale |
+|---|---|---|
+| ambassador | email, push | Haute valeur justifie multicanal soigné |
+| to_reactivate | email, sms | Besoin de recréer un lien fort |
+| opportunist | email | ROI modéré, pas de surcharge |
+| cold_prospect | email | ROI incertain, investissement minimal |
 
 ---
 
@@ -108,70 +108,42 @@ Ce trigger est le seul qui opère hors gate.
 ### Quand
 Tirage effectué le 10 janvier 2026.
 Résultats : registered / waitlist / refused.
-Deadline waitlist : 1er mars 2026 (au-delà, un refusé est définitivement out).
+Deadline waitlist : 1er mars 2026.
 
 ### Données disponibles
-Tous les champs Gate 2 (Gate 1 + registrationStatus, waitlistPosition,
-upsellsPurchased, upsellRevenue, postLotterySegment).
+Gate 1 + registrationStatus, waitlistPosition, upsellsPurchased, upsellRevenue,
+paymentStatus, postLotterySegment.
 
 ### Objectif marketing
-- **Registered** : confirmer, engager, maximiser les upsells
-- **Waitlist** : retenir l'intérêt, préparer à l'attente
-- **Refused** : reconvertir vers d'autres événements Datasport
+- Registered : confirmer, engager, maximiser les upsells
+- Waitlist : retenir l'intérêt, préparer à l'attente
+- Refused : reconvertir vers d'autres événements Datasport
 
-### Segments
+### Segments prédéfinis
 
-| Segment | Badge | Taille | Description | Objectif campagne |
-|---|---|---|---|---|
-| `confirmed_engaged` | 🟢 Confirmed — Engaged | ~205 athletes | Registered + engagement > 60 | Upsells, préparation course |
-| `confirmed_passive` | 🟡 Confirmed — Passive | ~95 athletes | Registered + engagement ≤ 60 | Réactiver avant la course |
-| `waitlist_hot` | 🟠 Waitlist — Hot | ~20 athletes | Waitlist position ≤ 200 | Maintenir l'espoir, préparer |
-| `waitlist_cold` | ⚪ Waitlist — Cold | ~30 athletes | Waitlist position > 200 | Message honnête, alternatives |
-| `refused_reactivatable` | 🔴 Refused — Reactivatable | ~60 athletes | Refused + returning athlete | Reconversion autres events |
-| `refused_lost` | ⚫ Refused — Lost | ~90 athletes | Refused + première candidature | Message de consolation léger |
+Champ DB : `postLotterySegment`
 
-Note : même principe que Gate 1 pour les chiffres UI vs DB statique.
-Chiffres UI affichés : 8,200 / 3,800 / 800 / 1,200 / 2,400 / 3,600.
+| Segment | Taille UI | Description | Objectif |
+|---|---|---|---|
+| `confirmed_engaged` | 8,200 | Registered + engagement > 60 | Upsells, préparation course |
+| `confirmed_passive` | 3,800 | Registered + engagement ≤ 60 | Réactiver avant la course |
+| `waitlist_hot` | 800 | Waitlist position ≤ 200 | Maintenir l'espoir |
+| `waitlist_cold` | 1,200 | Waitlist position > 200 | Message honnête, alternatives |
+| `refused_reactivatable` | 2,400 | Refused + returning athlete | Fidélisation long terme |
+| `refused_lost` | 3,600 | Refused + première candidature | Message consolation léger |
 
-### Upsells à proposer (segment confirmed uniquement)
+**Total gate 2** : 20,000 athletes
 
-```
-- Accommodation Package    €180  (hôtel partenaire 2 nuits)
-- Charity Bib              €50+  (dossard caritatif)
-- VIP Finish Line          €75   (zone VIP à l'arrivée)
-- Race Photo Pack          €35   (photos officielles)
-- Pace Group Access        €25   (groupe de pace dédié)
-- Finisher T-shirt Premium €40   (t-shirt premium)
-```
+### Upsells disponibles (segment confirmed uniquement)
 
-### Channels recommandés par segment
-
-**Confirmed — Engaged**
-- Email (confirmation + upsells)
-- Push notification (compte à rebours, tips préparation)
-- Rationale : déjà engagés, prêts à acheter des upsells
-
-**Confirmed — Passive**
-- Email (storytelling, témoignages finishers)
-- SMS (rappel date limite upsells)
-- Rationale : besoin de recréer l'excitation
-
-**Waitlist — Hot**
-- Email (updates réguliers sur les places disponibles)
-- SMS (alerte immédiate si place disponible)
-- Rationale : urgence et proximité du résultat
-
-**Waitlist — Cold**
-- Email uniquement (message honnête + alternatives)
-- Rationale : ne pas surinvestir sur des positions peu probables
-
-**Refused — Reactivatable**
-- Email (autres événements Datasport, programme fidélité)
-- Rationale : valeur long terme à préserver
-
-**Refused — Lost**
-- Email uniquement (message de consolation + invitation 2027)
-- Rationale : coût minimal, porte ouverte pour l'an prochain
+| Upsell | Prix |
+|---|---|
+| Accommodation Package | ~€180 |
+| Charity Bib | €50+ |
+| VIP Finish Line | €75 |
+| Race Photo Pack | €35 |
+| Pace Group Access | €25 |
+| Finisher T-shirt Premium | €40 |
 
 ---
 
@@ -182,65 +154,104 @@ Après la course du 17 mai 2026.
 Données de résultats disponibles dans les 24h post-course.
 
 ### Données disponibles
-Tous les champs Gate 3 (Gate 2 + raceStatus, finishTime, finishCategory,
-finishRank, personalBest, reRegistrationProbability, postRaceSegment).
+Gate 2 + raceStatus, finishTime, finishCategory, finishRank, personalBest,
+reRegistrationProbability, postRaceSegment.
 
 ### Objectif marketing
-- Capitaliser sur l'émotion post-course
-- Identifier les athletes à risque de ne pas revenir (35% naturellement)
-- Maximiser les ré-inscriptions pour l'édition 2027
-- Convertir les meilleurs finishers en ambassadeurs
+Capitaliser sur l'émotion post-course et maximiser les ré-inscriptions 2027.
 
-### Segments
+### Segments prédéfinis
 
-| Segment | Badge | Taille | Description | Objectif campagne |
-|---|---|---|---|---|
-| `loyal_finisher` | 🟢 Loyal Finisher | ~170 athletes | Finisher + reRegistration > 0.7 | Early bird 2027, fidélisation |
-| `champion_ambassador` | 🔴 Champion | ~35 athletes | Finisher + personalBest + engagement > 75 | Programme ambassadeur |
-| `at_risk_returner` | 🟠 At Risk | ~53 athletes | Finisher + reRegistration ≤ 0.4 | Reconquête proactive |
-| `lost_dns` | ⚫ DNS | ~30 athletes | Did not start | Message empathique, retour 2027 |
-| `reconquest_dnf` | 🟡 DNF | ~12 athletes | Did not finish | Défi de revanche, soutien |
+Champ DB : `postRaceSegment`
 
-Note : chiffres UI affichés : 6,800 / 1,400 / 2,100 / 1,200 / 500.
+| Segment | Taille UI | Description | Objectif |
+|---|---|---|---|
+| `loyal_finisher` | 6,800 | Finisher + reRegistration > 0.7 | Early bird 2027 |
+| `champion_ambassador` | 1,400 | Finisher + personalBest + engagement > 75 | Programme ambassadeur |
+| `at_risk_returner` | 2,100 | Finisher + reRegistration ≤ 0.4 | Reconquête proactive |
+| `lost_dns` | 1,200 | Did not start | Message empathique |
+| `reconquest_dnf` | 500 | Did not finish | Narrative de revanche |
 
-### Channels recommandés par segment
+**Total gate 3** : 12,000 athletes
 
-**Loyal Finisher**
-- Email (félicitations + early bird 2027)
-- Push notification (badge finisher dans l'app)
-- Rationale : momentum émotionnel post-course à exploiter immédiatement
+### Bannière impact IA (spécifique Gate 3)
+Affichée au-dessus des segments :
+> "Targeted re-registration campaigns could recover **1,950** additional athletes
+> worth **€97,500** in incremental revenue (82% vs 65% natural return rate)."
 
-**Champion Ambassador**
-- Email (invitation programme ambassadeur)
-- Instagram (tag et mise en avant sur le compte officiel)
-- Rationale : ces athletes sont des vecteurs d'acquisition naturels
+---
 
-**At Risk Returner**
-- Email (storytelling, "tu nous manqueras en 2027")
-- SMS (offre early bird limitée dans le temps)
-- Rationale : urgence nécessaire pour contrer le désengagement
+## Création de segments personnalisés (commun à toutes les gates)
 
-**DNS**
-- Email uniquement (ton empathique, pas de pression)
-- Rationale : on ne sait pas pourquoi ils n'ont pas couru — respecter la distance
+### Accès
+Bouton "+ Créer un segment" dans le header de la colonne gauche, à droite du total.
 
-**DNF**
-- Email (ton de défi, "tu as l'étoffe d'un finisher")
-- SMS (offre spéciale revanche 2027)
-- Rationale : l'émotion de l'abandon est un levier puissant si bien utilisé
+### Composant : SegmentBuilder (modal)
+
+**Section 1 — Nom** : champ texte libre
+
+**Section 2 — Décrire en langage naturel** (IA)
+- Textarea + bouton "Analyser →" (rouge)
+- Appel à `/api/ai/parse-segment`
+- Retourne : filtres structurés appliqués automatiquement + interprétation en vert
+- Raccourci : ⌘+Entrée
+
+**Section 3 — Définir par objectif métier** (IA)
+- Textarea + bouton "Suggérer un segment →" (noir)
+- Appel à `/api/ai/suggest-segment` avec stats agrégées de la DB
+- Retourne :
+  - **Portrait** : description naturelle du segment (qui + pourquoi)
+  - **Filtres** : appliqués automatiquement
+  - **Insights** (fond jaune) : critères non-filtrables expliqués
+  - **Rationale** (italique) : justification des seuils choisis
+- Raccourci : ⌘+Entrée
+
+**Section 4 — Scope**
+- Pills des segments prédéfinis du gate (sélection multiple)
+- "Tous les athletes" si aucun sélectionné
+- Scope = pool sur lequel les filtres sont appliqués
+
+**Section 5 — Filtres manuels** (9 champs disponibles)
+
+| Champ | Type | Options |
+|---|---|---|
+| `gender` | select | M / F |
+| `age_min` | number | 16–80 |
+| `age_max` | number | 16–80 |
+| `nationality` | select | DK, SE, DE, UK, NL, NO, FR, US, IT, CH, PL, BE |
+| `isReturningAthlete` | select | Oui / Non |
+| `total_editions_min` | number | 0–20 |
+| `total_editions_max` | number | 0–20 |
+| `engagement_min` | number | 0–100 |
+| `city_contains` | text | recherche partielle |
+
+**Section 6 — Objectif & contexte** : texte libre injecté dans le prompt de génération
+
+**Section 7 — Compteur** : nombre d'athletes correspondant (mis à l'échelle vers les chiffres réels)
+
+### Scaling du compteur
+
+```
+Si scope = tous les athletes :
+  scaledCount = round(rawCount / 500 * GATE_TOTAL)
+
+Si scope = segments sélectionnés :
+  effectiveTotal = somme des tailles UI des segments sélectionnés
+  baseRaw = count(athletes in selected segments, no filter)
+  scaledCount = round(rawCount / baseRaw * effectiveTotal)
+```
+
+### Affichage du segment créé
+- Row dans la colonne gauche sous les segments prédéfinis
+- Point coloré + nom + compteur mis à l'échelle + bouton delete
+- Badge CUSTOM dans le panel campagne à droite
+- Génération via prompt `custom_segment` enrichi de `buildSegmentDescription()`
 
 ---
 
 ## Règles communes à toutes les gates
 
-1. **Pas de re-segmentation entre les gates** — les segments sont figés à chaque gate
-   et ne changent pas tant que la gate suivante n'est pas atteinte.
-
-2. **Exception waitlist** — le trigger waitlist drop-in opère en temps réel,
-   hors gate, uniquement après Gate 2.
-
-3. **Un athlete = un segment par gate** — pas de double appartenance.
-
-4. **Les chiffres UI sont des constantes** — ils représentent la DB complète
-   de 20,000 athletes, pas les 500 de la DB statique.
-   Les listes d'athletes affichées sont issues des 500 de la DB statique.
+1. **Un athlete = un segment par gate** — pas de double appartenance (segments prédéfinis)
+2. **Segments custom = mémoire React uniquement** — disparaissent au rechargement
+3. **Chiffres UI = constantes** — jamais calculés depuis la DB statique
+4. **Scaling obligatoire** — toujours mettre à l'échelle rawCount → chiffres réels

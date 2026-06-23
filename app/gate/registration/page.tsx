@@ -71,6 +71,7 @@ export default function RegistrationPage() {
   const [channels, setChannels] = useState<Channel[]>([]);
   const [customSegments, setCustomSegments] = useState<CustomSegment[]>([]);
   const [showBuilder, setShowBuilder] = useState(false);
+  const [editingSegment, setEditingSegment] = useState<CustomSegment | null>(null);
 
   const selectedStatic = SEGMENTS.find(s => s.id === selectedId);
   const selectedCustom = customSegments.find(s => s.id === selectedId);
@@ -93,8 +94,13 @@ export default function RegistrationPage() {
   };
 
   const handleSaveCustom = (seg: CustomSegment) => {
-    setCustomSegments(prev => [...prev, seg]);
+    if (editingSegment) {
+      setCustomSegments(prev => prev.map(s => s.id === seg.id ? seg : s));
+    } else {
+      setCustomSegments(prev => [...prev, seg]);
+    }
     setShowBuilder(false);
+    setEditingSegment(null);
     handleSelect(seg.id);
   };
 
@@ -189,6 +195,10 @@ export default function RegistrationPage() {
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--fg-3)', marginTop: 1 }}>Segment personnalisé</div>
                   </div>
+                  <button onClick={e => { e.stopPropagation(); setEditingSegment(seg); }} style={{ background: 'var(--bg-2)', border: '1px solid var(--border-1)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', color: 'var(--fg-2)', padding: '3px 6px', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11 }}>
+                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 9l6-6 2 2-6 6H1.5V9z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/><path d="M7 3.5l1 1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
+                    Modifier
+                  </button>
                   <button onClick={e => { e.stopPropagation(); handleDeleteCustom(seg.id); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-3)', padding: 4, display: 'flex', alignItems: 'center' }}>
                     <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M3 3l7 7M10 3l-7 7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
                   </button>
@@ -253,7 +263,7 @@ export default function RegistrationPage() {
                 />
               </div>
               <div style={{ borderBottom: '1px solid var(--border-1)', marginBottom: 20 }} />
-              <CampaignGenerator gate="gate1" segment={selectedStatic.id} channels={channels} />
+              <CampaignGenerator gate="gate1" segment={selectedStatic.id} channels={channels} gateLabel="Registration" segmentName={selectedStatic.label} segmentColor={selectedStatic.color} segmentColorBg={selectedStatic.colorBg} />
             </div>
           </div>
         )}
@@ -304,6 +314,10 @@ export default function RegistrationPage() {
                 segment="custom_segment"
                 channels={channels}
                 segmentDescription={buildSegmentDescription(selectedCustom)}
+                gateLabel="Registration"
+                segmentName={selectedCustom.name}
+                segmentColor={selectedCustom.color}
+                segmentColorBg={selectedCustom.colorBg}
               />
             </div>
           </div>
@@ -322,14 +336,15 @@ export default function RegistrationPage() {
         )}
       </div>
 
-      {showBuilder && (
+      {(showBuilder || editingSegment) && (
         <SegmentBuilder
           existingCount={customSegments.length}
           gateTotal={GATE_TOTAL}
           segmentSizes={sizes}
           gateSegments={GATE_SEGMENTS}
           athleteSegmentField={SEGMENT_FIELD}
-          onClose={() => setShowBuilder(false)}
+          initialSegment={editingSegment ?? undefined}
+          onClose={() => { setShowBuilder(false); setEditingSegment(null); }}
           onSave={handleSaveCustom}
         />
       )}

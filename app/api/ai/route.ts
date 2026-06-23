@@ -10,7 +10,7 @@ const client = new Anthropic({
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { gate, segment, channels, customInstructions, channelToRegenerate, segmentDescription } = body;
+    const { gate, segment, channels, customInstructions, channelToRegenerate, segmentDescription, historicalExamples } = body;
 
     const systemPrompt = SYSTEM_PROMPTS[gate as string]?.[segment as string];
 
@@ -24,12 +24,13 @@ export async function POST(req: NextRequest) {
     const segmentSize = (SEGMENT_SIZES as Record<string, Record<string, number>>)[gate as string]?.[segment as string] ?? 1000;
 
     const userPrompt = channelToRegenerate
-      ? buildRegeneratePrompt(channelToRegenerate, customInstructions ?? '')
+      ? buildRegeneratePrompt(channelToRegenerate, customInstructions ?? '', historicalExamples ?? [])
       : buildUserPrompt({
           channels: channels ?? [],
           customInstructions,
           segmentDescription,
           segmentStats: { size: segmentSize },
+          historicalExamples: historicalExamples ?? [],
         });
 
     const message = await client.messages.create({

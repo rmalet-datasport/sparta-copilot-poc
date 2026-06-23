@@ -55,19 +55,25 @@ export default function ChannelSelector({ available, selected, onChange, rationa
 
   return (
     <div>
-      <div style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-        Channels
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 10 }}>
+        <div style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          Channels
+        </div>
+        {available.length > 0 && (
+          <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>
+            recommandés : {available.map(ch => CHANNEL_LABELS[ch]).join(', ')}
+          </span>
+        )}
       </div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {ALL_CHANNELS.map(ch => {
-          const isAvailable = available.includes(ch);
+          const isRecommended = available.includes(ch);
           const isSelected = selected.includes(ch);
 
           return (
             <button
               key={ch}
-              onClick={() => isAvailable && toggle(ch)}
-              disabled={!isAvailable}
+              onClick={() => toggle(ch)}
               title={rationale?.[ch]}
               style={{
                 display: 'flex',
@@ -76,19 +82,19 @@ export default function ChannelSelector({ available, selected, onChange, rationa
                 padding: '6px 12px',
                 borderRadius: 'var(--radius-md)',
                 border: `1.5px solid ${isSelected ? 'var(--primary)' : 'var(--border-1)'}`,
-                background: isSelected ? '#FFF0F2' : isAvailable ? 'var(--bg-1)' : 'var(--bg-2)',
-                color: isSelected ? 'var(--primary)' : isAvailable ? 'var(--fg-1)' : 'var(--fg-3)',
+                background: isSelected ? '#FFF0F2' : 'var(--bg-1)',
+                color: isSelected ? 'var(--primary)' : 'var(--fg-1)',
                 fontSize: 12,
                 fontWeight: isSelected ? 570 : 400,
-                cursor: isAvailable ? 'pointer' : 'not-allowed',
-                opacity: isAvailable ? 1 : 0.45,
+                cursor: 'pointer',
                 transition: 'all 0.15s ease',
+                position: 'relative',
               }}
             >
               {CHANNEL_ICONS[ch]}
               {CHANNEL_LABELS[ch]}
-              {!isAvailable && (
-                <span style={{ fontSize: 10, color: 'var(--fg-3)' }}>—</span>
+              {isRecommended && !isSelected && (
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--primary)', opacity: 0.5, flexShrink: 0 }} />
               )}
             </button>
           );

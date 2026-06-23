@@ -27,6 +27,7 @@ interface SegmentBuilderProps {
   segmentSizes: Record<string, number>
   gateSegments: GateSegmentDef[]
   athleteSegmentField: string
+  initialSegment?: CustomSegment
   onClose: () => void
   onSave: (segment: CustomSegment) => void
 }
@@ -37,13 +38,14 @@ export default function SegmentBuilder({
   segmentSizes,
   gateSegments,
   athleteSegmentField,
+  initialSegment,
   onClose,
   onSave,
 }: SegmentBuilderProps) {
-  const [name, setName] = useState('');
-  const [objective, setObjective] = useState('');
-  const [filters, setFilters] = useState<FilterCondition[]>([]);
-  const [selectedBaseIds, setSelectedBaseIds] = useState<string[]>([]);
+  const [name, setName] = useState(() => initialSegment?.name ?? '');
+  const [objective, setObjective] = useState(() => initialSegment?.objective ?? '');
+  const [filters, setFilters] = useState<FilterCondition[]>(() => initialSegment?.filters ?? []);
+  const [selectedBaseIds, setSelectedBaseIds] = useState<string[]>(() => initialSegment?.baseSegmentIds ?? []);
 
   // NL parsing state (describe criteria)
   const [nlQuery, setNlQuery] = useState('');
@@ -163,12 +165,14 @@ export default function SegmentBuilder({
 
   const handleSave = () => {
     if (!name.trim()) return;
-    const { color, colorBg } = CUSTOM_SEGMENT_COLORS[existingCount % CUSTOM_SEGMENT_COLORS.length];
+    const { color, colorBg } = initialSegment
+      ? { color: initialSegment.color, colorBg: initialSegment.colorBg }
+      : CUSTOM_SEGMENT_COLORS[existingCount % CUSTOM_SEGMENT_COLORS.length];
     const baseSegmentLabels = gateSegments
       .filter(s => selectedBaseIds.includes(s.id))
       .map(s => s.label);
     onSave({
-      id: `custom_${Date.now()}`,
+      id: initialSegment?.id ?? `custom_${Date.now()}`,
       name: name.trim(),
       color,
       colorBg,
@@ -200,7 +204,7 @@ export default function SegmentBuilder({
         onClick={e => e.stopPropagation()}
       >
         <h3 style={{ margin: '0 0 20px', fontSize: 16, fontWeight: 570, color: 'var(--fg-1)' }}>
-          Nouveau segment
+          {initialSegment ? 'Modifier le segment' : 'Nouveau segment'}
         </h3>
 
         {/* Name */}
@@ -482,7 +486,7 @@ export default function SegmentBuilder({
             disabled={!name.trim()}
             style={{ padding: '8px 18px', borderRadius: 'var(--radius-md)', border: 'none', background: name.trim() ? 'var(--primary)' : 'var(--bg-3)', color: name.trim() ? 'white' : 'var(--fg-3)', fontSize: 13, fontWeight: 570, cursor: name.trim() ? 'pointer' : 'not-allowed', transition: 'background 0.15s' }}
           >
-            Créer le segment
+            {initialSegment ? 'Enregistrer les modifications' : 'Créer le segment'}
           </button>
         </div>
       </div>

@@ -6,7 +6,7 @@ Sparta Co-Pilot est un outil de marketing automation pour organisateurs
 d'événements sportifs. Ce POC est conçu pour une démo client avec
 l'organisateur du Copenhagen Marathon.
 
-Stack : Next.js 14 (App Router), TypeScript, Tailwind CSS, Anthropic API.
+Stack : Next.js 15 (App Router), TypeScript, Tailwind CSS, Anthropic API, SheetJS (xlsx).
 
 ---
 
@@ -17,6 +17,10 @@ sparta-copilot/
 ├── app/
 │   ├── layout.tsx
 │   ├── page.tsx                         (redirect vers /gate/registration)
+│   ├── brand-voice/
+│   │   └── page.tsx                     (Brand Voice — upload historique campagnes)
+│   ├── campaigns/
+│   │   └── page.tsx                     (campagnes sauvegardées)
 │   ├── gate/
 │   │   ├── creation/page.tsx            (Gate 0 — Event Creation)
 │   │   ├── registration/page.tsx        (Gate 1 — Pre-lottery)
@@ -36,11 +40,15 @@ sparta-copilot/
 │   ├── types/
 │   │   ├── athlete.ts                   (type Athlete complet)
 │   │   ├── gates.ts                     (types par gate)
-│   │   └── segments.ts                  (FilterField, FilterCondition, CustomSegment,
-│   │                                     FILTER_FIELD_LABELS, FILTER_VALUE_OPTIONS,
-│   │                                     CUSTOM_SEGMENT_COLORS, buildSegmentDescription)
+│   │   ├── segments.ts                  (FilterField, FilterCondition, CustomSegment,
+│   │   │                                 FILTER_FIELD_LABELS, FILTER_VALUE_OPTIONS,
+│   │   │                                 CUSTOM_SEGMENT_COLORS, buildSegmentDescription)
+│   │   └── brandHistory.ts              (interface BrandExample)
+│   ├── context/
+│   │   ├── CampaignHistoryContext.tsx   (historique campagnes sauvegardées)
+│   │   └── BrandHistoryContext.tsx      (exemples historiques + parsing xlsx/csv)
 │   ├── ai/
-│   │   └── prompts.ts                   (system prompts par gate/segment)
+│   │   └── prompts.ts                   (system prompts + buildHistoricalExamplesBlock)
 │   └── constants.ts                     (EVENT, SEGMENT_SIZES, KPI, REREGISTRATION_RATES)
 ├── components/
 │   ├── layout/
@@ -177,8 +185,9 @@ Modal avec 5 sections dans l'ordre :
 model: "claude-sonnet-4-6"
 max_tokens: 1024
 stream: true
-// Paramètre supplémentaire :
-segmentDescription?: string  // injecté dans le user prompt pour les segments custom
+// Paramètres du body :
+segmentDescription?: string    // injecté dans le user prompt pour les segments custom
+historicalExamples?: BrandExample[]  // exemples filtrés par BrandHistoryContext
 ```
 
 ### Route parse-segment : NL → filtres
@@ -205,6 +214,11 @@ La clé `custom_segment` existe pour tous les gates — le contexte est injecté
 via `buildSegmentDescription(segment)` dans le user prompt.
 Ne jamais écrire les prompts directement dans les composants.
 
+### Helpers prompts (`lib/ai/prompts.ts`)
+- `buildUserPrompt(params)` — construit le user prompt ; accepte `historicalExamples?: BrandExample[]`
+- `buildRegeneratePrompt(channel, instructions, historicalExamples?)` — régénération channel seul
+- `buildHistoricalExamplesBlock(examples)` — formate les exemples historiques en bloc texte injecté dans le prompt
+
 ### Format de réponse (génération campagne)
 Claude répond toujours en JSON structuré (voir `docs/AI_PROMPTS.md`).
 Parser la réponse côté client avec un try/catch.
@@ -216,6 +230,79 @@ Les routes `parse-segment` et `suggest-segment` ne streament pas.
 
 ---
 
+## Édition inline des assets générés
+
+`AssetCard` supporte l'édition directe du texte après génération.
+
+### Comportement
+- Tous les champs texte (subject, title, body, caption, hashtags) sont des `<input>` / `<textarea>` éditables
+- Visuellement identiques à du texte statique — bordure subtile au hover/focus
+- Les `<textarea>` s'auto-redimensionnent à la saisie
+- L'état édité est local à `AssetCard` (`editedAsset` state)
+- Reset automatique si l'asset est régénéré (via `useEffect` sur les champs de contenu)
+
+### Preview Instagram Story temps réel
+- La Story preview (`InstagramStoryPreview`) reçoit `editedAsset.caption` et `editedAsset.hashtags`
+- Toute modification du texte se reflète immédiatement dans la preview
+
+### Save
+- `onSave(imageUrl?, editedAsset?)` transmet les champs édités à `CampaignGenerator`
+- `saveAsset` utilise `editedAsset ?? asset` pour persister le contenu édité
+
+---
+
+## Brand Voice — historique campagnes
+
+Feature permettant d'uploader des campagnes passées pour enrichir le contexte IA.
+
+### Page (`app/brand-voice/page.tsx`)
+- Explication de la feature en 3 étapes
+- Table du format attendu + bouton téléchargement template CSV
+- Zone drag & drop (`.xlsx`, `.xls`, `.csv`)
+- État "chargé" : bannière verte + breakdown par channel et par gate
+- Accessible depuis la sidebar (lien "Historique" avec badge compteur vert)
+
+### Context (`lib/context/BrandHistoryContext.tsx`)
+```ts
+interface BrandHistoryContextValue {
+  examples: BrandExample[]
+  fileName: string | null
+  uploadFile: (file: File) => Promise<void>   // parse xlsx ou csv
+  clearExamples: () => void
+  getRelevantExamples(context: { gate, segment, channel? }): BrandExample[]
+}
+```
+
+`getRelevantExamples` filtre par gate + segment (+ channel optionnel), exclut les exemples qui contredisent le contexte, trie par score de spécificité, retourne max 6 exemples.
+
+### Format du fichier Excel/CSV
+Colonnes reconnues (FR + EN, insensible à la casse) :
+
+| Colonne | Alias reconnus | Optionnel |
+|---|---|---|
+| `channel` | canal, ch | oui |
+| `gate` | phase, etape, step | oui |
+| `segment` | audience, cible, target | oui |
+| `subject` | objet, sujet | — |
+| `title` | titre | — |
+| `body` | texte, contenu, content, message | — |
+| `caption` | legende, cap | — |
+| `hashtags` | tags, hashtag | — |
+
+Normalisation gate : `registration`/`1`/`gate1` → `gate1`, `lottery`/`2` → `gate2`, etc.
+
+### Injection dans le prompt
+`buildHistoricalExamplesBlock(examples)` formate les exemples en bloc texte inséré dans `buildUserPrompt` et `buildRegeneratePrompt`. L'IA est instruite de s'inspirer du style sans copier mot pour mot.
+
+### Scoring et filtrage
+- Match channel : +2 pts
+- Match gate : +2 pts
+- Match segment : +2 pts
+- Contradiction sur un champ → exemple exclu
+- Max 6 exemples par génération
+
+---
+
 ## Comportements critiques pour la démo
 
 1. **Navigation entre gates instantanée** — pas de loading, données statiques
@@ -224,6 +311,7 @@ Les routes `parse-segment` et `suggest-segment` ne streament pas.
 4. **JSON malformé** — fallback propre, pas de crash
 5. **Chiffres UI toujours visibles** — affichés sur les cartes segment avant toute interaction
 6. **Segments custom en mémoire uniquement** — pas de persistance entre rechargements
+7. **Brand Voice en mémoire uniquement** — disparaît au rechargement, pas de persistance
 
 ---
 
@@ -235,3 +323,4 @@ Les routes `parse-segment` et `suggest-segment` ne streament pas.
 - Pas d'envoi réel de campagnes ("Approve & schedule" est un bouton UI sans action)
 - Pas de liste d'événements — un seul event, Copenhagen Marathon 2026
 - Pas de persistance des segments personnalisés (mémoire React uniquement)
+- Pas de persistance des exemples Brand Voice (mémoire React uniquement)

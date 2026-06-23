@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import AssetCard from './AssetCard';
+import { useCampaignHistory } from '@/lib/context/CampaignHistoryContext';
+import { useBrandHistory } from '@/lib/context/BrandHistoryContext';
 
 interface Asset {
   channel: string;
@@ -18,6 +20,10 @@ interface CampaignGeneratorProps {
   segment: string;
   channels: string[];
   segmentDescription?: string;
+  segmentName?: string;
+  segmentColor?: string;
+  segmentColorBg?: string;
+  gateLabel?: string;
 }
 
 function LoadingDots() {
@@ -46,18 +52,24 @@ function LoadingDots() {
   );
 }
 
-export default function CampaignGenerator({ gate, segment, channels, segmentDescription }: CampaignGeneratorProps) {
+export default function CampaignGenerator({ gate, segment, channels, segmentDescription, segmentName, segmentColor, segmentColorBg, gateLabel }: CampaignGeneratorProps) {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [status, setStatus] = useState<'idle' | 'generating' | 'done' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
   const [customInstructions, setCustomInstructions] = useState('');
   const [regenChannel, setRegenChannel] = useState<string | null>(null);
+  const [savedChannels, setSavedChannels] = useState<Set<string>>(new Set());
+  const { saveAsset } = useCampaignHistory();
+  const { getRelevantExamples } = useBrandHistory();
 
   const generate = async (opts?: { channelToRegenerate?: string; customPrompt?: string }) => {
     if (channels.length === 0 && !opts?.channelToRegenerate) return;
 
     setStatus('generating');
     setError(null);
+    setSavedChannels(new Set());
+
+    const historicalExamples = getRelevantExamples({ gate, segment });
 
     try {
       const res = await fetch('/api/ai', {
@@ -70,6 +82,7 @@ export default function CampaignGenerator({ gate, segment, channels, segmentDesc
           customInstructions: opts?.customPrompt ?? customInstructions,
           channelToRegenerate: opts?.channelToRegenerate,
           segmentDescription,
+          historicalExamples,
         }),
       });
 
@@ -103,6 +116,7 @@ export default function CampaignGenerator({ gate, segment, channels, segmentDesc
 
   const handleRegenerate = async (channel: string, instructions: string) => {
     setRegenChannel(channel);
+    setSavedChannels(prev => { const s = new Set(prev); s.delete(channel); return s; });
     await generate({ channelToRegenerate: channel, customPrompt: instructions });
     setRegenChannel(null);
   };
@@ -141,6 +155,31 @@ export default function CampaignGenerator({ gate, segment, channels, segmentDesc
           />
         </div>
       )}
+
+      {/* Historical examples indicator */}
+      {(() => {
+        const count = getRelevantExamples({ gate, segment }).length;
+        if (count === 0) return null;
+        return (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '6px 10px', marginBottom: 12,
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--bg-2)',
+            border: '1px solid var(--border-1)',
+          }}>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ color: 'var(--fg-3)', flexShrink: 0 }}>
+              <ellipse cx="6" cy="3" rx="4" ry="1.5" stroke="currentColor" strokeWidth="1.1"/>
+              <path d="M2 3v3c0 .828 1.79 1.5 4 1.5S10 6.828 10 6V3" stroke="currentColor" strokeWidth="1.1"/>
+              <path d="M2 6v3c0 .828 1.79 1.5 4 1.5S10 9.828 10 9V6" stroke="currentColor" strokeWidth="1.1"/>
+            </svg>
+            <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>
+              <span style={{ fontWeight: 570, color: 'var(--fg-2)' }}>{count}</span>
+              {' '}exemple{count > 1 ? 's' : ''} historique{count > 1 ? 's' : ''} actif{count > 1 ? 's' : ''} pour ce contexte
+            </span>
+          </div>
+        );
+      })()}
 
       {/* Generate button */}
       <button
@@ -210,6 +249,21 @@ export default function CampaignGenerator({ gate, segment, channels, segmentDesc
               asset={asset}
               onRegenerate={handleRegenerate}
               isRegenerating={regenChannel === asset.channel}
+              isSaved={savedChannels.has(asset.channel)}
+              onSave={(imageUrl?: string, editedAsset?: Asset) => {
+                saveAsset({
+                  gate,
+                  gateLabel: gateLabel ?? gate,
+                  segmentId: segment,
+                  segmentName: segmentName ?? segment,
+                  segmentColor: segmentColor ?? '#6B7280',
+                  segmentColorBg: segmentColorBg ?? '#F9FAFB',
+                  channel: asset.channel,
+                  asset: editedAsset ?? asset,
+                  imageUrl,
+                });
+                setSavedChannels(prev => new Set([...prev, asset.channel]));
+              }}
             />
           ))}
 

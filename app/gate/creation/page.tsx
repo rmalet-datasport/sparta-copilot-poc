@@ -77,6 +77,7 @@ export default function CreationPage() {
   const [channels, setChannels] = useState<Channel[]>([]);
   const [customSegments, setCustomSegments] = useState<CustomSegment[]>([]);
   const [showBuilder, setShowBuilder] = useState(false);
+  const [editingSegment, setEditingSegment] = useState<CustomSegment | null>(null);
 
   const selected = SEGMENTS.find(s => s.id === selectedId);
   const selectedCustom = customSegments.find(s => s.id === selectedId);
@@ -182,6 +183,13 @@ export default function CreationPage() {
                   <div style={{ fontSize: 11, color: 'var(--fg-3)', marginTop: 1 }}>Segment personnalisé</div>
                 </div>
                 <button
+                  onClick={e => { e.stopPropagation(); setEditingSegment(seg); }}
+                  style={{ background: 'var(--bg-2)', border: '1px solid var(--border-1)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', color: 'var(--fg-2)', padding: '3px 6px', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11 }}
+                >
+                  <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 9l6-6 2 2-6 6H1.5V9z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/><path d="M7 3.5l1 1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
+                  Modifier
+                </button>
+                <button
                   onClick={e => { e.stopPropagation(); setCustomSegments(p => p.filter(s => s.id !== seg.id)); if (selectedId === seg.id) { setSelectedId(null); setChannels([]); } }}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-3)', padding: 4, display: 'flex', alignItems: 'center' }}
                 >
@@ -241,7 +249,7 @@ export default function CreationPage() {
                 <ChannelSelector available={['email', 'sms', 'push', 'instagram']} selected={channels} onChange={setChannels} rationale={{}} />
               </div>
               <div style={{ borderBottom: '1px solid var(--border-1)', marginBottom: 20 }} />
-              <CampaignGenerator gate="gate0" segment="custom_segment" channels={channels} segmentDescription={buildSegmentDescription(selectedCustom)} />
+              <CampaignGenerator gate="gate0" segment="custom_segment" channels={channels} segmentDescription={buildSegmentDescription(selectedCustom)} gateLabel="Event Creation" segmentName={selectedCustom.name} segmentColor={selectedCustom.color} segmentColorBg={selectedCustom.colorBg} />
             </div>
           </div>
         ) : selected ? (
@@ -267,7 +275,7 @@ export default function CreationPage() {
                 />
               </div>
               <div style={{ borderBottom: '1px solid var(--border-1)', marginBottom: 20 }} />
-              <CampaignGenerator gate="gate0" segment={selected.id} channels={channels} />
+              <CampaignGenerator gate="gate0" segment={selected.id} channels={channels} gateLabel="Event Creation" segmentName={selected.label} segmentColor={selected.color} segmentColorBg={selected.colorBg} />
             </div>
           </div>
         ) : (
@@ -284,15 +292,26 @@ export default function CreationPage() {
         )}
       </div>
 
-      {showBuilder && (
+      {(showBuilder || editingSegment) && (
         <SegmentBuilder
           existingCount={customSegments.length}
           gateTotal={GATE_TOTAL}
           segmentSizes={sizes}
           gateSegments={GATE_SEGMENTS}
           athleteSegmentField={SEGMENT_FIELD}
-          onClose={() => setShowBuilder(false)}
-          onSave={seg => { setCustomSegments(p => [...p, seg]); setShowBuilder(false); setSelectedId(seg.id); setChannels(['email']); }}
+          initialSegment={editingSegment ?? undefined}
+          onClose={() => { setShowBuilder(false); setEditingSegment(null); }}
+          onSave={seg => {
+            if (editingSegment) {
+              setCustomSegments(p => p.map(s => s.id === seg.id ? seg : s));
+            } else {
+              setCustomSegments(p => [...p, seg]);
+            }
+            setShowBuilder(false);
+            setEditingSegment(null);
+            setSelectedId(seg.id);
+            setChannels(['email']);
+          }}
         />
       )}
     </div>

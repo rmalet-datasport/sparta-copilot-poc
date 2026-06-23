@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useCampaignHistory } from '@/lib/context/CampaignHistoryContext';
+import { useBrandHistory } from '@/lib/context/BrandHistoryContext';
 
 const GATES = [
   {
@@ -64,6 +66,8 @@ const GATES = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { savedAssets } = useCampaignHistory();
+  const { examples } = useBrandHistory();
 
   return (
     <aside
@@ -174,6 +178,92 @@ export default function Sidebar() {
           );
         })}
       </nav>
+
+      {/* Campaigns */}
+      <div style={{ padding: '8px 0', borderTop: '1px solid var(--color-grey-800)' }}>
+        <div style={{ padding: '8px 16px 6px', color: 'var(--color-grey-600)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          Campagnes
+        </div>
+        <Link
+          href="/campaigns"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '9px 16px',
+            color: pathname === '/campaigns' ? 'var(--color-white)' : 'var(--color-grey-500)',
+            background: pathname === '/campaigns' ? 'var(--color-grey-800)' : 'transparent',
+            borderRadius: 6, margin: '1px 8px', textDecoration: 'none',
+            transition: 'all 0.15s ease',
+            borderLeft: pathname === '/campaigns' ? '2px solid var(--primary)' : '2px solid transparent',
+          }}
+        >
+          <span style={{ color: pathname === '/campaigns' ? 'var(--primary)' : 'var(--color-grey-600)', flexShrink: 0 }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M3 2h10l1.5 2.5v9a1 1 0 01-1 1H2.5a1 1 0 01-1-1V4.5L3 2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+              <path d="M5.5 2v4h5V2" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+              <path d="M4.5 10h7M4.5 12.5h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+            </svg>
+          </span>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: pathname === '/campaigns' ? 570 : 400, lineHeight: 1.3 }}>
+                Sauvegardées
+              </div>
+            </div>
+            {savedAssets.length > 0 && (
+              <span style={{
+                fontSize: 10, fontWeight: 570, minWidth: 18, height: 18,
+                background: 'var(--primary)', color: 'white',
+                borderRadius: 'var(--radius-full)', display: 'flex',
+                alignItems: 'center', justifyContent: 'center', padding: '0 5px',
+              }}>
+                {savedAssets.length}
+              </span>
+            )}
+          </div>
+        </Link>
+      </div>
+
+      {/* Brand Voice */}
+      <div style={{ padding: '8px 0', borderTop: '1px solid var(--color-grey-800)' }}>
+        <div style={{ padding: '8px 16px 6px', color: 'var(--color-grey-600)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          Brand Voice
+        </div>
+        <Link
+          href="/brand-voice"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '9px 16px',
+            color: pathname === '/brand-voice' ? 'var(--color-white)' : 'var(--color-grey-500)',
+            background: pathname === '/brand-voice' ? 'var(--color-grey-800)' : 'transparent',
+            borderRadius: 6, margin: '1px 8px', textDecoration: 'none',
+            transition: 'all 0.15s ease',
+            borderLeft: pathname === '/brand-voice' ? '2px solid var(--primary)' : '2px solid transparent',
+          }}
+        >
+          <span style={{ color: pathname === '/brand-voice' ? 'var(--primary)' : 'var(--color-grey-600)', flexShrink: 0 }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 2C4.686 2 2 4.686 2 8s2.686 6 6 6 6-2.686 6-6-2.686-6-6-6z" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M5.5 8c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+              <circle cx="8" cy="8" r="1" fill="currentColor"/>
+            </svg>
+          </span>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: 12, fontWeight: pathname === '/brand-voice' ? 570 : 400, lineHeight: 1.3 }}>
+              Historique
+            </div>
+            {examples.length > 0 && (
+              <span style={{
+                fontSize: 10, fontWeight: 570, minWidth: 18, height: 18,
+                background: '#16A34A', color: 'white',
+                borderRadius: 'var(--radius-full)', display: 'flex',
+                alignItems: 'center', justifyContent: 'center', padding: '0 5px',
+              }}>
+                {examples.length}
+              </span>
+            )}
+          </div>
+        </Link>
+      </div>
 
       {/* Footer */}
       <div

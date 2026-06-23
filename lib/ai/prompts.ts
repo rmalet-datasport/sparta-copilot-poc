@@ -393,6 +393,34 @@ ${FORMAT_INSTRUCTION}`,
   },
 };
 
+import type { BrandExample } from '@/lib/types/brandHistory';
+
+export function buildHistoricalExamplesBlock(examples: BrandExample[]): string {
+  if (examples.length === 0) return '';
+
+  const lines: string[] = [
+    '',
+    '---',
+    'EXEMPLES DE CAMPAGNES HISTORIQUES DU CLIENT',
+    "Utilise ces exemples comme référence de style, de ton et de vocabulaire. Ne les copie pas mot pour mot — inspire-toi de leur approche rédactionnelle pour rester cohérent avec la voix de la marque.",
+    '',
+  ];
+
+  for (const ex of examples) {
+    const label = [ex.gate, ex.segment, ex.channel].filter(Boolean).join(' · ');
+    lines.push(label ? `[${label}]` : '[global]');
+    if (ex.subject)   lines.push(`Subject: ${ex.subject}`);
+    if (ex.title)     lines.push(`Title: ${ex.title}`);
+    if (ex.body)      lines.push(`Body: ${ex.body}`);
+    if (ex.caption)   lines.push(`Caption: ${ex.caption}`);
+    if (ex.hashtags)  lines.push(`Hashtags: ${ex.hashtags}`);
+    lines.push('');
+  }
+
+  lines.push('---');
+  return lines.join('\n');
+}
+
 export function buildUserPrompt(params: {
   channels: string[];
   customInstructions?: string;
@@ -402,8 +430,9 @@ export function buildUserPrompt(params: {
     nationality?: string;
     avgEngagement?: number;
   };
+  historicalExamples?: BrandExample[];
 }): string {
-  const { channels, customInstructions, segmentDescription, segmentStats } = params;
+  const { channels, customInstructions, segmentDescription, segmentStats, historicalExamples } = params;
   const parts: string[] = [];
 
   parts.push(`Génère des assets marketing pour les channels suivants : ${channels.join(', ')}.`);
@@ -419,6 +448,10 @@ export function buildUserPrompt(params: {
     if (segmentStats.avgEngagement) parts.push(`- Score d'engagement moyen : ${segmentStats.avgEngagement}/100`);
   }
 
+  if (historicalExamples && historicalExamples.length > 0) {
+    parts.push(buildHistoricalExamplesBlock(historicalExamples));
+  }
+
   if (customInstructions) {
     parts.push(`\nInstructions supplémentaires : ${customInstructions}`);
   }
@@ -428,9 +461,13 @@ export function buildUserPrompt(params: {
   return parts.join('\n');
 }
 
-export function buildRegeneratePrompt(channel: string, customInstructions: string): string {
+export function buildRegeneratePrompt(channel: string, customInstructions: string, historicalExamples?: BrandExample[]): string {
+  const channelExamples = historicalExamples?.filter(e => !e.channel || e.channel === channel) ?? [];
+  const exBlock = buildHistoricalExamplesBlock(channelExamples);
+
   return `Régénère uniquement l'asset pour le channel "${channel}".
 Instructions spécifiques : ${customInstructions}
+${exBlock}
 Garde le même ton et contexte que les autres assets générés.
 Réponds avec un JSON contenant uniquement l'asset pour ce channel (format : {"assets": [{...}]}).`;
 }

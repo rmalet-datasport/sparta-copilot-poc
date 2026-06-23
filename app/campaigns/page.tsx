@@ -48,7 +48,7 @@ const CHANNEL_ICONS: Record<string, React.ReactNode> = {
 };
 
 function formatTime(ts: number): string {
-  return new Date(ts).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  return new Date(ts).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 }
 
 function getPreview(asset: SavedAsset['asset']): string {
@@ -64,7 +64,7 @@ export default function CampaignsPage() {
       {/* Header */}
       <div style={{ marginBottom: 28, display: 'flex', alignItems: 'baseline', gap: 12 }}>
         <h1 style={{ margin: 0, fontSize: 20, fontWeight: 570, color: 'var(--fg-1)' }}>
-          Assets sauvegardés
+          Saved assets
         </h1>
         {savedAssets.length > 0 && (
           <span style={{ fontSize: 13, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>
@@ -87,11 +87,11 @@ export default function CampaignsPage() {
           </svg>
           <div>
             <div style={{ fontSize: 14, fontWeight: 570, color: 'var(--fg-2)', marginBottom: 4 }}>
-              Aucun asset sauvegardé
+              No saved assets
             </div>
             <div style={{ fontSize: 12, lineHeight: 1.6 }}>
-              Générez une campagne depuis un gate et cliquez sur<br/>
-              <strong style={{ color: 'var(--fg-2)' }}>Sauvegarder</strong> sur chaque channel pour le retrouver ici.
+              Generate a campaign from a gate and click<br/>
+              <strong style={{ color: 'var(--fg-2)' }}>Save</strong> on each channel to find it here.
             </div>
           </div>
         </div>
@@ -173,7 +173,7 @@ export default function CampaignsPage() {
 
                   {/* CTA */}
                   <div style={{ marginTop: 'auto', paddingTop: 8, fontSize: 11, color: 'var(--primary)', fontWeight: 570 }}>
-                    Voir le détail →
+                    View details →
                   </div>
                 </div>
               </div>

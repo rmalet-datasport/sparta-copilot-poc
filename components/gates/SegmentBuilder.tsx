@@ -129,7 +129,7 @@ export default function SegmentBuilder({
       setNlInterpretation(data.interpretation ?? null);
       if (!name && data.interpretation) setName(data.interpretation);
     } catch {
-      setNlError('Erreur lors de l\'analyse. Vérifie ta clé API.');
+      setNlError('Analysis failed. Check your API key.');
     } finally {
       setIsParsing(false);
     }
@@ -157,7 +157,7 @@ export default function SegmentBuilder({
       setSuggestion({ portrait: data.portrait ?? '', insights: data.insights ?? [], rationale: data.rationale ?? '' });
       if (!name && data.portrait) setName(objQuery.slice(0, 48));
     } catch {
-      setSuggestionError('Erreur lors de l\'analyse. Vérifie ta clé API.');
+      setSuggestionError('Analysis failed. Check your API key.');
     } finally {
       setIsSuggesting(false);
     }
@@ -204,17 +204,17 @@ export default function SegmentBuilder({
         onClick={e => e.stopPropagation()}
       >
         <h3 style={{ margin: '0 0 20px', fontSize: 16, fontWeight: 570, color: 'var(--fg-1)' }}>
-          {initialSegment ? 'Modifier le segment' : 'Nouveau segment'}
+          {initialSegment ? 'Edit segment' : 'New segment'}
         </h3>
 
         {/* Name */}
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 11, color: 'var(--fg-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Nom</div>
+          <div style={{ fontSize: 11, color: 'var(--fg-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Name</div>
           <input
             type="text"
             value={name}
             onChange={e => setName(e.target.value)}
-            placeholder="Ex: Femmes danoises 25–35 ans"
+            placeholder="E.g. Danish women 25–35"
             style={{ ...inputStyle, width: '100%' }}
             autoFocus
           />
@@ -227,7 +227,7 @@ export default function SegmentBuilder({
               <path d="M6.5 1l1 3h3l-2.5 2 1 3-2.5-2-2.5 2 1-3L3 4h3l.5-3Z" fill="var(--primary)" opacity="0.8"/>
             </svg>
             <span style={{ fontSize: 11, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Décrire en langage naturel
+              Describe in plain language
             </span>
           </div>
 
@@ -235,7 +235,7 @@ export default function SegmentBuilder({
             value={nlQuery}
             onChange={e => setNlQuery(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleParseNL(); }}
-            placeholder="Ex: femmes entre 25 et 35 ans de Copenhague qui ont participé à au moins 2 éditions et sont très engagées..."
+            placeholder="E.g. women aged 25–35 from Copenhagen who participated in at least 2 editions and are highly engaged..."
             rows={2}
             style={{ ...inputStyle, width: '100%', resize: 'none', lineHeight: 1.5, marginBottom: 8 }}
           />
@@ -262,12 +262,12 @@ export default function SegmentBuilder({
               {isParsing ? (
                 <>
                   <span style={{ width: 10, height: 10, border: '1.5px solid rgba(255,255,255,0.4)', borderTopColor: 'white', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} />
-                  Analyse...
+                  Analyzing...
                   <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                 </>
-              ) : 'Analyser →'}
+              ) : 'Analyze →'}
             </button>
-            <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>⌘ + Entrée</span>
+            <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>⌘ + Enter</span>
           </div>
 
           {nlInterpretation && (
@@ -295,18 +295,18 @@ export default function SegmentBuilder({
               <path d="M6.5 4v3.5M6.5 9v.5" stroke="var(--primary)" strokeWidth="1.3" strokeLinecap="round"/>
             </svg>
             <span style={{ fontSize: 11, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Définir par objectif métier
+              Define by business goal
             </span>
           </div>
           <p style={{ margin: '0 0 10px', fontSize: 11, color: 'var(--fg-3)', lineHeight: 1.5 }}>
-            Décrivez ce que vous voulez accomplir — l'IA analyse les distributions de la base et propose le profil qui correspond, avec les critères et leur justification.
+            Describe what you want to achieve — the AI analyses the database distributions and suggests the best matching profile, with criteria and rationale.
           </p>
 
           <textarea
             value={objQuery}
             onChange={e => setObjQuery(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSuggestSegment(); }}
-            placeholder="Ex: je veux les athlètes les plus susceptibles de se réinscrire en 2027, environ 3 000 personnes"
+            placeholder="E.g. I want the athletes most likely to re-register in 2027, around 3,000 people"
             rows={2}
             style={{ ...inputStyle, width: '100%', resize: 'none', lineHeight: 1.5, marginBottom: 8 }}
           />
@@ -333,25 +333,25 @@ export default function SegmentBuilder({
               {isSuggesting ? (
                 <>
                   <span style={{ width: 10, height: 10, border: '1.5px solid rgba(255,255,255,0.4)', borderTopColor: 'white', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} />
-                  Analyse...
+                  Analyzing...
                 </>
-              ) : 'Suggérer un segment →'}
+              ) : 'Suggest a segment →'}
             </button>
-            <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>⌘ + Entrée</span>
+            <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>⌘ + Enter</span>
           </div>
 
           {suggestion && (
             <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
               {/* Portrait */}
               <div style={{ padding: '10px 12px', borderRadius: 'var(--radius-md)', background: 'var(--bg-1)', border: '1px solid var(--border-1)' }}>
-                <div style={{ fontSize: 10, fontWeight: 570, color: 'var(--fg-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Portrait du segment</div>
+                <div style={{ fontSize: 10, fontWeight: 570, color: 'var(--fg-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 5 }}>Segment portrait</div>
                 <p style={{ margin: 0, fontSize: 12, color: 'var(--fg-1)', lineHeight: 1.6 }}>{suggestion.portrait}</p>
               </div>
 
               {/* Insights libres */}
               {suggestion.insights.length > 0 && (
                 <div style={{ padding: '10px 12px', borderRadius: 'var(--radius-md)', background: '#FFFBEB', border: '1px solid #FDE68A' }}>
-                  <div style={{ fontSize: 10, fontWeight: 570, color: '#92400E', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Critères non filtrables — à garder en tête</div>
+                  <div style={{ fontSize: 10, fontWeight: 570, color: '#92400E', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Non-filterable criteria — keep in mind</div>
                   <ul style={{ margin: 0, padding: '0 0 0 16px', display: 'flex', flexDirection: 'column', gap: 4 }}>
                     {suggestion.insights.map((ins, i) => (
                       <li key={i} style={{ fontSize: 12, color: '#78350F', lineHeight: 1.5 }}>{ins}</li>
@@ -386,7 +386,7 @@ export default function SegmentBuilder({
               onClick={() => setSelectedBaseIds([])}
               style={{ padding: '5px 11px', borderRadius: 'var(--radius-full)', border: `1.5px solid ${selectedBaseIds.length === 0 ? 'var(--fg-2)' : 'var(--border-1)'}`, background: selectedBaseIds.length === 0 ? 'var(--fg-1)' : 'var(--bg-1)', color: selectedBaseIds.length === 0 ? 'var(--bg-1)' : 'var(--fg-3)', fontSize: 11, fontWeight: selectedBaseIds.length === 0 ? 570 : 400, cursor: 'pointer', transition: 'all 0.15s' }}
             >
-              Tous les athletes
+              All athletes
             </button>
             {gateSegments.map(seg => {
               const isActive = selectedBaseIds.includes(seg.id);
@@ -404,7 +404,7 @@ export default function SegmentBuilder({
           </div>
           {selectedBaseIds.length > 0 && (
             <div style={{ marginTop: 6, fontSize: 11, color: 'var(--fg-3)' }}>
-              Filtres appliqués sur {selectedBaseIds.length === 1 ? 'ce segment' : `ces ${selectedBaseIds.length} segments`}
+              Filters applied to {selectedBaseIds.length === 1 ? 'this segment' : `these ${selectedBaseIds.length} segments`}
             </div>
           )}
         </div>
@@ -414,7 +414,7 @@ export default function SegmentBuilder({
         {/* Demographic filters */}
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 11, color: 'var(--fg-3)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            Filtres
+            Filters
             {filters.length > 0 && <span style={{ marginLeft: 6, color: 'var(--primary)', fontWeight: 570 }}>{filters.length}</span>}
           </div>
 
@@ -439,7 +439,7 @@ export default function SegmentBuilder({
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                 <path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
               </svg>
-              Ajouter un filtre
+              Add a filter
             </button>
           )}
         </div>
@@ -449,13 +449,13 @@ export default function SegmentBuilder({
         {/* Objective */}
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 11, color: 'var(--fg-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            Objectif & contexte
-            <span style={{ marginLeft: 6, fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>— guide l'IA pour la génération</span>
+            Objective & context
+            <span style={{ marginLeft: 6, fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>— guides AI generation</span>
           </div>
           <textarea
             value={objective}
             onChange={e => setObjective(e.target.value)}
-            placeholder="Ex: Ces femmes ont toutes fini avec un PR. Message de félicitations + early bird 2027. Ton inspirant, pas promotionnel."
+            placeholder="E.g. These women all finished with a PR. Congratulations message + 2027 early bird. Inspiring tone, not promotional."
             rows={2}
             style={{ ...inputStyle, width: '100%', resize: 'vertical', lineHeight: 1.5 }}
           />
@@ -468,8 +468,8 @@ export default function SegmentBuilder({
           </span>
           <span style={{ fontSize: 12, color: 'var(--fg-3)' }}>
             {selectedBaseIds.length === 0 && filters.length === 0
-              ? 'athletes dans ce gate (aucun filtre appliqué)'
-              : 'athletes correspondent à ces critères'}
+              ? 'athletes in this gate (no filter applied)'
+              : 'athletes match these criteria'}
           </span>
         </div>
 
@@ -479,14 +479,14 @@ export default function SegmentBuilder({
             onClick={onClose}
             style={{ padding: '8px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-1)', background: 'var(--bg-1)', color: 'var(--fg-2)', fontSize: 13, cursor: 'pointer' }}
           >
-            Annuler
+            Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={!name.trim()}
             style={{ padding: '8px 18px', borderRadius: 'var(--radius-md)', border: 'none', background: name.trim() ? 'var(--primary)' : 'var(--bg-3)', color: name.trim() ? 'white' : 'var(--fg-3)', fontSize: 13, fontWeight: 570, cursor: name.trim() ? 'pointer' : 'not-allowed', transition: 'background 0.15s' }}
           >
-            {initialSegment ? 'Enregistrer les modifications' : 'Créer le segment'}
+            {initialSegment ? 'Save changes' : 'Create segment'}
           </button>
         </div>
       </div>

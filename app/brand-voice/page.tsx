@@ -85,8 +85,8 @@ export default function BrandVoicePage() {
           <h1 style={{ fontSize: 22, fontWeight: 570, color: 'var(--fg-1)', margin: 0 }}>Brand Voice</h1>
         </div>
         <p style={{ fontSize: 14, color: 'var(--fg-2)', lineHeight: 1.6, margin: 0, maxWidth: 560 }}>
-          Apprends à Sparta ton style de communication. En uploadant tes campagnes passées,
-          chaque nouvelle génération s'alignera automatiquement sur ta voix de marque.
+          Teach Sparta your communication style. By uploading your past campaigns,
+          every new generation will automatically align with your brand voice.
         </p>
       </div>
 
@@ -114,7 +114,7 @@ export default function BrandVoicePage() {
               <div>
                 <div style={{ fontSize: 13, fontWeight: 570, color: '#15803D' }}>{fileName}</div>
                 <div style={{ fontSize: 11, color: '#16A34A', marginTop: 1 }}>
-                  {examples.length} exemple{examples.length > 1 ? 's' : ''} chargé{examples.length > 1 ? 's' : ''} · actif pour toutes les générations
+                  {examples.length} example{examples.length > 1 ? 's' : ''} loaded · active for all generations
                 </div>
               </div>
             </div>
@@ -127,7 +127,7 @@ export default function BrandVoicePage() {
                   color: '#16A34A', fontSize: 12, cursor: 'pointer',
                 }}
               >
-                Remplacer
+                Replace
               </button>
               <button
                 onClick={clearExamples}
@@ -137,7 +137,7 @@ export default function BrandVoicePage() {
                   color: 'var(--fg-3)', fontSize: 12, cursor: 'pointer',
                 }}
               >
-                Supprimer
+                Remove
               </button>
             </div>
           </div>
@@ -148,7 +148,7 @@ export default function BrandVoicePage() {
             {/* By channel */}
             <div style={{ padding: '16px 18px', border: '1px solid var(--border-1)', borderRadius: 'var(--radius-lg)', background: 'var(--bg-1)' }}>
               <div style={{ fontSize: 11, color: 'var(--fg-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
-                Par channel
+                By channel
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {Object.entries(channelCounts)
@@ -170,12 +170,12 @@ export default function BrandVoicePage() {
                   })}
                 {(channelCounts['__global__'] ?? 0) > 0 && (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>Global (tous channels)</span>
+                    <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>Global (all channels)</span>
                     <span style={{ fontSize: 12, color: 'var(--fg-2)', fontWeight: 570 }}>{channelCounts['__global__']}</span>
                   </div>
                 )}
                 {Object.keys(channelCounts).filter(k => k !== '__global__').length === 0 && (
-                  <span style={{ fontSize: 12, color: 'var(--fg-3)' }}>Tous globaux</span>
+                  <span style={{ fontSize: 12, color: 'var(--fg-3)' }}>All global</span>
                 )}
               </div>
             </div>
@@ -183,7 +183,7 @@ export default function BrandVoicePage() {
             {/* By gate */}
             <div style={{ padding: '16px 18px', border: '1px solid var(--border-1)', borderRadius: 'var(--radius-lg)', background: 'var(--bg-1)' }}>
               <div style={{ fontSize: 11, color: 'var(--fg-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
-                Par gate
+                By gate
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {Object.entries(gateCounts)
@@ -198,18 +198,18 @@ export default function BrandVoicePage() {
                   ))}
                 {(gateCounts['__global__'] ?? 0) > 0 && (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>Global (tous gates)</span>
+                    <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>Global (all gates)</span>
                     <span style={{ fontSize: 12, color: 'var(--fg-2)', fontWeight: 570 }}>{gateCounts['__global__']}</span>
                   </div>
                 )}
                 {globalCount > 0 && gateCounts['__global__'] !== globalCount && (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>Sans contexte</span>
+                    <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>No context</span>
                     <span style={{ fontSize: 12, color: 'var(--fg-2)', fontWeight: 570 }}>{globalCount}</span>
                   </div>
                 )}
                 {Object.keys(gateCounts).filter(k => k !== '__global__').length === 0 && (
-                  <span style={{ fontSize: 12, color: 'var(--fg-3)' }}>Tous globaux</span>
+                  <span style={{ fontSize: 12, color: 'var(--fg-3)' }}>All global</span>
                 )}
               </div>
             </div>
@@ -218,11 +218,11 @@ export default function BrandVoicePage() {
           {/* How examples are used */}
           <div style={{ padding: '16px 18px', border: '1px solid var(--border-1)', borderRadius: 'var(--radius-lg)', background: 'var(--bg-2)' }}>
             <div style={{ fontSize: 12, color: 'var(--fg-2)', lineHeight: 1.6 }}>
-              <strong style={{ color: 'var(--fg-1)' }}>Comment Sparta utilise ces exemples</strong>
+              <strong style={{ color: 'var(--fg-1)' }}>How Sparta uses these examples</strong>
               <br />
-              À chaque génération, Sparta sélectionne automatiquement les exemples les plus pertinents pour le gate et le segment actifs.
-              Les exemples très spécifiques (channel + gate + segment) ont la priorité sur les exemples globaux.
-              Jusqu'à 6 exemples sont injectés dans le prompt pour guider le ton, le style et la structure des assets générés.
+              At each generation, Sparta automatically selects the most relevant examples for the active gate and segment.
+              Highly specific examples (channel + gate + segment) take priority over global ones.
+              Up to 6 examples are injected into the prompt to guide the tone, style and structure of the generated assets.
             </div>
           </div>
 
@@ -233,14 +233,14 @@ export default function BrandVoicePage() {
           {/* How it works */}
           <div>
             <h2 style={{ fontSize: 14, fontWeight: 570, color: 'var(--fg-1)', marginBottom: 14, marginTop: 0 }}>
-              Comment ça marche
+              How it works
             </h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
               {[
                 {
                   num: '1',
-                  title: 'Exporte tes campagnes',
-                  desc: 'Récupère tes emails, SMS ou posts Instagram passés depuis ton outil de marketing.',
+                  title: 'Export your campaigns',
+                  desc: 'Retrieve your past emails, SMS or Instagram posts from your marketing tool.',
                   icon: (
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                       <rect x="2" y="3" width="14" height="11" rx="2" stroke="currentColor" strokeWidth="1.4"/>
@@ -251,8 +251,8 @@ export default function BrandVoicePage() {
                 },
                 {
                   num: '2',
-                  title: 'Structure en Excel ou CSV',
-                  desc: 'Place les textes dans un fichier avec les colonnes décrites ci-dessous. Prend 5 minutes.',
+                  title: 'Structure in Excel or CSV',
+                  desc: 'Put the texts in a file with the columns described below. Takes 5 minutes.',
                   icon: (
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                       <rect x="2" y="2" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.4"/>
@@ -262,8 +262,8 @@ export default function BrandVoicePage() {
                 },
                 {
                   num: '3',
-                  title: 'Sparta adopte ton style',
-                  desc: 'À chaque génération, les exemples pertinents sont injectés automatiquement dans le prompt.',
+                  title: 'Sparta adopts your style',
+                  desc: 'At each generation, relevant examples are automatically injected into the prompt.',
                   icon: (
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                       <path d="M9 2C5.134 2 2 5.134 2 9s3.134 7 7 7 7-3.134 7-7-3.134-7-7-7z" stroke="currentColor" strokeWidth="1.4"/>
@@ -291,7 +291,7 @@ export default function BrandVoicePage() {
                       {step.icon}
                     </div>
                     <span style={{ fontSize: 10, fontWeight: 570, color: 'var(--fg-3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Étape {step.num}
+                      Step {step.num}
                     </span>
                   </div>
                   <div style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-1)', marginBottom: 5 }}>{step.title}</div>
@@ -305,7 +305,7 @@ export default function BrandVoicePage() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <h2 style={{ fontSize: 14, fontWeight: 570, color: 'var(--fg-1)', margin: 0 }}>
-                Format du fichier
+                File format
               </h2>
               <a
                 href={`data:text/csv;charset=utf-8,${encodeURIComponent(TEMPLATE_CSV)}`}
@@ -321,7 +321,7 @@ export default function BrandVoicePage() {
                   <path d="M5.5 1.5v5M3.5 5l2 2 2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M1.5 8.5v1a.5.5 0 00.5.5h7a.5.5 0 00.5-.5v-1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
                 </svg>
-                Télécharger le template
+                Download template
               </a>
             </div>
 
@@ -344,7 +344,7 @@ export default function BrandVoicePage() {
                               color: 'var(--fg-3)', background: 'var(--border-1)',
                               padding: '1px 4px', borderRadius: 3,
                             }}>
-                              optionnel
+                              optional
                             </span>
                           )}
                         </th>
@@ -390,8 +390,8 @@ export default function BrandVoicePage() {
               </div>
               <div style={{ padding: '10px 14px', borderTop: '1px solid var(--border-1)', background: 'var(--bg-2)' }}>
                 <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>
-                  Les colonnes <strong style={{ color: 'var(--fg-2)' }}>channel</strong>, <strong style={{ color: 'var(--fg-2)' }}>gate</strong> et <strong style={{ color: 'var(--fg-2)' }}>segment</strong> sont optionnelles — une ligne sans ces colonnes s'applique à tous les contextes.
-                  Les noms de colonnes sont reconnus en français et en anglais.
+                  The <strong style={{ color: 'var(--fg-2)' }}>channel</strong>, <strong style={{ color: 'var(--fg-2)' }}>gate</strong> and <strong style={{ color: 'var(--fg-2)' }}>segment</strong> columns are optional — a row without these columns applies to all contexts.
+                  Column names are recognised in both French and English.
                 </span>
               </div>
             </div>
@@ -400,7 +400,7 @@ export default function BrandVoicePage() {
           {/* Upload zone */}
           <div>
             <h2 style={{ fontSize: 14, fontWeight: 570, color: 'var(--fg-1)', marginBottom: 14, marginTop: 0 }}>
-              Upload ton historique
+              Upload your history
             </h2>
             <div
               onClick={() => !isLoading && fileInputRef.current?.click()}
@@ -426,7 +426,7 @@ export default function BrandVoicePage() {
                     animation: 'spin 0.8s linear infinite',
                   }} />
                   <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-                  <div style={{ fontSize: 13, color: 'var(--fg-2)' }}>Analyse du fichier…</div>
+                  <div style={{ fontSize: 13, color: 'var(--fg-2)' }}>Analyzing file…</div>
                 </>
               ) : (
                 <>
@@ -443,10 +443,10 @@ export default function BrandVoicePage() {
                   </div>
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: 14, fontWeight: 570, color: 'var(--fg-1)', marginBottom: 4 }}>
-                      Glisse ton fichier ici
+                      Drop your file here
                     </div>
                     <div style={{ fontSize: 12, color: 'var(--fg-3)' }}>
-                      ou clique pour parcourir · Excel (.xlsx) ou CSV (.csv)
+                      or click to browse · Excel (.xlsx) or CSV (.csv)
                     </div>
                   </div>
                 </>

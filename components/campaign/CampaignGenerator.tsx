@@ -175,7 +175,7 @@ export default function CampaignGenerator({ gate, segment, channels, segmentDesc
             </svg>
             <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>
               <span style={{ fontWeight: 570, color: 'var(--fg-2)' }}>{count}</span>
-              {' '}exemple{count > 1 ? 's' : ''} historique{count > 1 ? 's' : ''} actif{count > 1 ? 's' : ''} pour ce contexte
+              {' '}historical example{count > 1 ? 's' : ''} active for this context
             </span>
           </div>
         );

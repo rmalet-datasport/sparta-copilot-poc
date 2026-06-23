@@ -182,7 +182,7 @@ export default function Sidebar() {
       {/* Campaigns */}
       <div style={{ padding: '8px 0', borderTop: '1px solid var(--color-grey-800)' }}>
         <div style={{ padding: '8px 16px 6px', color: 'var(--color-grey-600)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-          Campagnes
+          Campaigns
         </div>
         <Link
           href="/campaigns"
@@ -206,7 +206,7 @@ export default function Sidebar() {
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
               <div style={{ fontSize: 12, fontWeight: pathname === '/campaigns' ? 570 : 400, lineHeight: 1.3 }}>
-                Sauvegardées
+                Saved
               </div>
             </div>
             {savedAssets.length > 0 && (

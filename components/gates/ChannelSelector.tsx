@@ -61,7 +61,7 @@ export default function ChannelSelector({ available, selected, onChange, rationa
         </div>
         {available.length > 0 && (
           <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>
-            recommandés : {available.map(ch => CHANNEL_LABELS[ch]).join(', ')}
+            recommended: {available.map(ch => CHANNEL_LABELS[ch]).join(', ')}
           </span>
         )}
       </div>

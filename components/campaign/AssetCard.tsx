@@ -60,8 +60,8 @@ const CHANNEL_ICONS: Record<string, React.ReactNode> = {
 const IMAGE_CHANNELS = ['email', 'instagram'];
 
 const IMAGE_SPECS: Record<string, { dims: string; ratio: string }> = {
-  email:     { dims: '600×300 px', ratio: 'Bannière email' },
-  instagram: { dims: '1080×1080 px', ratio: 'Carré · 1080×1920 px pour les stories' },
+  email:     { dims: '600×300 px', ratio: 'Email banner' },
+  instagram: { dims: '1080×1080 px', ratio: 'Square · 1080×1920 px for stories' },
 };
 
 function InstagramStoryPreview({ caption, hashtags, imageUrl }: { caption?: string; hashtags?: string; imageUrl?: string | null }) {
@@ -134,7 +134,7 @@ function InstagramStoryPreview({ caption, hashtags, imageUrl }: { caption?: stri
               copenhagen_marathon
             </div>
             <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.7)', lineHeight: 1.2 }}>
-              Maintenant
+              Now
             </div>
           </div>
           {/* Close + mute */}
@@ -187,7 +187,7 @@ function InstagramStoryPreview({ caption, hashtags, imageUrl }: { caption?: stri
             <path d="M2 8l6-6 6 6" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
           <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.65)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-            Voir plus
+            See more
           </div>
         </div>
 
@@ -202,7 +202,7 @@ function InstagramStoryPreview({ caption, hashtags, imageUrl }: { caption?: stri
             border: '1px solid rgba(255,255,255,0.4)',
             display: 'flex', alignItems: 'center', paddingLeft: 10,
           }}>
-            <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.55)' }}>Envoyer un message...</span>
+            <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.55)' }}>Send a message...</span>
           </div>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M2 2l12 6-12 6V9.5l8-1.5-8-1.5V2z" stroke="rgba(255,255,255,0.7)" strokeWidth="1.2" strokeLinejoin="round"/>
@@ -211,7 +211,7 @@ function InstagramStoryPreview({ caption, hashtags, imageUrl }: { caption?: stri
       </div>
 
       <div style={{ marginTop: 10, fontSize: 10, color: 'var(--fg-3)', textAlign: 'center' }}>
-        Aperçu Story · 1080×1920 px
+        Story Preview · 1080×1920 px
       </div>
     </div>
   );
@@ -287,14 +287,14 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
                 <rect x="2.5" y="2" width="5" height="3.5" rx="0.5" fill="currentColor" opacity="0.3"/>
                 <path d="M2.5 7h5M2.5 8.5h3" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round"/>
               </svg>
-              Aperçu Story
+              Story Preview
             </button>
           )}
           {onSave && (
             <button
               onClick={() => onSave(localImageUrl ?? undefined, editedAsset)}
               disabled={isSaved}
-              title={isSaved ? 'Sauvegardé' : 'Sauvegarder cet asset'}
+              title={isSaved ? 'Saved' : 'Save this asset'}
               style={{
                 display: 'flex', alignItems: 'center', gap: 4,
                 padding: '3px 9px', borderRadius: 'var(--radius-md)',
@@ -314,7 +314,7 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
                   <path d="M2 1.5h7l1 1.5v6.5l-3.5-2L3 9.5V3l-1-1.5z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
                 </svg>
               )}
-              {isSaved ? 'Sauvegardé' : 'Sauvegarder'}
+              {isSaved ? 'Saved' : 'Save'}
             </button>
           )}
           {onRegenerate && (
@@ -457,7 +457,7 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
           <div style={{ borderTop: '1px solid var(--border-1)', paddingTop: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
               <span style={{ fontSize: 10, color: 'var(--fg-3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                Visuel
+                Visual
               </span>
               <span style={{ fontSize: 10, color: 'var(--fg-3)' }}>
                 {IMAGE_SPECS[asset.channel]?.dims} · {IMAGE_SPECS[asset.channel]?.ratio}
@@ -475,7 +475,7 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
                 )}
                 {showStoryPreview && (
                   <div style={{ fontSize: 11, color: 'var(--fg-3)', padding: '2px 0 6px', fontStyle: 'italic' }}>
-                    Visuel appliqué à la story ↑
+                    Visual applied to the story above ↑
                   </div>
                 )}
                 {onSave && (
@@ -484,13 +484,13 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
                       onClick={() => fileInputRef.current?.click()}
                       style={{ flex: 1, padding: '5px 0', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-1)', background: 'var(--bg-1)', color: 'var(--fg-2)', fontSize: 11, cursor: 'pointer' }}
                     >
-                      Changer
+                      Change
                     </button>
                     <button
                       onClick={() => setLocalImageUrl(null)}
                       style={{ flex: 1, padding: '5px 0', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-1)', background: 'var(--bg-1)', color: 'var(--fg-3)', fontSize: 11, cursor: 'pointer' }}
                     >
-                      Supprimer
+                      Remove
                     </button>
                   </div>
                 )}
@@ -517,8 +517,8 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
                   <path d="M11 19v-4M9 17l2-2 2 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 12, color: 'var(--fg-2)', fontWeight: 570 }}>Ajouter une photo</div>
-                  <div style={{ fontSize: 11, color: 'var(--fg-3)', marginTop: 2 }}>Glisser-déposer ou cliquer · PNG, JPG</div>
+                  <div style={{ fontSize: 12, color: 'var(--fg-2)', fontWeight: 570 }}>Add a photo</div>
+                  <div style={{ fontSize: 11, color: 'var(--fg-3)', marginTop: 2 }}>Drag & drop or click · PNG, JPG</div>
                 </div>
               </div>
             ) : null}

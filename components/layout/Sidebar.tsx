@@ -2,8 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 import { useCampaignHistory } from '@/lib/context/CampaignHistoryContext';
 import { useBrandHistory } from '@/lib/context/BrandHistoryContext';
+import { useSidebar } from '@/lib/context/SidebarContext';
 
 const GATES = [
   {
@@ -68,9 +70,19 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { savedAssets } = useCampaignHistory();
   const { examples } = useBrandHistory();
+  const { isOpen, close } = useSidebar();
+
+  useEffect(() => { close(); }, [pathname]);
 
   return (
+    <>
+      {/* Mobile overlay */}
+      <div
+        className={`sparta-overlay${isOpen ? ' visible' : ''}`}
+        onClick={close}
+      />
     <aside
+      className={`sparta-sidebar${isOpen ? ' open' : ''}`}
       style={{
         width: 224,
         minHeight: '100vh',
@@ -249,7 +261,7 @@ export default function Sidebar() {
           </span>
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ fontSize: 12, fontWeight: pathname === '/brand-voice' ? 570 : 400, lineHeight: 1.3 }}>
-              Historique
+              History
             </div>
             {examples.length > 0 && (
               <span style={{
@@ -280,5 +292,6 @@ export default function Sidebar() {
         </div>
       </div>
     </aside>
+    </>
   );
 }

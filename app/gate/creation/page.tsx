@@ -99,7 +99,7 @@ export default function CreationPage() {
   };
 
   return (
-    <div style={{ padding: '0 28px 28px' }}>
+    <div className="sparta-gate-page" style={{ padding: '0 28px 28px' }}>
       <GateTimeline activeGate="creation" />
 
       {/* KPI strip */}
@@ -118,9 +118,9 @@ export default function CreationPage() {
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 20 }}>
+      <div className="sparta-gate-layout" style={{ display: 'flex', gap: 20 }}>
         {/* Left */}
-        <div style={{ flex: '0 0 360px' }}>
+        <div className="sparta-gate-left" style={{ flex: '0 0 360px' }}>
           {/* Segment cards */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
             <div>

@@ -128,7 +128,7 @@ export default function LotteryPage() {
   };
 
   return (
-    <div style={{ padding: '0 28px 28px' }}>
+    <div className="sparta-gate-page" style={{ padding: '0 28px 28px' }}>
       <GateTimeline activeGate="lottery" />
 
       {/* KPI strip */}
@@ -147,9 +147,9 @@ export default function LotteryPage() {
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 20 }}>
+      <div className="sparta-gate-layout" style={{ display: 'flex', gap: 20 }}>
         {/* Left: segment list */}
-        <div style={{ flex: '0 0 380px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="sparta-gate-left" style={{ flex: '0 0 380px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {/* Section header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
             <div>

@@ -119,7 +119,7 @@ export default function FinishPage() {
   };
 
   return (
-    <div style={{ padding: '0 28px 28px' }}>
+    <div className="sparta-gate-page" style={{ padding: '0 28px 28px' }}>
       <GateTimeline activeGate="finish" />
 
       {/* KPI strip */}
@@ -158,8 +158,8 @@ export default function FinishPage() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 20 }}>
-        <div style={{ flex: '0 0 360px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className="sparta-gate-layout" style={{ display: 'flex', gap: 20 }}>
+        <div className="sparta-gate-left" style={{ flex: '0 0 360px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {/* Section header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
             <div>

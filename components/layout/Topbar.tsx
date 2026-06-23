@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { useSidebar } from '@/lib/context/SidebarContext';
 
 const GATE_LABELS: Record<string, { gate: string; label: string }> = {
   '/gate/creation': { gate: 'Gate 0', label: 'Event Creation' },
@@ -11,6 +12,7 @@ const GATE_LABELS: Record<string, { gate: string; label: string }> = {
 
 export default function Topbar() {
   const pathname = usePathname();
+  const { toggle } = useSidebar();
   const current = Object.entries(GATE_LABELS).find(([path]) => pathname.startsWith(path));
   const gateInfo = current?.[1];
 
@@ -23,13 +25,21 @@ export default function Topbar() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 24px',
+        padding: '0 16px',
         flexShrink: 0,
+        gap: 12,
       }}
     >
+      {/* Hamburger — mobile only */}
+      <button className="sparta-hamburger" onClick={toggle} aria-label="Toggle menu">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      </button>
+
       {/* Breadcrumb */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ color: 'var(--fg-3)', fontSize: 13 }}>Copenhagen Marathon 2026</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, overflow: 'hidden' }}>
+        <span style={{ color: 'var(--fg-3)', fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Copenhagen Marathon 2026</span>
         {gateInfo && (
           <>
             <span style={{ color: 'var(--border-2)', fontSize: 13 }}>/</span>

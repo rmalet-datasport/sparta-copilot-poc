@@ -4,6 +4,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import Topbar from '@/components/layout/Topbar';
 import { CampaignHistoryProvider } from '@/lib/context/CampaignHistoryContext';
 import { BrandHistoryProvider } from '@/lib/context/BrandHistoryContext';
+import { SidebarProvider } from '@/lib/context/SidebarContext';
 
 export const metadata: Metadata = {
   title: 'Sparta Co-Pilot — Copenhagen Marathon 2026',
@@ -14,6 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" style={{ height: '100%' }}>
       <body style={{ height: '100%', display: 'flex', overflow: 'hidden' }}>
+        <SidebarProvider>
         <BrandHistoryProvider>
         <CampaignHistoryProvider>
           <Sidebar />
@@ -25,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </CampaignHistoryProvider>
         </BrandHistoryProvider>
+        </SidebarProvider>
       </body>
     </html>
   );

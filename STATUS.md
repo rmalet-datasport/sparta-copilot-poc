@@ -3,12 +3,9 @@
 ## Comment lancer le projet
 
 ```bash
-cd "C:\Users\Optimus\OneDrive - Datasport AG\Dokumente\sparta-copilot"
 npm run dev
 # → http://localhost:3000
 ```
-
-> Le projet est sur OneDrive (pas sur K:). Démarrage ~5-10 secondes.
 
 ---
 
@@ -18,7 +15,7 @@ npm run dev
 - Sidebar, topbar, segments avec chiffres UI
 - Sélection des channels par segment
 - Appel API Claude (`POST /api/ai`) — retourne HTTP 200
-- Repo GitHub : `github.com/rmalet-datasport/sparta-copilot-poc`
+- Repo GitHub : à mettre à jour lors de la migration vers le repo Datasport
 
 ## Ce qui reste à régler
 

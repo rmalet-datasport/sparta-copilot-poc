@@ -291,7 +291,7 @@ function generateAthletes(): Athlete[] {
     const regMonth = regDay <= 30 ? 11 : 12;
     const regDayAdj = regDay <= 30 ? regDay : regDay - 30;
     const registrationDate = `2025-${String(regMonth).padStart(2, '0')}-${String(regDayAdj).padStart(2, '0')}`;
-    const distance = (i * 3 + 1) % 3 === 0 ? 'Half Marathon 21K' : 'Marathon 42K';
+    const distance = i % 3 === 0 ? 'Half Marathon 21K' : 'Marathon 42K';
     const estimatedH = distance === 'Marathon 42K' ? (3 + (i % 3)) : (1 + (i % 2));
     const estimatedM = (i * 7) % 60;
     const estimatedFinishTime = `${estimatedH}:${String(estimatedM).padStart(2, '0')}:00`;

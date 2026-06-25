@@ -10,7 +10,7 @@ export const EVENT = {
   lotteryDate: '2026-01-10',
   waitlistDeadline: '2026-03-01',
   distances: ['Marathon 42K', 'Half Marathon 21K'],
-  historicalReturnRate: 0.65,
+  historicalReturnRate: 0.30,
   totalApplicants: 20000,
 };
 
@@ -45,10 +45,10 @@ export const SEGMENT_SIZES = {
 };
 
 export const REREGISTRATION_RATES = {
-  naturalReturnRate: 0.65,
-  aiTargetedReturnRate: 0.82,
-  incrementalAthletes: 1950,
-  incrementalRevenue: 97500,
+  naturalReturnRate: 0.30,
+  aiTargetedReturnRate: 0.50,
+  incrementalAthletes: 2240,
+  incrementalRevenue: 224000,
 };
 
 export const KPI = {
@@ -75,7 +75,7 @@ export const KPI = {
     totalFinishers: 11200,
     avgFinishTime: '4:12:34',
     personalBestRate: 0.28,
-    projectedReRegistration: 0.82,
+    projectedReRegistration: 0.50,
   },
 };
 

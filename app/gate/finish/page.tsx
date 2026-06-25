@@ -153,7 +153,7 @@ export default function FinishPage() {
             <strong style={{ color: 'var(--primary)' }}>{REREGISTRATION_RATES.incrementalAthletes.toLocaleString()}</strong>{' '}
             additional athletes worth{' '}
             <strong style={{ color: 'var(--primary)' }}>€{REREGISTRATION_RATES.incrementalRevenue.toLocaleString()}</strong>{' '}
-            in incremental revenue (82% vs 65% natural return rate).
+            in incremental revenue ({Math.round(REREGISTRATION_RATES.aiTargetedReturnRate * 100)}% vs {Math.round(REREGISTRATION_RATES.naturalReturnRate * 100)}% natural return rate).
           </span>
         </div>
       </div>

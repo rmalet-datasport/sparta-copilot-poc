@@ -86,12 +86,31 @@ async function parseFile(file: File): Promise<BrandExample[]> {
   }
 
   if (ext === 'xlsx' || ext === 'xls') {
-    const XLSX = await import('xlsx');
+    const ExcelJS = await import('exceljs');
+    const wb = new ExcelJS.Workbook();
     const buffer = await file.arrayBuffer();
-    const data = new Uint8Array(buffer);
-    const wb = XLSX.read(data, { type: 'array' });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json<Record<string, string>>(ws, { defval: '' });
+    await wb.xlsx.load(buffer);
+    const ws = wb.worksheets[0];
+    if (!ws) return [];
+
+    const headers: string[] = [];
+    const rows: Record<string, string>[] = [];
+
+    ws.eachRow((row, rowIndex) => {
+      if (rowIndex === 1) {
+        row.eachCell({ includeEmpty: true }, (cell, col) => {
+          headers[col] = String(cell.value ?? '').trim();
+        });
+      } else {
+        const rowData: Record<string, string> = {};
+        row.eachCell({ includeEmpty: true }, (cell, col) => {
+          const key = headers[col];
+          if (key) rowData[key] = String(cell.value ?? '').trim();
+        });
+        rows.push(rowData);
+      }
+    });
+
     return parseRows(rows);
   }
 

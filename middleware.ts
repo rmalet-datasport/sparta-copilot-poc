@@ -3,6 +3,16 @@ import type { NextRequest } from 'next/server'
 
 const PUBLIC_PATHS = ['/access', '/api/access']
 
+// Constant-time string comparison — prevents timing attacks
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  let diff = 0
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  }
+  return diff === 0
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
@@ -15,8 +25,9 @@ export function middleware(request: NextRequest) {
   }
 
   const accessCookie = request.cookies.get('demo_access')
+  const secret = process.env.DEMO_COOKIE_SECRET ?? ''
 
-  if (!accessCookie || accessCookie.value !== process.env.DEMO_COOKIE_SECRET) {
+  if (!accessCookie || !timingSafeEqual(accessCookie.value, secret)) {
     const url = request.nextUrl.clone()
     url.pathname = '/access'
     return NextResponse.redirect(url)

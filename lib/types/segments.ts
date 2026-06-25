@@ -8,6 +8,7 @@ export type FilterField =
   | 'total_editions_max'
   | 'engagement_min'
   | 'city_contains'
+  | 'distance'
 
 export interface FilterCondition {
   id: string
@@ -36,6 +37,7 @@ export const FILTER_FIELD_LABELS: Record<FilterField, string> = {
   total_editions_max: 'Éditions max.',
   engagement_min: 'Engagement min.',
   city_contains: 'Ville',
+  distance: 'Distance',
 }
 
 export const FILTER_VALUE_OPTIONS: Partial<Record<FilterField, { value: string; label: string }[]>> = {
@@ -61,6 +63,10 @@ export const FILTER_VALUE_OPTIONS: Partial<Record<FilterField, { value: string; 
   isReturningAthlete: [
     { value: 'true', label: 'Oui' },
     { value: 'false', label: 'Non' },
+  ],
+  distance: [
+    { value: 'Marathon 42K', label: 'Marathon 42K' },
+    { value: 'Half Marathon 21K', label: 'Half Marathon 21K' },
   ],
 }
 

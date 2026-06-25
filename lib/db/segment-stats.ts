@@ -21,6 +21,8 @@ export function computeDbStats() {
 
   const returningPct = Math.round(athletes.filter(a => a.isReturningAthlete).length / athletes.length * 100)
   const femalePct = Math.round(athletes.filter(a => a.gender === 'F').length / athletes.length * 100)
+  const marathonPct = Math.round(athletes.filter(a => a.distance === 'Marathon 42K').length / athletes.length * 100)
+  const halfMarathonPct = 100 - marathonPct
 
   const editionsDist = {
     zero: Math.round(athletes.filter(a => a.totalEditionsRaced === 0).length / athletes.length * 100),
@@ -50,6 +52,8 @@ export function computeDbStats() {
     returningPct,
     femalePct,
     nationalityDist,
+    marathonPct,
+    halfMarathonPct,
   }
 }
 
@@ -61,5 +65,6 @@ export function formatStatsForPrompt(): string {
 - Éditions courues : 0 édition ${s.editionsRaced.dist.zero}%, 1 édition ${s.editionsRaced.dist.one}%, 2-3 éditions ${s.editionsRaced.dist.twoThree}%, 4+ éditions ${s.editionsRaced.dist.fourPlus}%
 - Athletes retournants (déjà participé) : ${s.returningPct}%
 - Genre : ${s.femalePct}% femmes, ${100 - s.femalePct}% hommes
-- Nationalités : ${s.nationalityDist}`
+- Nationalités : ${s.nationalityDist}
+- Distance : ${s.marathonPct}% Marathon 42K (taux de rétention naturel ~30%), ${s.halfMarathonPct}% Half Marathon 21K (taux de rétention naturel ~50%)`
 }

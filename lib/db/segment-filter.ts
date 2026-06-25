@@ -50,6 +50,8 @@ export function filterAthletes(
           return v !== '' && a.engagement.score >= parseInt(v)
         case 'city_contains':
           return v !== '' && a.city.toLowerCase().includes(v.toLowerCase())
+        case 'distance':
+          return a.distance === v
         default:
           return true
       }

@@ -30,7 +30,8 @@ sparta-copilot/
 │   │   └── ai/
 │   │       ├── route.ts                 (génération campagne, streaming)
 │   │       ├── parse-segment/route.ts   (NL → filtres structurés)
-│   │       └── suggest-segment/route.ts (objectif métier → profil + filtres)
+│   │       ├── suggest-segment/route.ts (objectif métier → profil + filtres)
+│   │       └── analyze-gate/route.ts   (analyse pool athletes → sous-segments IA)
 │   └── globals.css                      (CSS vars Datasport)
 ├── lib/
 │   ├── db/
@@ -58,7 +59,8 @@ sparta-copilot/
 │   │   ├── GateTimeline.tsx
 │   │   ├── SegmentCard.tsx
 │   │   ├── ChannelSelector.tsx
-│   │   └── SegmentBuilder.tsx           (modal création segment personnalisé)
+│   │   ├── SegmentBuilder.tsx           (modal création segment personnalisé)
+│   │   └── AISubSegments.tsx            (widget découverte sous-segments par IA)
 │   └── campaign/
 │       ├── CampaignGenerator.tsx
 │       ├── AssetCard.tsx
@@ -122,16 +124,17 @@ scaledCount = Math.round(rawCount / DB_SIZE * effectiveTotal)
 ```
 
 ### Filtrage athletes (`lib/db/segment-filter.ts`)
-La fonction `filterAthletes(filters, baseSegmentIds?, segmentField?)` :
+La fonction `filterAthletes(filters, baseSegmentIds?, segmentField?, baseAthleteIds?)` :
 - Filtre le pool selon un scope de segments (`baseSegmentIds` + `segmentField`)
+- Ou directement selon un `Set<string>` d'IDs (`baseAthleteIds`) — prioritaire sur `baseSegmentIds`
 - Applique les filtres démographiques (`FilterCondition[]`)
 - Cas spécial : `segmentField === 'gate0Segment'` → segment dérivé dynamiquement
   depuis les champs existants (pas stocké dans la DB)
 
 ### Statistiques DB (`lib/db/segment-stats.ts`)
-`formatStatsForPrompt()` calcule les percentiles et distributions de la DB
-(engagement p25/50/75/90, âges, éditions, nationalités, % retournants)
-et retourne une string injectée dans le prompt `/api/ai/suggest-segment`.
+Deux fonctions disponibles :
+- `formatStatsForPrompt()` — stats complètes de la DB (engagement p25/50/75/90, âges, éditions, nationalités, % retournants, distance). Injectée dans `/api/ai/suggest-segment` et `/api/ai/analyze-gate` (pool complet).
+- `formatStatsForSubPool(pool: Athlete[])` — même structure mais calculée sur un sous-pool arbitraire. Injectée dans `/api/ai/analyze-gate` quand `athleteIds` est fourni.
 
 ---
 
@@ -147,6 +150,7 @@ React (pas de persistance) et disparaissent au rechargement.
 type FilterField =
   | 'gender' | 'age_min' | 'age_max' | 'nationality' | 'isReturningAthlete'
   | 'total_editions_min' | 'total_editions_max' | 'engagement_min' | 'city_contains'
+  | 'distance' | 'hasInsurance'
 
 interface FilterCondition { id: string; field: FilterField; value: string }
 
@@ -165,15 +169,51 @@ Modal avec 5 sections dans l'ordre :
 2. **Décrire en langage naturel** — NL → `/api/ai/parse-segment` → filtres auto-appliqués
 3. **Définir par objectif métier** — objectif → `/api/ai/suggest-segment` → portrait + filtres + insights
 4. **Scope** — pills des segments prédéfinis du gate (sélection multiple) + "Tous les athletes"
-5. **Filtres** — filtres démographiques manuels (9 champs disponibles)
+5. **Filtres** — filtres démographiques manuels (11 champs : gender, age_min, age_max, nationality, isReturningAthlete, total_editions_min, total_editions_max, engagement_min, city_contains, distance, hasInsurance)
 6. **Objectif & contexte** — texte libre injecté dans le prompt de génération de campagne
 7. **Compteur** — nombre d'athletes correspondant aux critères (mis à l'échelle)
+
+Accepte `initialSegment?: CustomSegment` pour pré-remplir le formulaire (édition d'un segment existant).
+
+`GateSegmentDef` (interface exportée) :
+```ts
+interface GateSegmentDef {
+  id: string
+  label: string
+  color: string
+  filters?: FilterCondition[]   // présent pour les segments générés par IA (AISubSegments)
+}
+```
+Quand `filters` est présent dans un `GateSegmentDef` sélectionné en scope, le compteur calcule l'intersection via `filterAthletes` directement (pas via `athleteSegmentField`).
 
 ### Affichage dans les gates
 - Header colonne gauche : `[LABEL] [total athletes in this gate] — [+ Créer un segment]`
 - Segments prédéfinis : `SegmentCard` en liste verticale
 - Segments custom : rows avec point coloré + nom + compteur + bouton delete, directement sous les prédéfinis
 - Sélection d'un segment custom : panel campagne à droite avec badge CUSTOM
+
+### AISubSegments (`components/gates/AISubSegments.tsx`)
+Widget affiché dans le panneau de droite quand un segment est sélectionné. Permet de découvrir des sous-groupes IA dans la population du segment courant.
+
+Props :
+```ts
+interface Props {
+  parentId: string              // '__full_pool__' ou id d'un segment prédéfini
+  parentLabel: string
+  parentAthleteIds: string[]    // IDs filtrés du pool courant
+  parentScaledSize: number      // taille UI du segment parent
+  parentFilters?: FilterCondition[]  // filtres du parent pour merge si AI sub-segment
+  onSelect: (seg: CustomSegment) => void
+}
+```
+
+Comportement :
+- État `idle` : bouton "Découvrir des sous-segments"
+- Au clic → appelle `/api/ai/analyze-gate` avec `athleteIds` + `parentLabel`
+- Affiche 3–4 sous-segments avec nom, description, compteur scalé
+- Sélectionner un sous-segment → crée un `CustomSegment` avec les filtres du sous-segment
+  (mergés avec `parentFilters` si fournis) et appelle `onSelect()`
+- Bouton "Relancer" pour re-analyser une fois les résultats affichés
 
 ---
 
@@ -206,6 +246,17 @@ historicalExamples?: BrandExample[]  // exemples filtrés par BrandHistoryContex
 // Modèle : claude-sonnet-4-6, max_tokens: 800, pas de streaming
 // Stats DB injectées automatiquement via formatStatsForPrompt()
 ```
+
+### Route analyze-gate : pool → sous-segments IA
+```ts
+// app/api/ai/analyze-gate/route.ts
+// Input : { athleteIds?: string[], parentLabel?: string }
+// Output : { segments: AIRawSegment[] }   (3–4 segments si athleteIds fourni, 4 sinon)
+// Modèle : claude-sonnet-4-6, max_tokens: 1200, pas de streaming
+// Si athleteIds fourni → formatStatsForSubPool() ; sinon → formatStatsForPrompt()
+// Chaque segment retourné : { id, name, description, suggestedChannels, channelRationale, filters, color, colorBg }
+```
+Utilisée par `AISubSegments.tsx` pour découvrir des sous-groupes actionnables dans un segment parent.
 
 ### System prompts
 Définis dans `lib/ai/prompts.ts`, importés depuis `docs/AI_PROMPTS.md`.

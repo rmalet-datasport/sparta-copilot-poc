@@ -15,7 +15,7 @@ Informations sur l'événement :
 - Organisateur : Copenhagen Marathon / Datasport`;
 
 const FORMAT_INSTRUCTION = `Réponds UNIQUEMENT en JSON valide, sans markdown, sans backticks.
-Format attendu :
+Format attendu (génère uniquement les channels demandés) :
 {
   "assets": [
     {
@@ -40,10 +40,20 @@ Format attendu :
       "caption": "...",
       "hashtags": "...",
       "meta": "..."
+    },
+    {
+      "channel": "offline",
+      "title": "Campaign name (3-6 words, readable on a flyer)",
+      "caption": "Punchy flyer tagline (max 8 words)",
+      "body": "Ambassador briefing in English: who to target, what to say, where to go. Include 3-5 specific distribution points based on the segment's geographic profile (areas, cities, venue types — running stores, gyms, parkrun events, sports expos, etc.). Write as practical field instructions for the ambassador.",
+      "utmCampaign": "short_snake_case_utm_campaign_slug",
+      "distributionPoints": "3-5 distribution points separated by commas, in English",
+      "meta": "..."
     }
   ]
 }
-Le champ "meta" décrit en une ligne le contexte ou l'intention de l'asset.`;
+Le champ "meta" décrit en une ligne le contexte ou l'intention de l'asset.
+For the "offline" channel: utmCampaign must be a short slug (e.g. cph26_loyal_finishers), all text fields must be in English.`;
 
 export const SYSTEM_PROMPTS: Record<string, Record<string, string>> = {
   gate0: {

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import GateTimeline from '@/components/gates/GateTimeline';
 import ChannelSelector from '@/components/gates/ChannelSelector';
 import CampaignGenerator from '@/components/campaign/CampaignGenerator';
 import SegmentBuilder from '@/components/gates/SegmentBuilder';
+import AISubSegments from '@/components/gates/AISubSegments';
 import { SEGMENT_SIZES, DEFAULT_CHANNELS, KPI, EVENT } from '@/lib/constants';
 import type { Channel } from '@/lib/constants';
 import { filterAthletes } from '@/lib/db/segment-filter';
@@ -59,11 +60,11 @@ const SEGMENTS = [
 ];
 
 const HISTORICAL = [
-  { year: 2025, applicants: 18500, finishers: 10800, upsellRevenue: 298000 },
-  { year: 2024, applicants: 17200, finishers: 10200, upsellRevenue: 271000 },
-  { year: 2023, applicants: 15800, finishers: 9600, upsellRevenue: 244000 },
-  { year: 2022, applicants: 14200, finishers: 8900, upsellRevenue: 218000 },
-  { year: 2021, applicants: 11500, finishers: 7200, upsellRevenue: 176000 },
+  { year: 2025, applicants: 18500, finishers: 10800 },
+  { year: 2024, applicants: 17200, finishers: 10200 },
+  { year: 2023, applicants: 15800, finishers: 9600 },
+  { year: 2022, applicants: 14200, finishers: 8900 },
+  { year: 2021, applicants: 11500, finishers: 7200 },
 ];
 
 const GATE_TOTAL = Object.values(SEGMENT_SIZES.gate0).reduce((a, b) => a + b, 0);
@@ -78,15 +79,36 @@ export default function CreationPage() {
   const [customSegments, setCustomSegments] = useState<CustomSegment[]>([]);
   const [showBuilder, setShowBuilder] = useState(false);
   const [editingSegment, setEditingSegment] = useState<CustomSegment | null>(null);
+  const [aiParentId, setAiParentId] = useState<string>('__full_pool__');
 
   const selected = SEGMENTS.find(s => s.id === selectedId);
   const selectedCustom = customSegments.find(s => s.id === selectedId);
   const kpi = KPI.gate0;
 
+  const aiParentInfo = useMemo(() => {
+    if (aiParentId === '__full_pool__') {
+      return { label: 'Tous les prospects (pré-ballot)', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
+    }
+    const seg = SEGMENTS.find(s => s.id === aiParentId);
+    if (!seg) return { label: 'Tous les prospects', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
+    return {
+      label: seg.label,
+      scaledSize: seg.size,
+      athleteIds: filterAthletes([], [seg.id], SEGMENT_FIELD).map(a => a.id),
+    };
+  }, [aiParentId]);
+
   const handleSelect = (id: string) => {
     if (selectedId === id) { setSelectedId(null); setChannels([]); return; }
     setSelectedId(id);
     setChannels((DEFAULT_CHANNELS[id] ?? ['email']) as Channel[]);
+    if (SEGMENTS.some(s => s.id === id)) setAiParentId(id);
+  };
+
+  const handleAISubSelect = (seg: CustomSegment) => {
+    setCustomSegments(prev => prev.some(s => s.id === seg.id) ? prev : [...prev, seg]);
+    setSelectedId(seg.id);
+    setChannels(['email']);
   };
 
   const getScaledCount = (seg: CustomSegment) => {
@@ -121,7 +143,6 @@ export default function CreationPage() {
       <div className="sparta-gate-layout" style={{ display: 'flex', gap: 20 }}>
         {/* Left */}
         <div className="sparta-gate-left" style={{ flex: '0 0 360px' }}>
-          {/* Segment cards */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
             <div>
               <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Pre-ballot Segments</span>
@@ -166,6 +187,15 @@ export default function CreationPage() {
               </button>
             ))}
 
+            <AISubSegments
+              key={aiParentId}
+              parentId={aiParentId}
+              parentLabel={aiParentInfo.label}
+              parentAthleteIds={aiParentInfo.athleteIds}
+              parentScaledSize={aiParentInfo.scaledSize}
+              onSelect={handleAISubSelect}
+            />
+
             {customSegments.map(seg => (
               <div
                 key={seg.id}
@@ -208,7 +238,7 @@ export default function CreationPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border-1)' }}>
-                    {['Year', 'Applicants', 'Finishers', 'Upsells'].map(h => (
+                    {['Year', 'Applicants', 'Finishers'].map(h => (
                       <th key={h} style={{ padding: '8px 12px', textAlign: 'right', color: 'var(--fg-3)', fontWeight: 570, fontSize: 11, letterSpacing: '0.04em' }}>
                         {h}
                       </th>
@@ -221,7 +251,6 @@ export default function CreationPage() {
                       <td style={{ padding: '7px 12px', fontFamily: 'var(--font-mono)', color: 'var(--fg-1)', fontWeight: 570 }}>{row.year}</td>
                       <td style={{ padding: '7px 12px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--fg-2)' }}>{row.applicants.toLocaleString()}</td>
                       <td style={{ padding: '7px 12px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--fg-2)' }}>{row.finishers.toLocaleString()}</td>
-                      <td style={{ padding: '7px 12px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--fg-2)' }}>€{(row.upsellRevenue / 1000).toFixed(0)}k</td>
                     </tr>
                   ))}
                 </tbody>

@@ -119,12 +119,6 @@ const NATIONALITIES = deterministicShuffle(
   NAT_DIST.flatMap(({ nat, count }) => Array(count).fill(nat))
 );
 
-const PRE_LOTTERY_SEGMENTS: string[] = deterministicShuffle([
-  ...Array(160).fill('ambassador'),
-  ...Array(140).fill('to_reactivate'),
-  ...Array(125).fill('opportunist'),
-  ...Array(75).fill('cold_prospect'),
-]);
 
 const POST_LOTTERY_SEGMENTS: string[] = deterministicShuffle([
   ...Array(205).fill('confirmed_engaged'),
@@ -145,14 +139,10 @@ const POST_RACE_SEGMENTS: string[] = deterministicShuffle([
   ...Array(12).fill('reconquest_dnf'),
 ]);
 
-const UPSELL_ITEMS: UpsellItem[] = [
-  'accommodation_package', 'charity_bib', 'vip_finish_line',
-  'race_photo_pack', 'pace_group_access', 'finisher_tshirt_premium',
-];
+const UPSELL_ITEMS: UpsellItem[] = ['cancellation_insurance'];
 
 const UPSELL_PRICES: Record<UpsellItem, number> = {
-  accommodation_package: 180, charity_bib: 50, vip_finish_line: 75,
-  race_photo_pack: 35, pace_group_access: 25, finisher_tshirt_premium: 40,
+  cancellation_insurance: 25,
 };
 
 const EXTERNAL_SOURCES = [
@@ -176,7 +166,7 @@ function generateZip(nat: string, seed: number): string {
   return `${p.zip}${String(1000 + (Math.abs(seed) % 9000)).substring(0, 4)}`;
 }
 
-function generatePastEditions(seed: number, isReturning: boolean, segment: string): PastEdition[] {
+function generatePastEditions(seed: number, isReturning: boolean): PastEdition[] {
   const editions: PastEdition[] = [];
   const years = [2021, 2022, 2023, 2024, 2025];
 
@@ -223,28 +213,16 @@ function generatePastEditions(seed: number, isReturning: boolean, segment: strin
   return editions;
 }
 
-function generateEngagement(segment: string, seed: number): EngagementData {
+function generateEngagement(seed: number): EngagementData {
   const t = (seed % 100) / 100;
-  let baseScore: number;
-
-  switch (segment) {
-    case 'ambassador': baseScore = lerp(65, 95, t); break;
-    case 'to_reactivate': baseScore = lerp(20, 55, t); break;
-    case 'opportunist': baseScore = lerp(45, 70, t); break;
-    case 'cold_prospect': baseScore = lerp(15, 45, t); break;
-    case 'confirmed_engaged': baseScore = lerp(61, 92, t); break;
-    case 'confirmed_passive': baseScore = lerp(20, 59, t); break;
-    case 'champion_ambassador': baseScore = lerp(76, 98, t); break;
-    default: baseScore = lerp(30, 70, t);
-  }
-
+  const baseScore = Math.round(lerp(15, 95, t));
   return {
     score: baseScore,
     emailOpenRate: parseFloat((0.3 + (baseScore / 100) * 0.5).toFixed(2)),
-    appOpens: lerp(0, 45, baseScore / 100),
+    appOpens: Math.round(lerp(0, 45, baseScore / 100)),
     smsClickRate: parseFloat((0.15 + (baseScore / 100) * 0.35).toFixed(2)),
     instagramFollow: baseScore > 60,
-    websiteVisits: lerp(0, 25, baseScore / 100),
+    websiteVisits: Math.round(lerp(0, 25, baseScore / 100)),
   };
 }
 
@@ -256,7 +234,6 @@ function generateAthletes(): Athlete[] {
   for (let i = 0; i < 500; i++) {
     const nat = NATIONALITIES[i];
     const pool = POOL[nat];
-    const preLotSeg = PRE_LOTTERY_SEGMENTS[i] as Athlete['preLotterySegment'];
     const postLotSeg = POST_LOTTERY_SEGMENTS[i] as Athlete['postLotterySegment'];
 
     const isMale = (i * 7 + 3) % 2 === 0;
@@ -268,11 +245,15 @@ function generateAthletes(): Athlete[] {
 
     const age = 25 + (i * 13 + 7) % 30;
     const isExternal = i % 13 === 7; // ~38 athletes
-    const isReturning = !isExternal && (preLotSeg === 'ambassador' || preLotSeg === 'to_reactivate' || (i % 4 !== 0));
+    const isReturning = !isExternal && i % 4 !== 0;
 
-    const pastEditions = generatePastEditions(i, isReturning, preLotSeg!);
+    // Generate base attributes first, then derive segment from them
+    const pastEditions = generatePastEditions(i, isReturning);
     const totalApplied = pastEditions.filter(e => e.applied).length;
     const totalRaced = pastEditions.filter(e => e.raceStatus === 'finisher').length;
+
+    const engSeed = i * 37 + 11;
+    const engagement = generateEngagement(engSeed);
 
     const email = `${firstName.toLowerCase().replace(/[^a-z]/g, '')}.${lastName.toLowerCase().replace(/[^a-z]/g, '')}${i}@${pool.domain}`;
     const phone = generatePhone(pool.phone, i);
@@ -281,10 +262,6 @@ function generateAthletes(): Athlete[] {
     const acqSource: AcquisitionSource = isExternal
       ? 'external_prospect'
       : isReturning ? 'returning_athlete' : pick(ACQ_SOURCES, i);
-
-    // Engagement based on pre-lottery segment
-    const engSeed = i * 37 + 11;
-    const engagement = generateEngagement(preLotSeg!, engSeed);
 
     // Gate 1 values
     const regDay = 1 + (i % 45);
@@ -296,28 +273,13 @@ function generateAthletes(): Athlete[] {
     const estimatedM = (i * 7) % 60;
     const estimatedFinishTime = `${estimatedH}:${String(estimatedM).padStart(2, '0')}:00`;
 
-    let candidacyScore: number, anticipatedValue: number, selectionProbability: number;
-    switch (preLotSeg) {
-      case 'ambassador':
-        candidacyScore = lerp(72, 95, (i % 160) / 159);
-        anticipatedValue = lerp(180, 420, (i % 160) / 159);
-        selectionProbability = parseFloat((0.6 + ((i % 160) / 159) * 0.3).toFixed(2));
-        break;
-      case 'to_reactivate':
-        candidacyScore = lerp(55, 80, (i % 140) / 139);
-        anticipatedValue = lerp(120, 320, (i % 140) / 139);
-        selectionProbability = parseFloat((0.08 + ((i % 140) / 139) * 0.32).toFixed(2));
-        break;
-      case 'opportunist':
-        candidacyScore = lerp(40, 68, (i % 125) / 124);
-        anticipatedValue = lerp(45, 140, (i % 125) / 124);
-        selectionProbability = parseFloat((0.5 + ((i % 125) / 124) * 0.3).toFixed(2));
-        break;
-      default: // cold_prospect
-        candidacyScore = lerp(18, 45, (i % 75) / 74);
-        anticipatedValue = lerp(20, 90, (i % 75) / 74);
-        selectionProbability = parseFloat((0.04 + ((i % 75) / 74) * 0.3).toFixed(2));
-    }
+    const t = ((i * 17 + 3) % 100) / 100;
+    // Scores derived from real attributes: engagement + editions history
+    const candidacyScore = Math.min(100, Math.round(engagement.score * 0.65 + Math.min(totalRaced * 8, 28) + t * 7));
+    const anticipatedValue = isExternal
+      ? Math.round(lerp(20, 80, t))
+      : Math.round(lerp(60 + totalRaced * 20, 120 + totalRaced * 45, t));
+    const selectionProbability = parseFloat(Math.min(0.95, 0.05 + (candidacyScore / 100) * 0.85).toFixed(2));
 
     // Gate 2 values
     const isRegistered = postLotSeg === 'confirmed_engaged' || postLotSeg === 'confirmed_passive';
@@ -334,17 +296,10 @@ function generateAthletes(): Athlete[] {
 
     if (isRegistered) {
       paymentStatus = 'paid';
-      if (i % 3 !== 0) {
-        const upsellCount = 1 + (i % 3);
-        upsellsPurchased = [];
-        upsellRevenue = 0;
-        for (let u = 0; u < upsellCount; u++) {
-          const item = UPSELL_ITEMS[(i + u * 7) % UPSELL_ITEMS.length];
-          if (!upsellsPurchased.includes(item)) {
-            upsellsPurchased.push(item);
-            upsellRevenue += UPSELL_PRICES[item];
-          }
-        }
+      // ~22% of registered athletes buy the cancellation insurance
+      if (i % 5 === 0) {
+        upsellsPurchased = ['cancellation_insurance'];
+        upsellRevenue = UPSELL_PRICES['cancellation_insurance'];
       } else {
         upsellsPurchased = [];
         upsellRevenue = 0;
@@ -396,7 +351,7 @@ function generateAthletes(): Athlete[] {
       registrationDate, distance, estimatedFinishTime,
       externalProspect: isExternal,
       externalProspectSource: isExternal ? EXTERNAL_SOURCES[i % EXTERNAL_SOURCES.length] : undefined,
-      candidacyScore, anticipatedValue, selectionProbability, preLotterySegment: preLotSeg,
+      candidacyScore, anticipatedValue, selectionProbability,
       registrationStatus, lotteryDate: '2026-01-10', waitlistPosition,
       upsellsPurchased, upsellRevenue, paymentStatus,
       postLotterySegment: postLotSeg,
@@ -411,10 +366,6 @@ function generateAthletes(): Athlete[] {
 }
 
 export const athletes: Athlete[] = generateAthletes();
-
-export function getAthletesByPreLotterySegment(segment: Athlete['preLotterySegment']): Athlete[] {
-  return athletes.filter(a => a.preLotterySegment === segment);
-}
 
 export function getAthletesByPostLotterySegment(segment: Athlete['postLotterySegment']): Athlete[] {
   return athletes.filter(a => a.postLotterySegment === segment);

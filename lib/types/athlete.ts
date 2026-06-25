@@ -7,13 +7,7 @@ export type AcquisitionSource =
   | 'returning_athlete'
   | 'external_prospect';
 
-export type UpsellItem =
-  | 'accommodation_package'
-  | 'charity_bib'
-  | 'vip_finish_line'
-  | 'race_photo_pack'
-  | 'pace_group_access'
-  | 'finisher_tshirt_premium';
+export type UpsellItem = 'cancellation_insurance';
 
 export type PastEdition = {
   year: number;
@@ -65,7 +59,6 @@ export type Athlete = {
   candidacyScore?: number;
   anticipatedValue?: number;
   selectionProbability?: number;
-  preLotterySegment?: 'ambassador' | 'to_reactivate' | 'opportunist' | 'cold_prospect';
 
   // ─── GATE 2 ─────────────────────────────────────────────────────
   registrationStatus?: 'registered' | 'waitlist' | 'refused';

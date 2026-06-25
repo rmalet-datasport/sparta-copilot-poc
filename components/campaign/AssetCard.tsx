@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface Asset {
   channel: string;
@@ -9,6 +10,8 @@ interface Asset {
   body?: string;
   caption?: string;
   hashtags?: string;
+  utmCampaign?: string;
+  distributionPoints?: string;
   meta?: string;
 }
 
@@ -26,6 +29,7 @@ const CHANNEL_COLORS: Record<string, { color: string; bg: string }> = {
   sms:       { color: '#16A34A', bg: '#F0FDF4' },
   push:      { color: '#7C3AED', bg: '#F5F3FF' },
   instagram: { color: '#EA580C', bg: '#FFF7ED' },
+  offline:   { color: '#0E7490', bg: '#ECFEFF' },
 };
 
 const CHANNEL_ICONS: Record<string, React.ReactNode> = {
@@ -53,6 +57,17 @@ const CHANNEL_ICONS: Record<string, React.ReactNode> = {
       <rect x="2" y="2" width="10" height="10" rx="3" stroke="currentColor" strokeWidth="1.3"/>
       <circle cx="7" cy="7" r="2.2" stroke="currentColor" strokeWidth="1.3"/>
       <circle cx="10.2" cy="3.8" r="0.8" fill="currentColor"/>
+    </svg>
+  ),
+  offline: (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <rect x="1.5" y="1.5" width="4" height="4" rx="0.5" stroke="currentColor" strokeWidth="1.2"/>
+      <rect x="8.5" y="1.5" width="4" height="4" rx="0.5" stroke="currentColor" strokeWidth="1.2"/>
+      <rect x="1.5" y="8.5" width="4" height="4" rx="0.5" stroke="currentColor" strokeWidth="1.2"/>
+      <rect x="2.8" y="2.8" width="1.4" height="1.4" fill="currentColor"/>
+      <rect x="9.8" y="2.8" width="1.4" height="1.4" fill="currentColor"/>
+      <rect x="2.8" y="9.8" width="1.4" height="1.4" fill="currentColor"/>
+      <path d="M8.5 8.5h1.5v1.5M10 10v2.5M12 8.5v4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
 };
@@ -224,11 +239,17 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
   const [localImageUrl, setLocalImageUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [editedAsset, setEditedAsset] = useState<Asset>({ ...asset });
+  const [utmSource, setUtmSource] = useState('offline');
+  const [utmMedium, setUtmMedium] = useState('flyer');
+  const [utmContent, setUtmContent] = useState('ambassador');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setEditedAsset({ ...asset });
-  }, [asset.subject, asset.title, asset.body, asset.caption, asset.hashtags, asset.meta]);
+    setUtmSource('offline');
+    setUtmMedium('flyer');
+    setUtmContent('ambassador');
+  }, [asset.subject, asset.title, asset.body, asset.caption, asset.hashtags, asset.utmCampaign, asset.distributionPoints, asset.meta]);
 
   const setField = (field: keyof Asset, value: string) =>
     setEditedAsset(prev => ({ ...prev, [field]: value }));
@@ -236,7 +257,13 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
   const style = CHANNEL_COLORS[asset.channel] ?? { color: '#6B7280', bg: '#F9FAFB' };
   const needsImage = IMAGE_CHANNELS.includes(asset.channel);
   const isInstagram = asset.channel === 'instagram';
+  const isOffline = asset.channel === 'offline';
   const displayImage = localImageUrl ?? savedImageUrl ?? null;
+
+  const utmCampaignVal = editedAsset.utmCampaign ?? '';
+  const utmUrl = isOffline && utmCampaignVal
+    ? `https://copenhagenmarathon.dk/apply?utm_source=${utmSource}&utm_medium=${utmMedium}&utm_campaign=${utmCampaignVal}&utm_content=${utmContent}`
+    : null;
 
   const handleFile = (file: File) => {
     if (!file.type.startsWith('image/')) return;
@@ -343,8 +370,132 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
         </div>
       )}
 
-      {/* Content — hidden when story preview is active */}
-      {!showStoryPreview && (
+      {/* Offline / Ambassador content */}
+      {isOffline && (
+        <div style={{ padding: '16px' }}>
+          {/* Campaign title + tagline */}
+          {editedAsset.title !== undefined && (
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ fontSize: 10, color: 'var(--fg-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Nom de campagne</div>
+              <input
+                className="sparta-editable-line"
+                value={editedAsset.title ?? ''}
+                onChange={e => setField('title', e.target.value)}
+                style={{ fontSize: 14, fontWeight: 570, fontFamily: 'var(--font-sans)', border: '1px solid transparent', borderRadius: 3, background: 'transparent', outline: 'none', padding: '2px 5px', margin: '-2px -5px', color: 'var(--fg-1)', width: 'calc(100% + 10px)', display: 'block', boxSizing: 'border-box', transition: 'border-color 0.12s, background-color 0.12s' }}
+              />
+            </div>
+          )}
+          {editedAsset.caption !== undefined && (
+            <div style={{ marginBottom: 14, padding: '8px 12px', background: style.bg, borderRadius: 'var(--radius-md)', border: `1px solid ${style.color}22` }}>
+              <div style={{ fontSize: 10, color: style.color, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Tagline flyer</div>
+              <input
+                className="sparta-editable-line"
+                value={editedAsset.caption ?? ''}
+                onChange={e => setField('caption', e.target.value)}
+                style={{ fontSize: 13, fontWeight: 570, color: style.color, fontFamily: 'var(--font-sans)', border: '1px solid transparent', borderRadius: 3, background: 'transparent', outline: 'none', padding: '2px 5px', margin: '-2px -5px', width: 'calc(100% + 10px)', display: 'block', boxSizing: 'border-box', transition: 'border-color 0.12s' }}
+              />
+            </div>
+          )}
+
+          {/* Ambassador briefing */}
+          {editedAsset.body !== undefined && (
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 10, color: 'var(--fg-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Ambassador briefing</div>
+              <textarea
+                className="sparta-editable-area"
+                value={editedAsset.body ?? ''}
+                onChange={e => { setField('body', e.target.value); e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
+                onFocus={e => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
+                rows={Math.max(3, (editedAsset.body ?? '').split('\n').length)}
+                style={{ fontSize: 12, lineHeight: 1.65, fontFamily: 'var(--font-sans)', border: '1px solid transparent', borderRadius: 3, background: 'transparent', outline: 'none', padding: '2px 5px', margin: '-2px -5px', color: 'var(--fg-1)', width: 'calc(100% + 10px)', display: 'block', resize: 'none', overflow: 'hidden', boxSizing: 'border-box', transition: 'border-color 0.12s, background-color 0.12s' }}
+              />
+            </div>
+          )}
+
+          {/* Distribution points */}
+          {editedAsset.distributionPoints && (
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 10, color: 'var(--fg-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Distribution points</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {editedAsset.distributionPoints.split(',').map((pt, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                    <div style={{ width: 5, height: 5, borderRadius: '50%', background: style.color, marginTop: 5, flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: 'var(--fg-2)', lineHeight: 1.5 }}>{pt.trim()}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* QR code + UTM URL */}
+          <div style={{ borderTop: '1px solid var(--border-1)', paddingTop: 14 }}>
+            <div style={{ fontSize: 10, color: 'var(--fg-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Tracking URL & QR Code</div>
+            <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+              {/* QR code — live update as params change */}
+              <div style={{ flexShrink: 0, padding: 8, background: 'white', border: '1px solid var(--border-1)', borderRadius: 'var(--radius-md)' }}>
+                {utmUrl ? (
+                  <QRCodeSVG value={utmUrl} size={96} level="M" />
+                ) : (
+                  <div style={{ width: 96, height: 96, background: 'var(--bg-2)', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: 10, color: 'var(--fg-3)', textAlign: 'center', padding: '0 6px' }}>No campaign slug</span>
+                  </div>
+                )}
+              </div>
+              {/* UTM params form + live URL */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                {/* 4 editable UTM fields */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 8 }}>
+                  {([
+                    { label: 'source', value: utmSource, set: setUtmSource },
+                    { label: 'medium', value: utmMedium, set: setUtmMedium },
+                    { label: 'campaign', value: utmCampaignVal, set: (v: string) => setField('utmCampaign', v) },
+                    { label: 'content', value: utmContent, set: setUtmContent },
+                  ] as { label: string; value: string; set: (v: string) => void }[]).map(({ label, value, set }) => (
+                    <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 10, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)', width: 56, flexShrink: 0 }}>utm_{label}</span>
+                      <input
+                        value={value}
+                        onChange={e => set(e.target.value)}
+                        style={{
+                          flex: 1, fontSize: 11, fontFamily: 'var(--font-mono)',
+                          color: style.color, background: style.bg,
+                          border: `1px solid ${style.color}33`,
+                          borderRadius: 4, padding: '3px 7px', outline: 'none',
+                          transition: 'border-color 0.12s',
+                        }}
+                        onFocus={e => (e.target.style.borderColor = style.color)}
+                        onBlur={e => (e.target.style.borderColor = `${style.color}33`)}
+                      />
+                    </div>
+                  ))}
+                </div>
+                {/* Live URL preview */}
+                {utmUrl && (
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5, color: 'var(--fg-3)', background: 'var(--bg-2)', padding: '6px 8px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-1)', wordBreak: 'break-all', lineHeight: 1.7 }}>
+                    {utmUrl}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {editedAsset.meta && (
+            <div style={{ marginTop: 12, padding: '6px 10px', background: 'var(--bg-2)', borderRadius: 'var(--radius-md)', fontSize: 11, color: 'var(--fg-3)', fontStyle: 'italic' }}>
+              {editedAsset.meta}
+            </div>
+          )}
+
+          <style>{`
+            .sparta-editable-line:hover { background-color: var(--bg-2) !important; border-color: var(--border-1) !important; }
+            .sparta-editable-line:focus { background-color: var(--bg-1) !important; border-color: var(--color-grey-400, #9CA3AF) !important; }
+            .sparta-editable-area:hover { background-color: var(--bg-2) !important; border-color: var(--border-1) !important; }
+            .sparta-editable-area:focus { background-color: var(--bg-1) !important; border-color: var(--color-grey-400, #9CA3AF) !important; }
+          `}</style>
+        </div>
+      )}
+
+      {/* Content — hidden when story preview is active, not shown for offline */}
+      {!showStoryPreview && !isOffline && (
         <div style={{ padding: '14px 16px' }}>
           <style>{`
             .sparta-editable-line {
@@ -451,8 +602,8 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
         </div>
       )}
 
-      {/* Image upload zone — email & instagram only */}
-      {needsImage && (
+      {/* Image upload zone — email & instagram only (not offline) */}
+      {needsImage && !isOffline && (
         <div style={{ padding: '0 16px 16px' }}>
           <div style={{ borderTop: '1px solid var(--border-1)', paddingTop: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>

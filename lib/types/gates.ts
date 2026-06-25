@@ -4,7 +4,7 @@ export type Gate1Athlete = Pick<Athlete,
   'id' | 'firstName' | 'lastName' | 'nationality' | 'acquisitionSource' |
   'pastEditions' | 'isReturningAthlete' | 'engagement' |
   'registrationDate' | 'distance' | 'candidacyScore' |
-  'anticipatedValue' | 'selectionProbability' | 'preLotterySegment' |
+  'anticipatedValue' | 'selectionProbability' |
   'externalProspect' | 'externalProspectSource'
 >;
 

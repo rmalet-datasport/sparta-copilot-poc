@@ -6,6 +6,7 @@ import SegmentCard from '@/components/gates/SegmentCard';
 import ChannelSelector from '@/components/gates/ChannelSelector';
 import CampaignGenerator from '@/components/campaign/CampaignGenerator';
 import SegmentBuilder, { type GateSegmentDef } from '@/components/gates/SegmentBuilder';
+import AISubSegments from '@/components/gates/AISubSegments';
 import { SEGMENT_SIZES, DEFAULT_CHANNELS, KPI } from '@/lib/constants';
 import type { Channel } from '@/lib/constants';
 import { getAthletesByPostLotterySegment } from '@/lib/db/athletes';
@@ -85,6 +86,21 @@ export default function LotteryPage() {
   const SEGMENT_FIELD = 'postLotterySegment';
   const GATE_SEGMENTS: GateSegmentDef[] = SEGMENTS.map(s => ({ id: s.id, label: s.label, color: s.color }));
 
+  const [aiParentId, setAiParentId] = useState<string>('__full_pool__');
+
+  const aiParentInfo = useMemo(() => {
+    if (aiParentId === '__full_pool__') {
+      return { label: 'Tous les athletes (post-loterie)', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
+    }
+    const seg = SEGMENTS.find(s => s.id === aiParentId);
+    if (!seg) return { label: 'Tous les athletes', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
+    return {
+      label: seg.label,
+      scaledSize: sizes[seg.id as keyof typeof sizes] ?? 0,
+      athleteIds: getAthletesByPostLotterySegment(seg.id as any).map(a => a.id),
+    };
+  }, [aiParentId]);
+
   const getScaledCount = (seg: CustomSegment) => {
     const base = seg.baseSegmentIds.length > 0 ? seg.baseSegmentIds : undefined;
     const raw = filterAthletes(seg.filters, base, SEGMENT_FIELD).length;
@@ -108,7 +124,14 @@ export default function LotteryPage() {
       setChannels(['email']);
     } else {
       setChannels((DEFAULT_CHANNELS[id] ?? ['email']) as Channel[]);
+      setAiParentId(id);
     }
+  };
+
+  const handleAISubSelect = (seg: CustomSegment) => {
+    setCustomSegments(prev => prev.some(s => s.id === seg.id) ? prev : [...prev, seg]);
+    setSelectedId(seg.id);
+    setChannels(['email']);
   };
 
   const handleSaveCustom = (seg: CustomSegment) => {
@@ -150,7 +173,6 @@ export default function LotteryPage() {
       <div className="sparta-gate-layout" style={{ display: 'flex', gap: 20 }}>
         {/* Left: segment list */}
         <div className="sparta-gate-left" style={{ flex: '0 0 380px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {/* Section header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
             <div>
               <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Post-lottery Segments</span>
@@ -179,6 +201,15 @@ export default function LotteryPage() {
               onClick={() => handleSelect(seg.id)}
             />
           ))}
+
+          <AISubSegments
+            key={aiParentId}
+            parentId={aiParentId}
+            parentLabel={aiParentInfo.label}
+            parentAthleteIds={aiParentInfo.athleteIds}
+            parentScaledSize={aiParentInfo.scaledSize}
+            onSelect={handleAISubSelect}
+          />
 
           {/* Custom segments */}
           {customSegments.length > 0 && customSegments.map(seg => (
@@ -279,30 +310,29 @@ export default function LotteryPage() {
                   </span>
                 </div>
                 <p style={{ margin: 0, fontSize: 12, color: 'var(--fg-3)', lineHeight: 1.6 }}>
-                  {selectedCustom.baseSegmentIds.length > 0 && (
-                    <span style={{ display: 'block' }}>
-                      <span style={{ color: 'var(--fg-2)', fontWeight: 570 }}>Scope:</span>{' '}
-                      {selectedCustom.baseSegmentLabels.join(', ')}
-                    </span>
+                  {selectedCustom.objective ?? (
+                    <>
+                      {selectedCustom.baseSegmentIds.length > 0 && (
+                        <span style={{ display: 'block' }}>
+                          <span style={{ color: 'var(--fg-2)', fontWeight: 570 }}>Scope:</span>{' '}
+                          {selectedCustom.baseSegmentLabels.join(', ')}
+                        </span>
+                      )}
+                      {selectedCustom.filters.length > 0 && (
+                        <span style={{ display: 'block' }}>
+                          {selectedCustom.filters.map(f => {
+                            const val = FILTER_VALUE_OPTIONS[f.field]?.find(o => o.value === f.value)?.label ?? f.value;
+                            return `${FILTER_FIELD_LABELS[f.field]}: ${val}`;
+                          }).join(' · ')}
+                        </span>
+                      )}
+                    </>
                   )}
-                  {selectedCustom.filters.length > 0 && (
-                    <span style={{ display: 'block' }}>
-                      {selectedCustom.filters.map(f => {
-                        const val = FILTER_VALUE_OPTIONS[f.field]?.find(o => o.value === f.value)?.label ?? f.value;
-                        return `${FILTER_FIELD_LABELS[f.field]}: ${val}`;
-                      }).join(' · ')}
-                    </span>
-                  )}
-                  {selectedCustom.baseSegmentIds.length === 0 && selectedCustom.filters.length === 0 && 'All athletes, no filter'}
                 </p>
               </div>
               <div style={{ borderBottom: '1px solid var(--border-1)', marginBottom: 20 }} />
               <div style={{ marginBottom: 20 }}>
-                <ChannelSelector
-                  available={['email', 'sms', 'push', 'instagram']}
-                  selected={channels}
-                  onChange={setChannels}
-                />
+                <ChannelSelector available={['email', 'sms', 'push', 'instagram']} selected={channels} onChange={setChannels} />
               </div>
               <div style={{ borderBottom: '1px solid var(--border-1)', marginBottom: 20 }} />
               <CampaignGenerator

@@ -9,6 +9,7 @@ export type FilterField =
   | 'engagement_min'
   | 'city_contains'
   | 'distance'
+  | 'hasInsurance'
 
 export interface FilterCondition {
   id: string
@@ -38,6 +39,7 @@ export const FILTER_FIELD_LABELS: Record<FilterField, string> = {
   engagement_min: 'Engagement min.',
   city_contains: 'Ville',
   distance: 'Distance',
+  hasInsurance: 'Assurance annulation',
 }
 
 export const FILTER_VALUE_OPTIONS: Partial<Record<FilterField, { value: string; label: string }[]>> = {
@@ -61,6 +63,10 @@ export const FILTER_VALUE_OPTIONS: Partial<Record<FilterField, { value: string; 
     { value: 'BE', label: 'Belgique' },
   ],
   isReturningAthlete: [
+    { value: 'true', label: 'Oui' },
+    { value: 'false', label: 'Non' },
+  ],
+  hasInsurance: [
     { value: 'true', label: 'Oui' },
     { value: 'false', label: 'Non' },
   ],

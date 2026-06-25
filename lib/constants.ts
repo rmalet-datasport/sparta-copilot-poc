@@ -56,7 +56,7 @@ export const KPI = {
     totalApplicantsTarget: 20000,
     historicalAvgApplicants: 17500,
     avgRevenuePerEdition: 1350000,
-    avgUpsellRevenuePerEdition: 320000,
+    avgUpsellRevenuePerEdition: 66000,
   },
   gate1: {
     totalApplications: 20000,
@@ -68,8 +68,8 @@ export const KPI = {
     totalConfirmed: 12000,
     totalWaitlist: 2000,
     totalRefused: 6000,
-    avgUpsellRevenue: 87,
-    upsellConversionRate: 0.42,
+    avgUpsellRevenue: 25,
+    upsellConversionRate: 0.22,
   },
   gate3: {
     totalFinishers: 11200,
@@ -79,7 +79,7 @@ export const KPI = {
   },
 };
 
-export const CHANNELS = ['email', 'sms', 'push', 'instagram'] as const;
+export const CHANNELS = ['email', 'sms', 'push', 'instagram', 'offline'] as const;
 export type Channel = typeof CHANNELS[number];
 
 export const CHANNEL_LABELS: Record<Channel, string> = {
@@ -87,6 +87,7 @@ export const CHANNEL_LABELS: Record<Channel, string> = {
   sms: 'SMS',
   push: 'Push',
   instagram: 'Instagram',
+  offline: 'Offline / Ambassador',
 };
 
 export const DEFAULT_CHANNELS: Record<string, Channel[]> = {
@@ -109,7 +110,7 @@ export const DEFAULT_CHANNELS: Record<string, Channel[]> = {
   refused_lost: ['email'],
   // Gate 3
   loyal_finisher: ['email', 'push'],
-  champion_ambassador: ['email', 'instagram'],
+  champion_ambassador: ['email', 'instagram', 'offline'],
   at_risk_returner: ['email', 'sms'],
   lost_dns: ['email'],
   reconquest_dnf: ['email', 'sms'],

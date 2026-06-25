@@ -11,7 +11,7 @@ import {
 
 const ALL_FIELDS: FilterField[] = [
   'gender', 'age_min', 'age_max', 'nationality', 'isReturningAthlete',
-  'total_editions_min', 'total_editions_max', 'engagement_min', 'city_contains', 'distance',
+  'total_editions_min', 'total_editions_max', 'engagement_min', 'city_contains', 'distance', 'hasInsurance',
 ];
 const DB_SIZE = 500;
 
@@ -19,6 +19,7 @@ export interface GateSegmentDef {
   id: string
   label: string
   color: string
+  filters?: FilterCondition[]  // present for AI-generated segments
 }
 
 interface SegmentBuilderProps {
@@ -26,7 +27,7 @@ interface SegmentBuilderProps {
   gateTotal: number
   segmentSizes: Record<string, number>
   gateSegments: GateSegmentDef[]
-  athleteSegmentField: string
+  athleteSegmentField?: string
   initialSegment?: CustomSegment
   onClose: () => void
   onSave: (segment: CustomSegment) => void
@@ -61,15 +62,26 @@ export default function SegmentBuilder({
 
   const activeBaseIds = selectedBaseIds.length > 0 ? selectedBaseIds : undefined;
 
-  const matchCount = useMemo(
-    () => filterAthletes(filters, activeBaseIds, athleteSegmentField).length,
-    [filters, activeBaseIds, athleteSegmentField]
-  );
+  // For AI segments (filter-based), compute a pre-filtered athlete ID set
+  const resolvedBaseAthleteIds = useMemo(() => {
+    if (selectedBaseIds.length === 0) return undefined;
+    const aiSegs = gateSegments.filter(s => s.filters && selectedBaseIds.includes(s.id));
+    if (aiSegs.length === 0) return undefined;
+    const ids = new Set<string>();
+    aiSegs.forEach(seg => filterAthletes(seg.filters!).forEach(a => ids.add(a.id)));
+    return ids;
+  }, [selectedBaseIds, gateSegments]);
+
+  const matchCount = useMemo(() => {
+    if (resolvedBaseAthleteIds) return filterAthletes(filters, undefined, undefined, resolvedBaseAthleteIds).length;
+    return filterAthletes(filters, activeBaseIds, athleteSegmentField).length;
+  }, [filters, activeBaseIds, athleteSegmentField, resolvedBaseAthleteIds]);
 
   const baseRawCount = useMemo(() => {
     if (selectedBaseIds.length === 0) return DB_SIZE;
+    if (resolvedBaseAthleteIds) return resolvedBaseAthleteIds.size;
     return filterAthletes([], selectedBaseIds, athleteSegmentField).length;
-  }, [selectedBaseIds, athleteSegmentField]);
+  }, [selectedBaseIds, athleteSegmentField, resolvedBaseAthleteIds]);
 
   const effectiveTotal = selectedBaseIds.length === 0
     ? gateTotal

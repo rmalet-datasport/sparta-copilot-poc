@@ -14,11 +14,14 @@ function getGate0Segment(a: Athlete): string {
 export function filterAthletes(
   filters: FilterCondition[],
   baseSegmentIds?: string[],
-  segmentField?: string
+  segmentField?: string,
+  baseAthleteIds?: Set<string>
 ): Athlete[] {
   let pool: Athlete[] = athletes
 
-  if (baseSegmentIds && baseSegmentIds.length > 0 && segmentField) {
+  if (baseAthleteIds && baseAthleteIds.size > 0) {
+    pool = pool.filter(a => baseAthleteIds!.has(a.id))
+  } else if (baseSegmentIds && baseSegmentIds.length > 0 && segmentField) {
     if (segmentField === 'gate0Segment') {
       pool = pool.filter(a => baseSegmentIds.includes(getGate0Segment(a)))
     } else {
@@ -52,6 +55,8 @@ export function filterAthletes(
           return v !== '' && a.city.toLowerCase().includes(v.toLowerCase())
         case 'distance':
           return a.distance === v
+        case 'hasInsurance':
+          return (a.upsellsPurchased?.includes('cancellation_insurance') ?? false) === (v === 'true')
         default:
           return true
       }

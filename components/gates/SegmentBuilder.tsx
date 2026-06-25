@@ -11,7 +11,7 @@ import {
 
 const ALL_FIELDS: FilterField[] = [
   'gender', 'age_min', 'age_max', 'nationality', 'isReturningAthlete',
-  'total_editions_min', 'total_editions_max', 'engagement_min', 'city_contains',
+  'total_editions_min', 'total_editions_max', 'engagement_min', 'city_contains', 'distance',
 ];
 const DB_SIZE = 500;
 

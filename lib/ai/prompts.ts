@@ -222,6 +222,70 @@ Key elements to use:
 - Tone: friendly, relaxed, no urgency
 
 ${FORMAT_INSTRUCTION}`,
+
+    returning_marathon: `${BASE_PROMPT}
+
+Segment context:
+These athletes are returning participants applying for the full 42K marathon. They have already crossed the Copenhagen Marathon finish line at least once — they know the course, the atmosphere, the effort required. They are among the most loyal in the database.
+
+Your objective: reward their loyalty with a message that acknowledges their history, builds anticipation for 2026, and keeps their commitment strong while they wait for the ballot result.
+
+Key elements to use:
+- Reference to their past race(s) — the emotional memory of the finish line
+- Recognition that returning is a choice, not a given
+- Sense of belonging to an exclusive group of multi-edition runners
+- Light urgency: the ballot is live, spots are coveted
+- Tone: warm, proud, personal — like a fellow runner speaking to another
+
+${FORMAT_INSTRUCTION}`,
+
+    returning_half: `${BASE_PROMPT}
+
+Segment context:
+These athletes are returning participants who have chosen the half marathon (21K) for this edition. They have a history with the Copenhagen Marathon ecosystem — they know the event, trust the organisation, and have decided to come back.
+
+Your objective: acknowledge their loyalty and their choice of distance, maintain their engagement during the ballot wait, and subtly plant the seed of a future step up to the full 42K.
+
+Key elements to use:
+- Celebration of their return — coming back is already an achievement
+- Respect for the half marathon as a serious race, not a consolation
+- Optional: a gentle mention that the 42K will always be there for the day they're ready
+- Community angle — they are part of the Copenhagen Marathon family
+- Tone: warm, encouraging, never condescending about the distance
+
+${FORMAT_INSTRUCTION}`,
+
+    new_marathon: `${BASE_PROMPT}
+
+Segment context:
+These are first-time applicants targeting the full 42K marathon. This is their first engagement with the Copenhagen Marathon — and potentially their first marathon ever. Ambition is high, but so is the risk of dropout before race day.
+
+Your objective: build excitement and commitment from the very first contact. Make them feel that applying was already a brave act, and that the marathon community is ready to welcome them.
+
+Key elements to use:
+- Celebration of their ambition — 42K is a life goal, not just a race
+- Vivid description of the Copenhagen Marathon experience (city, crowd, finish line)
+- Practical reassurance: training plans, community support, everything they need is there
+- Build emotional investment early so they stay committed through the ballot wait
+- Tone: inspiring, energetic, welcoming — never intimidating
+
+${FORMAT_INSTRUCTION}`,
+
+    new_half: `${BASE_PROMPT}
+
+Segment context:
+These are first-time applicants for the half marathon (21K). This is their first interaction with the Copenhagen Marathon. The half marathon is their entry point into the event — and potentially into the sport.
+
+Your objective: convert their initial interest into genuine excitement and long-term attachment to the event. Make this feel like the beginning of something, not just a race entry.
+
+Key elements to use:
+- Warm welcome to the Copenhagen Marathon community
+- The half marathon as a perfect starting point — challenging, achievable, unforgettable
+- The city of Copenhagen as an inspiring backdrop
+- Low-friction CTA: the ballot is just the first step
+- Tone: friendly, accessible, enthusiastic — make them feel they made the right call
+
+${FORMAT_INSTRUCTION}`,
   },
 
   gate2: {

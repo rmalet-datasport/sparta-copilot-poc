@@ -55,19 +55,22 @@ npm run test:local
 Le script accepte une variable `BASE_URL` — il suffit de pointer vers l'URL de prod.
 
 ```powershell
-$env:BASE_URL      = "https://sparta-copilot.vercel.app"
+$env:BASE_URL      = "https://sparta-copilot.lab.datasport.com"
 $env:DEMO_PASSWORD = "votre_mot_de_passe"
 node scripts/test-routes.mjs
 ```
 
-Pour enchaîner les deux en une ligne PowerShell :
+Pour enchaîner en une ligne PowerShell :
 
 ```powershell
-$env:BASE_URL = "https://sparta-copilot.vercel.app"; $env:DEMO_PASSWORD = "xxx"; node scripts/test-routes.mjs
+$env:BASE_URL = "https://sparta-copilot.lab.datasport.com"; $env:DEMO_PASSWORD = "xxx"; node scripts/test-routes.mjs
 ```
 
-> Le `DEMO_PASSWORD` est celui configuré dans les variables d'environnement Vercel
+> Le `DEMO_PASSWORD` est celui configuré dans les variables d'environnement du serveur
 > (même valeur que `DEMO_PASSWORD` dans `.env.local`).
+>
+> **Note** : le test [9] (rate limiting) s'exécute en dernier car il épuise intentionnellement
+> le quota — les tests dry-run [8] doivent tourner avant pour ne pas être bloqués en 429.
 
 ---
 

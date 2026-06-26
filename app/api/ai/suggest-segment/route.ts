@@ -4,47 +4,47 @@ import { formatStatsForPrompt } from '@/lib/db/segment-stats'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-const SYSTEM_PROMPT = `Tu es un expert en segmentation marketing pour événements sportifs. Tu analyses des objectifs business et identifies les profils d'athletes qui y correspondent.
+const SYSTEM_PROMPT = `You are a marketing segmentation expert for sporting events. You analyse business objectives and identify the athlete profiles that match them.
 
-Tu disposes des champs filtrables suivants :
-- gender: "M" ou "F"
-- age_min / age_max: entier
+Available filterable fields:
+- gender: "M" or "F"
+- age_min / age_max: integer
 - nationality: DK, SE, DE, UK, NL, NO, FR, US, IT, CH, PL, BE
-- isReturningAthlete: "true" ou "false"
-- total_editions_min / total_editions_max: entier
+- isReturningAthlete: "true" or "false"
+- total_editions_min / total_editions_max: integer
 - engagement_min: score 0–100
-- city_contains: texte libre
+- city_contains: free text
 
-Réponds UNIQUEMENT en JSON valide, sans markdown :
+Reply ONLY in valid JSON, no markdown:
 {
-  "portrait": "Description naturelle du segment en 2-3 phrases, expliquant QUI sont ces athletes et POURQUOI ils correspondent à l'objectif.",
+  "portrait": "Natural description of the segment in 2-3 sentences, explaining WHO these athletes are and WHY they match the objective.",
   "filters": [
     { "field": "engagement_min", "value": "65" }
   ],
   "insights": [
-    "Critère libre ou non-filtrable que le client devrait savoir, expliqué clairement en 1 phrase.",
-    "Deuxième insight si pertinent."
+    "A free-text or non-filterable criterion the client should know, explained clearly in 1 sentence.",
+    "Second insight if relevant."
   ],
-  "rationale": "Explication courte du raisonnement : pourquoi ces seuils spécifiques, comment tu as calibré les filtres par rapport à l'objectif de taille."
+  "rationale": "Short explanation of the reasoning: why these specific thresholds, how you calibrated the filters against the target size objective."
 }
 
-Règles :
-- Calibre les seuils en fonction des statistiques fournies et de l'objectif de taille indicatif si mentionné
-- Si l'objectif mentionne "meilleurs", "plus engagés", utilise engagement_min au-delà du p75
-- Si l'objectif mentionne "fidèles", "retournants", utilise isReturningAthlete="true" et total_editions_min
-- Si pas d'objectif de taille, vise un segment significatif (ni trop petit ni trop large)
-- Les insights doivent expliquer ce que les filtres ne peuvent pas capturer (comportements, intentions, corrélations)`
+Rules:
+- Calibrate thresholds based on the provided statistics and the indicative size objective if mentioned
+- If the objective mentions "best", "most engaged", use engagement_min above the p75
+- If the objective mentions "loyal", "returning", use isReturningAthlete="true" and total_editions_min
+- If no size objective, aim for a meaningful segment (neither too small nor too large)
+- Insights should explain what the filters cannot capture (behaviours, intentions, correlations)`
 
 export async function POST(req: NextRequest) {
   try {
     const { objective, gateContext } = await req.json()
 
     if (!objective?.trim()) {
-      return new Response(JSON.stringify({ error: 'Objectif manquant' }), { status: 400 })
+      return new Response(JSON.stringify({ error: 'Missing objective' }), { status: 400 })
     }
 
     const stats = formatStatsForPrompt()
-    const context = gateContext ? `\nContexte du gate : ${gateContext}` : ''
+    const context = gateContext ? `\nGate context: ${gateContext}` : ''
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       system: SYSTEM_PROMPT,
       messages: [{
         role: 'user',
-        content: `${stats}${context}\n\nObjectif du client : "${objective}"\n\nPropose le segment qui correspond le mieux à cet objectif.`,
+        content: `${stats}${context}\n\nClient objective: "${objective}"\n\nPropose the segment that best matches this objective.`,
       }],
     })
 
@@ -65,6 +65,6 @@ export async function POST(req: NextRequest) {
     })
   } catch (err) {
     console.error('[suggest-segment]', err)
-    return new Response(JSON.stringify({ error: 'Erreur lors de l\'analyse' }), { status: 500 })
+    return new Response(JSON.stringify({ error: 'Analysis failed' }), { status: 500 })
   }
 }

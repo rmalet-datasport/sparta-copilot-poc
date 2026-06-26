@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo } from 'react';
 import GateTimeline from '@/components/gates/GateTimeline';
@@ -17,34 +17,34 @@ import { buildSegmentDescription, FILTER_FIELD_LABELS, FILTER_VALUE_OPTIONS } fr
 const SEGMENTS = [
   {
     id: 'confirmed_engaged',
-    label: 'Confirmed — Engaged',
+    label: 'Confirmed â€” Engaged',
     color: '#16A34A',
     colorBg: '#F0FDF4',
     description: 'Selected + engagement score > 60. Ready to buy upsells.',
     objective: 'Celebrate, upsell, countdown to race day.',
-    rationale: { email: 'Confirmation + upsell showcase.', push: 'Countdown & training tips — they are active users.' } as Partial<Record<Channel, string>>,
+    rationale: { email: 'Confirmation + upsell showcase.', push: 'Countdown & training tips â€” they are active users.' } as Partial<Record<Channel, string>>,
   },
   {
     id: 'confirmed_passive',
-    label: 'Confirmed — Passive',
+    label: 'Confirmed â€” Passive',
     color: '#CA8A04',
     colorBg: '#FEFCE8',
     description: 'Selected but low engagement. Risk of DNS.',
     objective: 'Reignite excitement before it fades.',
-    rationale: { email: 'Emotional storytelling.', sms: 'Upsell deadline reminder — creates urgency.' } as Partial<Record<Channel, string>>,
+    rationale: { email: 'Emotional storytelling.', sms: 'Upsell deadline reminder â€” creates urgency.' } as Partial<Record<Channel, string>>,
   },
   {
     id: 'waitlist_hot',
-    label: 'Waitlist — Hot',
+    label: 'Waitlist â€” Hot',
     color: '#EA580C',
     colorBg: '#FFF7ED',
-    description: 'Waitlist position ≤ 200. Real chance of being called up.',
+    description: 'Waitlist position â‰¤ 200. Real chance of being called up.',
     objective: 'Keep hope alive, prepare them to move fast.',
     rationale: { email: 'Regular updates on spots.', sms: 'Instant alert if a spot opens.' } as Partial<Record<Channel, string>>,
   },
   {
     id: 'waitlist_cold',
-    label: 'Waitlist — Cold',
+    label: 'Waitlist â€” Cold',
     color: '#6B7280',
     colorBg: '#F9FAFB',
     description: 'Waitlist position > 200. Unlikely to race in 2026.',
@@ -53,7 +53,7 @@ const SEGMENTS = [
   },
   {
     id: 'refused_reactivatable',
-    label: 'Refused — Reactivatable',
+    label: 'Refused â€” Reactivatable',
     color: '#DC2626',
     colorBg: '#FEF2F2',
     description: 'Refused but returning athlete. Long-term value is high.',
@@ -62,7 +62,7 @@ const SEGMENTS = [
   },
   {
     id: 'refused_lost',
-    label: 'Refused — Lost',
+    label: 'Refused â€” Lost',
     color: '#374151',
     colorBg: '#F1F5F9',
     description: 'First-time applicant, refused. Fragile relationship.',
@@ -157,9 +157,9 @@ export default function LotteryPage() {
       {/* KPI strip */}
       <div className="sparta-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, margin: '20px 0' }}>
         {[
-          { label: 'Total Confirmed', value: kpi.totalConfirmed.toLocaleString(), sub: 'Registered for 2026' },
-          { label: 'On Waitlist', value: kpi.totalWaitlist.toLocaleString(), sub: 'Awaiting spot' },
-          { label: 'Refused', value: kpi.totalRefused.toLocaleString(), sub: 'Not selected' },
+          { label: 'Total Confirmed', value: kpi.totalConfirmed.toLocaleString('en-US'), sub: 'Registered for 2026' },
+          { label: 'On Waitlist', value: kpi.totalWaitlist.toLocaleString('en-US'), sub: 'Awaiting spot' },
+          { label: 'Refused', value: kpi.totalRefused.toLocaleString('en-US'), sub: 'Not selected' },
           { label: 'Avg Upsell Revenue', value: `€${kpi.avgUpsellRevenue}`, sub: `${Math.round(kpi.upsellConversionRate * 100)}% conversion` },
         ].map(item => (
           <div key={item.label} style={{ background: 'var(--bg-1)', border: '1px solid var(--border-1)', borderRadius: 'var(--radius-lg)', padding: '12px 16px' }}>
@@ -176,7 +176,7 @@ export default function LotteryPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
             <div>
               <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Post-lottery Segments</span>
-              <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--fg-3)' }}>{GATE_TOTAL.toLocaleString()} total athletes in this gate</span>
+              <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--fg-3)' }}>{GATE_TOTAL.toLocaleString('en-US')} total athletes in this gate</span>
             </div>
             <button
               onClick={() => setShowBuilder(true)}
@@ -222,7 +222,7 @@ export default function LotteryPage() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: 13, fontWeight: 570, color: 'var(--fg-1)' }}>{seg.name}</span>
-                  <span style={{ fontSize: 13, fontWeight: 570, fontFamily: 'var(--font-mono)', color: selectedId === seg.id ? seg.color : 'var(--fg-1)' }}>{getScaledCount(seg).toLocaleString()}</span>
+                  <span style={{ fontSize: 13, fontWeight: 570, fontFamily: 'var(--font-mono)', color: selectedId === seg.id ? seg.color : 'var(--fg-1)' }}>{getScaledCount(seg).toLocaleString('en-US')}</span>
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--fg-3)', marginTop: 1 }}>Custom segment</div>
               </div>
@@ -249,7 +249,7 @@ export default function LotteryPage() {
                       <span style={{ fontSize: 12, color: 'var(--fg-1)' }}>{a.firstName} {a.lastName}</span>
                       <div style={{ display: 'flex', gap: 6 }}>
                         <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>{a.nationality}</span>
-                        {a.upsellRevenue !== undefined && <span style={{ fontSize: 11, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>€{a.upsellRevenue}</span>}
+                        {a.upsellRevenue !== undefined && <span style={{ fontSize: 11, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>&euro;{a.upsellRevenue}</span>}
                       </div>
                     </div>
                   ))
@@ -277,7 +277,7 @@ export default function LotteryPage() {
                   <span style={{ width: 10, height: 10, borderRadius: '50%', background: selectedStatic.color, display: 'inline-block' }} />
                   <h3 style={{ fontSize: 15, fontWeight: 570, margin: 0 }}>{selectedStatic.label}</h3>
                   <span style={{ fontSize: 13, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>
-                    {sizes[selectedStatic.id as keyof typeof sizes].toLocaleString()} athletes
+                    {sizes[selectedStatic.id as keyof typeof sizes].toLocaleString('en-US')} athletes
                   </span>
                 </div>
                 <p style={{ margin: 0, fontSize: 12, color: 'var(--fg-3)' }}>{selectedStatic.objective}</p>
@@ -303,7 +303,7 @@ export default function LotteryPage() {
                   <span style={{ width: 10, height: 10, borderRadius: '50%', background: selectedCustom.color, display: 'inline-block' }} />
                   <h3 style={{ fontSize: 15, fontWeight: 570, margin: 0 }}>{selectedCustom.name}</h3>
                   <span style={{ fontSize: 13, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>
-                    {getScaledCount(selectedCustom).toLocaleString()} athletes
+                    {getScaledCount(selectedCustom).toLocaleString('en-US')} athletes
                   </span>
                   <span style={{ fontSize: 10, color: selectedCustom.color, background: selectedCustom.colorBg, padding: '2px 7px', borderRadius: 'var(--radius-full)', fontWeight: 570, letterSpacing: '0.04em' }}>
                     CUSTOM
@@ -323,7 +323,7 @@ export default function LotteryPage() {
                           {selectedCustom.filters.map(f => {
                             const val = FILTER_VALUE_OPTIONS[f.field]?.find(o => o.value === f.value)?.label ?? f.value;
                             return `${FILTER_FIELD_LABELS[f.field]}: ${val}`;
-                          }).join(' · ')}
+                          }).join(' Â· ')}
                         </span>
                       )}
                     </>
@@ -375,3 +375,4 @@ export default function LotteryPage() {
     </div>
   );
 }
+

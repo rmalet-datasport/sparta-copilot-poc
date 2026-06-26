@@ -69,7 +69,7 @@ ${FORMAT_INSTRUCTION}`,
     past_finishers: `${BASE_PROMPT}
 
 Segment context:
-These athletes have already finished the Copenhagen Marathon in a previous edition (2021–2025) but have not yet registered for 2026. Their natural return rate is 65% — these athletes are among the 35% at risk of not coming back.
+These athletes have already finished the Copenhagen Marathon in a previous edition (2021-2025) but have not yet registered for 2026. Their natural return rate is 65% — these athletes are among the 35% at risk of not coming back.
 
 They know the event inside out. They don't need to be convinced of the race's quality — they need an emotional or practical reason to return this specific year.
 
@@ -239,7 +239,7 @@ ${FORMAT_INSTRUCTION}`,
     confirmed_passive: `${BASE_PROMPT}
 
 Segment context:
-These athletes have been selected but their engagement is low (score ≤ 60). They rarely open emails, don't click much, seem distant. Risk of withdrawal or DNS on race day.
+These athletes have been selected but their engagement is low (score <= 60). They rarely open emails, don't click much, seem distant. Risk of withdrawal or DNS on race day.
 
 Your objective: reignite their excitement before it fades completely. Remind them why they applied and what's waiting for them.
 
@@ -254,7 +254,7 @@ ${FORMAT_INSTRUCTION}`,
     waitlist_hot: `${BASE_PROMPT}
 
 Segment context:
-These athletes are on the waitlist but in a good position (≤ 200). They have a real chance of being called up before the 1 March 2026 deadline. Every withdrawal from a selected athlete opens a spot for them.
+These athletes are on the waitlist but in a good position (<= 200). They have a real chance of being called up before the 1 March 2026 deadline. Every withdrawal from a selected athlete opens a spot for them.
 
 Your objective: keep their hope alive and their motivation intact, while preparing them to act quickly if a spot opens up.
 
@@ -358,7 +358,7 @@ ${FORMAT_INSTRUCTION}`,
     at_risk_returner: `${BASE_PROMPT}
 
 Segment context:
-These athletes finished the race but their probability of returning in 2027 is low (≤ 0.4). Historically, this profile drops off after one edition. Without intervention, they will likely not re-apply.
+These athletes finished the race but their probability of returning in 2027 is low (<= 0.4). Historically, this profile drops off after one edition. Without intervention, they will likely not re-apply.
 
 Your objective: create emotional and practical urgency to convince them to sign up for the early bird before the momentum fades.
 
@@ -413,7 +413,7 @@ export function buildHistoricalExamplesBlock(examples: BrandExample[]): string {
     '',
     '---',
     'CLIENT HISTORICAL CAMPAIGN EXAMPLES',
-    'Use these examples as a reference for style, tone and vocabulary. Do not copy them word for word — draw inspiration from their editorial approach to stay consistent with the brand voice.',
+    "Use these examples as a reference for style, tone and vocabulary. Do not copy them word for word — draw inspiration from their editorial approach to stay consistent with the brand voice.",
     '',
   ];
 
@@ -463,7 +463,7 @@ export function buildUserPrompt(params: {
 
   if (segmentStats) {
     parts.push(`\nSegment statistics:`);
-    parts.push(`- Size: ${segmentStats.size.toLocaleString()} athletes`);
+    parts.push(`- Size: ${segmentStats.size.toLocaleString('en-US')} athletes`);
     if (segmentStats.nationality) parts.push(`- Nationalities: ${segmentStats.nationality}`);
     if (segmentStats.avgEngagement) parts.push(`- Average engagement score: ${segmentStats.avgEngagement}/100`);
   }

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import type { CustomSegment, FilterCondition } from '@/lib/types/segments'
@@ -85,8 +85,8 @@ export default function AISubSegments({
   }
 
   const contextLine = isFullPool
-    ? `Pool complet · ${parentScaledSize.toLocaleString()} athletes`
-    : `${parentLabel} · ${parentScaledSize.toLocaleString()} athletes`
+    ? `Pool complet Â· ${parentScaledSize.toLocaleString('en-US')} athletes`
+    : `${parentLabel} Â· ${parentScaledSize.toLocaleString('en-US')} athletes`
 
   return (
     <div style={{
@@ -118,7 +118,7 @@ export default function AISubSegments({
         <p style={{ margin: 0, fontSize: 11, color: 'var(--fg-3)' }}>{contextLine}</p>
       </div>
 
-      {/* Idle state — prominent CTA */}
+      {/* Idle state â€” prominent CTA */}
       {status === 'idle' && (
         <div style={{ padding: '12px 14px 14px' }}>
           <button
@@ -146,7 +146,7 @@ export default function AISubSegments({
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
             </svg>
-            Découvrir des sous-segments
+            DÃ©couvrir des sous-segments
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
@@ -164,7 +164,7 @@ export default function AISubSegments({
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }}>
               <path d="M21 12a9 9 0 1 1-6.219-8.56" />
             </svg>
-            <span style={{ fontSize: 12, color: 'var(--fg-2)' }}>Analyse en cours…</span>
+            <span style={{ fontSize: 12, color: 'var(--fg-2)' }}>Analyse en coursâ€¦</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {[1, 2, 3].map(i => (
@@ -182,12 +182,12 @@ export default function AISubSegments({
       {/* Error */}
       {status === 'error' && (
         <div style={{ padding: '12px 14px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 12, color: 'var(--fg-3)' }}>Analyse échouée</span>
+          <span style={{ fontSize: 12, color: 'var(--fg-3)' }}>Analyse Ã©chouÃ©e</span>
           <button
             onClick={analyze}
             style={{ fontSize: 12, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 570 }}
           >
-            Réessayer →
+            RÃ©essayer â†’
           </button>
         </div>
       )}
@@ -237,3 +237,4 @@ export default function AISubSegments({
     </div>
   )
 }
+

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo } from 'react';
 import { filterAthletes } from '@/lib/db/segment-filter';
@@ -226,7 +226,7 @@ export default function SegmentBuilder({
             type="text"
             value={name}
             onChange={e => setName(e.target.value)}
-            placeholder="E.g. Danish women 25–35"
+            placeholder="E.g. Danish women 25â€“35"
             style={{ ...inputStyle, width: '100%' }}
             autoFocus
           />
@@ -247,7 +247,7 @@ export default function SegmentBuilder({
             value={nlQuery}
             onChange={e => setNlQuery(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleParseNL(); }}
-            placeholder="E.g. women aged 25–35 from Copenhagen who participated in at least 2 editions and are highly engaged..."
+            placeholder="E.g. women aged 25â€“35 from Copenhagen who participated in at least 2 editions and are highly engaged..."
             rows={2}
             style={{ ...inputStyle, width: '100%', resize: 'none', lineHeight: 1.5, marginBottom: 8 }}
           />
@@ -277,9 +277,9 @@ export default function SegmentBuilder({
                   Analyzing...
                   <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                 </>
-              ) : 'Analyze →'}
+              ) : 'Analyze â†’'}
             </button>
-            <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>⌘ + Enter</span>
+            <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>âŒ˜ + Enter</span>
           </div>
 
           {nlInterpretation && (
@@ -311,7 +311,7 @@ export default function SegmentBuilder({
             </span>
           </div>
           <p style={{ margin: '0 0 10px', fontSize: 11, color: 'var(--fg-3)', lineHeight: 1.5 }}>
-            Describe what you want to achieve — the AI analyses the database distributions and suggests the best matching profile, with criteria and rationale.
+            Describe what you want to achieve â€” the AI analyses the database distributions and suggests the best matching profile, with criteria and rationale.
           </p>
 
           <textarea
@@ -347,9 +347,9 @@ export default function SegmentBuilder({
                   <span style={{ width: 10, height: 10, border: '1.5px solid rgba(255,255,255,0.4)', borderTopColor: 'white', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} />
                   Analyzing...
                 </>
-              ) : 'Suggest a segment →'}
+              ) : 'Suggest a segment â†’'}
             </button>
-            <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>⌘ + Enter</span>
+            <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>âŒ˜ + Enter</span>
           </div>
 
           {suggestion && (
@@ -363,7 +363,7 @@ export default function SegmentBuilder({
               {/* Insights libres */}
               {suggestion.insights.length > 0 && (
                 <div style={{ padding: '10px 12px', borderRadius: 'var(--radius-md)', background: '#FFFBEB', border: '1px solid #FDE68A' }}>
-                  <div style={{ fontSize: 10, fontWeight: 570, color: '#92400E', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Non-filterable criteria — keep in mind</div>
+                  <div style={{ fontSize: 10, fontWeight: 570, color: '#92400E', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Non-filterable criteria â€” keep in mind</div>
                   <ul style={{ margin: 0, padding: '0 0 0 16px', display: 'flex', flexDirection: 'column', gap: 4 }}>
                     {suggestion.insights.map((ins, i) => (
                       <li key={i} style={{ fontSize: 12, color: '#78350F', lineHeight: 1.5 }}>{ins}</li>
@@ -462,7 +462,7 @@ export default function SegmentBuilder({
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 11, color: 'var(--fg-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             Objective & context
-            <span style={{ marginLeft: 6, fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>— guides AI generation</span>
+            <span style={{ marginLeft: 6, fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>â€” guides AI generation</span>
           </div>
           <textarea
             value={objective}
@@ -476,7 +476,7 @@ export default function SegmentBuilder({
         {/* Match count */}
         <div style={{ padding: '10px 14px', borderRadius: 'var(--radius-md)', background: 'var(--bg-2)', border: '1px solid var(--border-1)', marginBottom: 24, display: 'flex', alignItems: 'baseline', gap: 8 }}>
           <span style={{ fontSize: 22, fontWeight: 570, fontFamily: 'var(--font-mono)', color: 'var(--fg-1)' }}>
-            {scaledCount.toLocaleString()}
+            {scaledCount.toLocaleString('en-US')}
           </span>
           <span style={{ fontSize: 12, color: 'var(--fg-3)' }}>
             {selectedBaseIds.length === 0 && filters.length === 0
@@ -590,3 +590,4 @@ function FilterRow({ filter, usedFields, onChange, onRemove, inputStyle }: Filte
     </div>
   );
 }
+

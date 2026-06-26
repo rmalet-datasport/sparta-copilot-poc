@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo } from 'react';
 import GateTimeline from '@/components/gates/GateTimeline';
@@ -22,7 +22,7 @@ const SEGMENTS = [
     colorBg: '#F0FDF4',
     description: 'Finisher with reRegistrationProbability > 0.7. Prime early-bird targets.',
     objective: 'Capitalize on post-race high. Convert to 2027 early bird.',
-    rationale: { email: 'Celebration + early bird.', push: 'Badge unlock — emotional momentum.' } as Partial<Record<Channel, string>>,
+    rationale: { email: 'Celebration + early bird.', push: 'Badge unlock â€” emotional momentum.' } as Partial<Record<Channel, string>>,
   },
   {
     id: 'champion_ambassador',
@@ -31,14 +31,14 @@ const SEGMENTS = [
     colorBg: '#FFF0F2',
     description: 'Finisher + personal best + engagement > 75. Natural brand amplifiers.',
     objective: 'Invite into ambassador program. Activate their social reach.',
-    rationale: { email: 'Exclusive ambassador invitation.', instagram: 'Feature them — they have followers.' } as Partial<Record<Channel, string>>,
+    rationale: { email: 'Exclusive ambassador invitation.', instagram: 'Feature them â€” they have followers.' } as Partial<Record<Channel, string>>,
   },
   {
     id: 'at_risk_returner',
     label: 'At Risk Returner',
     color: '#EA580C',
     colorBg: '#FFF7ED',
-    description: 'Finisher with reRegistrationProbability ≤ 0.4. At risk of not returning.',
+    description: 'Finisher with reRegistrationProbability â‰¤ 0.4. At risk of not returning.',
     objective: 'Create urgency before the emotional window closes.',
     rationale: { email: '"Come back" storytelling.', sms: 'Early bird offer with deadline.' } as Partial<Record<Channel, string>>,
   },
@@ -47,13 +47,13 @@ const SEGMENTS = [
     label: 'DNS',
     color: '#6B7280',
     colorBg: '#F9FAFB',
-    description: 'Did not start. Reason unknown — injury, life event, or dropout.',
+    description: 'Did not start. Reason unknown â€” injury, life event, or dropout.',
     objective: 'Gentle, empathetic touch. No pressure.',
     rationale: { email: 'Very soft message. Respect the distance.' } as Partial<Record<Channel, string>>,
   },
   {
     id: 'reconquest_dnf',
-    label: 'DNF — Reconquest',
+    label: 'DNF â€” Reconquest',
     color: '#CA8A04',
     colorBg: '#FEFCE8',
     description: 'Did not finish. The abandonment is a powerful emotional lever.',
@@ -148,7 +148,7 @@ export default function FinishPage() {
       {/* KPI strip */}
       <div className="sparta-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, margin: '20px 0' }}>
         {[
-          { label: 'Total Finishers', value: kpi.totalFinishers.toLocaleString(), sub: 'May 17, 2026' },
+          { label: 'Total Finishers', value: kpi.totalFinishers.toLocaleString('en-US'), sub: 'May 17, 2026' },
           { label: 'Avg Finish Time', value: kpi.avgFinishTime, sub: 'All distances' },
           { label: 'Personal Best Rate', value: `${Math.round(kpi.personalBestRate * 100)}%`, sub: 'New records set' },
           { label: 'AI Re-registration', value: `${Math.round(REREGISTRATION_RATES.aiTargetedReturnRate * 100)}%`, sub: `vs ${Math.round(REREGISTRATION_RATES.naturalReturnRate * 100)}% natural` },
@@ -173,9 +173,9 @@ export default function FinishPage() {
           <span style={{ fontSize: 13, fontWeight: 570, color: 'var(--fg-1)' }}>AI impact projection: </span>
           <span style={{ fontSize: 13, color: 'var(--fg-2)' }}>
             Targeted re-registration campaigns could recover{' '}
-            <strong style={{ color: 'var(--primary)' }}>{REREGISTRATION_RATES.incrementalAthletes.toLocaleString()}</strong>{' '}
+            <strong style={{ color: 'var(--primary)' }}>{REREGISTRATION_RATES.incrementalAthletes.toLocaleString('en-US')}</strong>{' '}
             additional athletes worth{' '}
-            <strong style={{ color: 'var(--primary)' }}>€{REREGISTRATION_RATES.incrementalRevenue.toLocaleString()}</strong>{' '}
+            <strong style={{ color: 'var(--primary)' }}>&euro;{REREGISTRATION_RATES.incrementalRevenue.toLocaleString('en-US')}</strong>{' '}
             in incremental revenue ({Math.round(REREGISTRATION_RATES.aiTargetedReturnRate * 100)}% vs {Math.round(REREGISTRATION_RATES.naturalReturnRate * 100)}% natural return rate).
           </span>
         </div>
@@ -186,7 +186,7 @@ export default function FinishPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
             <div>
               <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Post-race Segments</span>
-              <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--fg-3)' }}>{GATE_TOTAL.toLocaleString()} total athletes in this gate</span>
+              <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--fg-3)' }}>{GATE_TOTAL.toLocaleString('en-US')} total athletes in this gate</span>
             </div>
             <button
               onClick={() => setShowBuilder(true)}
@@ -232,7 +232,7 @@ export default function FinishPage() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: 13, fontWeight: 570, color: 'var(--fg-1)' }}>{seg.name}</span>
-                  <span style={{ fontSize: 13, fontWeight: 570, fontFamily: 'var(--font-mono)', color: selectedId === seg.id ? seg.color : 'var(--fg-1)' }}>{getScaledCount(seg).toLocaleString()}</span>
+                  <span style={{ fontSize: 13, fontWeight: 570, fontFamily: 'var(--font-mono)', color: selectedId === seg.id ? seg.color : 'var(--fg-1)' }}>{getScaledCount(seg).toLocaleString('en-US')}</span>
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--fg-3)', marginTop: 1 }}>Custom segment</div>
               </div>
@@ -287,7 +287,7 @@ export default function FinishPage() {
                   <span style={{ width: 10, height: 10, borderRadius: '50%', background: selectedStatic.color, display: 'inline-block' }} />
                   <h3 style={{ fontSize: 15, fontWeight: 570, margin: 0 }}>{selectedStatic.label}</h3>
                   <span style={{ fontSize: 13, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>
-                    {sizes[selectedStatic.id as keyof typeof sizes].toLocaleString()} athletes
+                    {sizes[selectedStatic.id as keyof typeof sizes].toLocaleString('en-US')} athletes
                   </span>
                 </div>
                 <p style={{ margin: 0, fontSize: 12, color: 'var(--fg-3)' }}>{selectedStatic.objective}</p>
@@ -313,7 +313,7 @@ export default function FinishPage() {
                   <span style={{ width: 10, height: 10, borderRadius: '50%', background: selectedCustom.color, display: 'inline-block' }} />
                   <h3 style={{ fontSize: 15, fontWeight: 570, margin: 0 }}>{selectedCustom.name}</h3>
                   <span style={{ fontSize: 13, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>
-                    {getScaledCount(selectedCustom).toLocaleString()} athletes
+                    {getScaledCount(selectedCustom).toLocaleString('en-US')} athletes
                   </span>
                   <span style={{ fontSize: 10, color: selectedCustom.color, background: selectedCustom.colorBg, padding: '2px 7px', borderRadius: 'var(--radius-full)', fontWeight: 570, letterSpacing: '0.04em' }}>
                     CUSTOM
@@ -333,7 +333,7 @@ export default function FinishPage() {
                           {selectedCustom.filters.map(f => {
                             const val = FILTER_VALUE_OPTIONS[f.field]?.find(o => o.value === f.value)?.label ?? f.value;
                             return `${FILTER_FIELD_LABELS[f.field]}: ${val}`;
-                          }).join(' · ')}
+                          }).join(' Â· ')}
                         </span>
                       )}
                     </>
@@ -384,3 +384,4 @@ export default function FinishPage() {
     </div>
   );
 }
+

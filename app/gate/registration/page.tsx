@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo } from 'react';
 import GateTimeline from '@/components/gates/GateTimeline';
@@ -19,13 +19,13 @@ const GATE_TOTAL = KPI.gate1.totalApplications;
 const GATE1_SEGMENTS = [
   {
     id: 'returning_marathon',
-    label: 'Returning — Marathon',
+    label: 'Returning â€” Marathon',
     color: '#16A34A',
     colorBg: '#F0FDF4',
     description: 'Athletes who participated in a previous edition, now targeting the full 42K.',
     objective: 'Reward loyalty. Reference their past race. Strong emotional hook.',
     channels: ['email', 'push'] as Channel[],
-    rationale: { email: 'Personalized message referencing past editions.', push: 'Countdown + training tips — active users.' } as Partial<Record<Channel, string>>,
+    rationale: { email: 'Personalized message referencing past editions.', push: 'Countdown + training tips â€” active users.' } as Partial<Record<Channel, string>>,
     filters: [
       { id: 'f1', field: 'isReturningAthlete', value: 'true' },
       { id: 'f2', field: 'distance', value: 'Marathon 42K' },
@@ -33,13 +33,13 @@ const GATE1_SEGMENTS = [
   },
   {
     id: 'returning_half',
-    label: 'Returning — Half Marathon',
+    label: 'Returning â€” Half Marathon',
     color: '#2563EB',
     colorBg: '#EFF6FF',
     description: 'Returning athletes applying for the half marathon distance.',
     objective: 'Acknowledge their experience. Offer upgrade path to 42K.',
     channels: ['email', 'sms'] as Channel[],
-    rationale: { email: 'Community angle — reference their journey.', sms: 'Early bird urgency.' } as Partial<Record<Channel, string>>,
+    rationale: { email: 'Community angle â€” reference their journey.', sms: 'Early bird urgency.' } as Partial<Record<Channel, string>>,
     filters: [
       { id: 'f1', field: 'isReturningAthlete', value: 'true' },
       { id: 'f2', field: 'distance', value: 'Half Marathon 21K' },
@@ -47,7 +47,7 @@ const GATE1_SEGMENTS = [
   },
   {
     id: 'new_marathon',
-    label: 'First-Time — Marathon',
+    label: 'First-Time â€” Marathon',
     color: '#EA580C',
     colorBg: '#FFF7ED',
     description: 'First-time applicants aiming for the full marathon. High ambition, higher dropout risk.',
@@ -61,7 +61,7 @@ const GATE1_SEGMENTS = [
   },
   {
     id: 'new_half',
-    label: 'First-Time — Half Marathon',
+    label: 'First-Time â€” Half Marathon',
     color: '#7C3AED',
     colorBg: '#F5F3FF',
     description: 'New applicants for the half marathon. Easier entry point, high acquisition potential.',
@@ -105,7 +105,7 @@ export default function RegistrationPage() {
 
   const aiParentInfo = useMemo(() => {
     if (aiParentId === '__full_pool__') {
-      return { label: 'Tous les athletes (pré-loterie)', scaledSize: GATE_TOTAL, athleteIds: [] as string[], filters: undefined as FilterCondition[] | undefined };
+      return { label: 'Tous les athletes (prÃ©-loterie)', scaledSize: GATE_TOTAL, athleteIds: [] as string[], filters: undefined as FilterCondition[] | undefined };
     }
     const seg = GATE1_SEGMENTS.find(s => s.id === aiParentId);
     if (!seg) return { label: 'Tous les athletes', scaledSize: GATE_TOTAL, athleteIds: [] as string[], filters: undefined as FilterCondition[] | undefined };
@@ -159,10 +159,10 @@ export default function RegistrationPage() {
       {/* KPI strip */}
       <div className="sparta-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, margin: '20px 0' }}>
         {[
-          { label: 'Total Applications', value: kpi.totalApplications.toLocaleString(), sub: '2026 ballot' },
+          { label: 'Total Applications', value: kpi.totalApplications.toLocaleString('en-US'), sub: '2026 ballot' },
           { label: 'Avg Candidacy Score', value: `${kpi.avgCandidacyScore}/100`, sub: 'Composite score' },
           { label: 'Avg Anticipated Value', value: `€${kpi.avgAnticipatedValue}`, sub: 'Per selected athlete' },
-          { label: 'External Prospects', value: kpi.externalProspects.toLocaleString(), sub: 'Partner imports' },
+          { label: 'External Prospects', value: kpi.externalProspects.toLocaleString('en-US'), sub: 'Partner imports' },
         ].map(kpiItem => (
           <div key={kpiItem.label} style={{ background: 'var(--bg-1)', border: '1px solid var(--border-1)', borderRadius: 'var(--radius-lg)', padding: '12px 16px' }}>
             <div style={{ fontSize: 11, color: 'var(--fg-3)', marginBottom: 4 }}>{kpiItem.label}</div>
@@ -178,7 +178,7 @@ export default function RegistrationPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
             <div>
               <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Pre-lottery Segments</span>
-              <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--fg-3)' }}>{GATE_TOTAL.toLocaleString()} total athletes in this gate</span>
+              <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--fg-3)' }}>{GATE_TOTAL.toLocaleString('en-US')} total athletes in this gate</span>
             </div>
             <button
               onClick={() => setShowBuilder(true)}
@@ -227,7 +227,7 @@ export default function RegistrationPage() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <span style={{ fontSize: 13, fontWeight: 570, color: 'var(--fg-1)' }}>{seg.name}</span>
-                      <span style={{ fontSize: 13, fontWeight: 570, fontFamily: 'var(--font-mono)', color: selectedId === seg.id ? seg.color : 'var(--fg-1)' }}>{getCustomScaledCount(seg).toLocaleString()}</span>
+                      <span style={{ fontSize: 13, fontWeight: 570, fontFamily: 'var(--font-mono)', color: selectedId === seg.id ? seg.color : 'var(--fg-1)' }}>{getCustomScaledCount(seg).toLocaleString('en-US')}</span>
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--fg-3)', marginTop: 1 }}>Custom segment</div>
                   </div>
@@ -253,7 +253,7 @@ export default function RegistrationPage() {
                   <span style={{ width: 10, height: 10, borderRadius: '50%', background: selectedStatic.color, display: 'inline-block' }} />
                   <h3 style={{ fontSize: 15, fontWeight: 570, margin: 0, color: 'var(--fg-1)' }}>{selectedStatic.label}</h3>
                   <span style={{ fontSize: 13, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>
-                    {(segmentSizes[selectedStatic.id] ?? 0).toLocaleString()} athletes
+                    {(segmentSizes[selectedStatic.id] ?? 0).toLocaleString('en-US')} athletes
                   </span>
                 </div>
                 <p style={{ margin: 0, fontSize: 12, color: 'var(--fg-3)' }}>{selectedStatic.objective}</p>
@@ -287,7 +287,7 @@ export default function RegistrationPage() {
                   <span style={{ width: 10, height: 10, borderRadius: '50%', background: selectedCustom.color, display: 'inline-block' }} />
                   <h3 style={{ fontSize: 15, fontWeight: 570, margin: 0, color: 'var(--fg-1)' }}>{selectedCustom.name}</h3>
                   <span style={{ fontSize: 13, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>
-                    {getCustomScaledCount(selectedCustom).toLocaleString()} athletes
+                    {getCustomScaledCount(selectedCustom).toLocaleString('en-US')} athletes
                   </span>
                   <span style={{ fontSize: 10, color: selectedCustom.color, background: selectedCustom.colorBg, padding: '2px 7px', borderRadius: 'var(--radius-full)', fontWeight: 570, letterSpacing: '0.04em' }}>
                     CUSTOM
@@ -341,3 +341,4 @@ export default function RegistrationPage() {
     </div>
   );
 }
+

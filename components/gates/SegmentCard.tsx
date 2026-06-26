@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 interface SegmentCardProps {
   segment: string;
@@ -84,7 +84,7 @@ export default function SegmentCard({
             fontFamily: 'var(--font-mono)',
           }}
         >
-          {size.toLocaleString()}
+          {size.toLocaleString('en-US')}
         </span>
       </div>
 
@@ -118,3 +118,4 @@ export default function SegmentCard({
     </button>
   );
 }
+

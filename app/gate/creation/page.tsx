@@ -18,11 +18,11 @@ const SEGMENTS = [
     label: 'Past Finishers',
     color: '#16A34A',
     colorBg: '#F0FDF4',
-    description: 'Athletes who finished in 2021–2025 but haven\'t applied for 2026 yet.',
+    description: 'Athletes who finished in 2021-2025 but have not applied for 2026 yet.',
     size: SEGMENT_SIZES.gate0.past_finishers,
     objective: 'Re-activate before ballot closes. Emotional hook on their past experience.',
     icon: '🏅',
-    rationale: { email: 'Warm reactivation — reference their past finish.', push: 'App-engaged returning athletes.' } as Partial<Record<Channel, string>>,
+    rationale: { email: 'Warm reactivation - reference their past finish.', push: 'App-engaged returning athletes.' } as Partial<Record<Channel, string>>,
   },
   {
     id: 'past_refused',
@@ -32,15 +32,15 @@ const SEGMENTS = [
     description: 'Athletes who applied in previous editions but were not selected.',
     size: SEGMENT_SIZES.gate0.past_refused,
     objective: 'Restore confidence. Each lottery is a fresh start.',
-    icon: '🔁',
-    rationale: { email: 'Empathetic tone — acknowledge the past rejection.', sms: 'Soft nudge to apply again.' } as Partial<Record<Channel, string>>,
+    icon: '🔄',
+    rationale: { email: 'Empathetic tone - acknowledge the past rejection.', sms: 'Soft nudge to apply again.' } as Partial<Record<Channel, string>>,
   },
   {
     id: 'international_targets',
     label: 'International Targets',
     color: '#2563EB',
     colorBg: '#EFF6FF',
-    description: 'Runner audiences in DE, UK, NL, NO — new acquisition priority.',
+    description: 'Runner audiences in DE, UK, NL, NO - new acquisition priority.',
     size: SEGMENT_SIZES.gate0.international_targets,
     objective: 'Present Copenhagen as the unmissable European marathon experience.',
     icon: '🌍',
@@ -87,10 +87,10 @@ export default function CreationPage() {
 
   const aiParentInfo = useMemo(() => {
     if (aiParentId === '__full_pool__') {
-      return { label: 'Tous les prospects (pré-ballot)', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
+      return { label: 'All pre-ballot prospects', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
     }
     const seg = SEGMENTS.find(s => s.id === aiParentId);
-    if (!seg) return { label: 'Tous les prospects', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
+    if (!seg) return { label: 'All prospects', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
     return {
       label: seg.label,
       scaledSize: seg.size,
@@ -127,10 +127,10 @@ export default function CreationPage() {
       {/* KPI strip */}
       <div className="sparta-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, margin: '20px 0' }}>
         {[
-          { label: '2026 Capacity', value: EVENT.capacity.toLocaleString(), sub: 'Marathon + Half' },
-          { label: 'Target Applicants', value: EVENT.totalApplicants.toLocaleString(), sub: `vs ${kpi.historicalAvgApplicants.toLocaleString()} avg` },
-          { label: 'Avg Revenue / Edition', value: `€${(kpi.avgRevenuePerEdition / 1000).toFixed(0)}k`, sub: 'Entry fees + upsells' },
-          { label: 'Natural Return Rate', value: '65%', sub: 'Finishers → next edition' },
+          { label: '2026 Capacity', value: EVENT.capacity.toLocaleString('en-US'), sub: 'Marathon + Half' },
+          { label: 'Target Applicants', value: EVENT.totalApplicants.toLocaleString('en-US'), sub: `vs ${kpi.historicalAvgApplicants.toLocaleString('en-US')} avg` },
+          { label: 'Avg Revenue / Edition', value: '€' + (kpi.avgRevenuePerEdition / 1000).toFixed(0) + 'k', sub: 'Entry fees + upsells' },
+          { label: 'Natural Return Rate', value: '65%', sub: 'Finishers > next edition' },
         ].map(item => (
           <div key={item.label} style={{ background: 'var(--bg-1)', border: '1px solid var(--border-1)', borderRadius: 'var(--radius-lg)', padding: '12px 16px' }}>
             <div style={{ fontSize: 11, color: 'var(--fg-3)', marginBottom: 4 }}>{item.label}</div>
@@ -146,7 +146,7 @@ export default function CreationPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
             <div>
               <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Pre-ballot Segments</span>
-              <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--fg-3)' }}>{GATE_TOTAL.toLocaleString()} total prospects in this gate</span>
+              <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--fg-3)' }}>{GATE_TOTAL.toLocaleString('en-US')} total prospects in this gate</span>
             </div>
             <button
               onClick={() => setShowBuilder(true)}
@@ -179,7 +179,7 @@ export default function CreationPage() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
                     <span style={{ fontSize: 13, fontWeight: 570, color: 'var(--fg-1)' }}>{seg.label}</span>
                     <span style={{ fontSize: 13, fontWeight: 570, fontFamily: 'var(--font-mono)', color: selectedId === seg.id ? seg.color : 'var(--fg-1)' }}>
-                      {seg.size.toLocaleString()}
+                      {seg.size.toLocaleString('en-US')}
                     </span>
                   </div>
                   <p style={{ margin: 0, fontSize: 11, color: 'var(--fg-3)', lineHeight: 1.4 }}>{seg.description}</p>
@@ -207,7 +207,7 @@ export default function CreationPage() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span style={{ fontSize: 13, fontWeight: 570, color: 'var(--fg-1)' }}>{seg.name}</span>
                     <span style={{ fontSize: 13, fontWeight: 570, fontFamily: 'var(--font-mono)', color: selectedId === seg.id ? seg.color : 'var(--fg-1)' }}>
-                      {getScaledCount(seg).toLocaleString()}
+                      {getScaledCount(seg).toLocaleString('en-US')}
                     </span>
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--fg-3)', marginTop: 1 }}>Custom segment</div>
@@ -249,8 +249,8 @@ export default function CreationPage() {
                   {HISTORICAL.map((row, i) => (
                     <tr key={row.year} style={{ borderBottom: i < HISTORICAL.length - 1 ? '1px solid var(--border-1)' : 'none', background: i % 2 === 0 ? 'transparent' : 'var(--bg-2)' }}>
                       <td style={{ padding: '7px 12px', fontFamily: 'var(--font-mono)', color: 'var(--fg-1)', fontWeight: 570 }}>{row.year}</td>
-                      <td style={{ padding: '7px 12px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--fg-2)' }}>{row.applicants.toLocaleString()}</td>
-                      <td style={{ padding: '7px 12px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--fg-2)' }}>{row.finishers.toLocaleString()}</td>
+                      <td style={{ padding: '7px 12px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--fg-2)' }}>{row.applicants.toLocaleString('en-US')}</td>
+                      <td style={{ padding: '7px 12px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--fg-2)' }}>{row.finishers.toLocaleString('en-US')}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -268,7 +268,7 @@ export default function CreationPage() {
                   <span style={{ padding: '2px 7px', borderRadius: 'var(--radius-sm)', background: selectedCustom.colorBg, color: selectedCustom.color, fontSize: 10, fontWeight: 570, letterSpacing: '0.06em' }}>CUSTOM</span>
                   <h3 style={{ fontSize: 15, fontWeight: 570, margin: 0 }}>{selectedCustom.name}</h3>
                   <span style={{ fontSize: 13, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>
-                    {getScaledCount(selectedCustom).toLocaleString()} athletes
+                    {getScaledCount(selectedCustom).toLocaleString('en-US')} athletes
                   </span>
                 </div>
                 {selectedCustom.objective && <p style={{ margin: 0, fontSize: 12, color: 'var(--fg-3)' }}>{selectedCustom.objective}</p>}
@@ -289,7 +289,7 @@ export default function CreationPage() {
                   <span style={{ fontSize: 20 }}>{selected.icon}</span>
                   <h3 style={{ fontSize: 15, fontWeight: 570, margin: 0 }}>{selected.label}</h3>
                   <span style={{ fontSize: 13, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>
-                    {selected.size.toLocaleString()} athletes
+                    {selected.size.toLocaleString('en-US')} athletes
                   </span>
                 </div>
                 <p style={{ margin: 0, fontSize: 12, color: 'var(--fg-3)' }}>{selected.objective}</p>

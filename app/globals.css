@@ -1,30 +1,5 @@
 @import "tailwindcss";
 
-/* ─── Saans Font Family ─────────────────────────────────────────── */
-@font-face {
-  font-family: 'Saans';
-  src: url('/fonts/Saans-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Saans';
-  src: url('/fonts/Saans-Medium.woff2') format('woff2');
-  font-weight: 570;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'SaansMono';
-  src: url('/fonts/SaansMono-Regular.woff2') format('woff2');
-  font-weight: 380;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* ─── Color Palette ─────────────────────────────────────────────── */
 :root {
   --color-red-700: #D6001D;
@@ -74,8 +49,8 @@
   --badge-dark-bg: #F1F5F9;
 
   /* Typography */
-  --font-sans: 'Saans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-  --font-mono: 'SaansMono', 'Courier New', Courier, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', 'Courier New', monospace;
 
   /* Shape */
   --radius-sm: 4px;

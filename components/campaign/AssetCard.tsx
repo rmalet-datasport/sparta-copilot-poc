@@ -29,7 +29,7 @@ const CHANNEL_COLORS: Record<string, { color: string; bg: string }> = {
   sms:       { color: '#16A34A', bg: '#F0FDF4' },
   push:      { color: '#7C3AED', bg: '#F5F3FF' },
   instagram: { color: '#EA580C', bg: '#FFF7ED' },
-  offline:   { color: '#0E7490', bg: '#ECFEFF' },
+  partner:   { color: '#0E7490', bg: '#ECFEFF' },
 };
 
 const CHANNEL_ICONS: Record<string, React.ReactNode> = {
@@ -59,7 +59,7 @@ const CHANNEL_ICONS: Record<string, React.ReactNode> = {
       <circle cx="10.2" cy="3.8" r="0.8" fill="currentColor"/>
     </svg>
   ),
-  offline: (
+  partner: (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
       <rect x="1.5" y="1.5" width="4" height="4" rx="0.5" stroke="currentColor" strokeWidth="1.2"/>
       <rect x="8.5" y="1.5" width="4" height="4" rx="0.5" stroke="currentColor" strokeWidth="1.2"/>
@@ -239,14 +239,14 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
   const [localImageUrl, setLocalImageUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [editedAsset, setEditedAsset] = useState<Asset>({ ...asset });
-  const [utmSource, setUtmSource] = useState('offline');
+  const [utmSource, setUtmSource] = useState('partner');
   const [utmMedium, setUtmMedium] = useState('flyer');
   const [utmContent, setUtmContent] = useState('ambassador');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setEditedAsset({ ...asset });
-    setUtmSource('offline');
+    setUtmSource('partner');
     setUtmMedium('flyer');
     setUtmContent('ambassador');
   }, [asset.subject, asset.title, asset.body, asset.caption, asset.hashtags, asset.utmCampaign, asset.distributionPoints, asset.meta]);
@@ -257,7 +257,7 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
   const style = CHANNEL_COLORS[asset.channel] ?? { color: '#6B7280', bg: '#F9FAFB' };
   const needsImage = IMAGE_CHANNELS.includes(asset.channel);
   const isInstagram = asset.channel === 'instagram';
-  const isOffline = asset.channel === 'offline';
+  const isOffline = asset.channel === 'partner';
   const displayImage = localImageUrl ?? savedImageUrl ?? null;
 
   const utmCampaignVal = editedAsset.utmCampaign ?? '';
@@ -494,7 +494,7 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
         </div>
       )}
 
-      {/* Content — hidden when story preview is active, not shown for offline */}
+      {/* Content — hidden when story preview is active, not shown for partner */}
       {!showStoryPreview && !isOffline && (
         <div style={{ padding: '14px 16px' }}>
           <style>{`
@@ -602,7 +602,7 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
         </div>
       )}
 
-      {/* Image upload zone — email & instagram only (not offline) */}
+      {/* Image upload zone — email & instagram only (not partner) */}
       {needsImage && !isOffline && (
         <div style={{ padding: '0 16px 16px' }}>
           <div style={{ borderTop: '1px solid var(--border-1)', paddingTop: 14 }}>

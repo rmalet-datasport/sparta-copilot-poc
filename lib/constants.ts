@@ -93,7 +93,7 @@ export const RACES: Race[] = [
   { id: 'cph_city_run_5k', name: 'CPH City Run', distance: '5K', type: 'satellite' },
 ];
 
-export const CHANNELS = ['email', 'sms', 'push', 'instagram', 'offline'] as const;
+export const CHANNELS = ['email', 'sms', 'push', 'instagram', 'partner'] as const;
 export type Channel = typeof CHANNELS[number];
 
 export const CHANNEL_LABELS: Record<Channel, string> = {
@@ -101,7 +101,7 @@ export const CHANNEL_LABELS: Record<Channel, string> = {
   sms: 'SMS',
   push: 'Push',
   instagram: 'Instagram',
-  offline: 'Offline / Ambassador',
+  partner: 'Partner / Ambassador',
 };
 
 export const DEFAULT_CHANNELS: Record<string, Channel[]> = {
@@ -124,7 +124,7 @@ export const DEFAULT_CHANNELS: Record<string, Channel[]> = {
   refused_lost: ['email'],
   // Gate 3
   loyal_finisher: ['email', 'push'],
-  champion_ambassador: ['email', 'instagram', 'offline'],
+  champion_ambassador: ['email', 'instagram', 'partner'],
   at_risk_returner: ['email', 'sms'],
   lost_dns: ['email'],
   reconquest_dnf: ['email', 'sms'],

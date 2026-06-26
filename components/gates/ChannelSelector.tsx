@@ -36,7 +36,7 @@ const CHANNEL_ICONS: Record<Channel, React.ReactNode> = {
       <circle cx="10.2" cy="3.8" r="0.8" fill="currentColor"/>
     </svg>
   ),
-  offline: (
+  partner: (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
       <rect x="1.5" y="1.5" width="4" height="4" rx="0.5" stroke="currentColor" strokeWidth="1.2"/>
       <rect x="8.5" y="1.5" width="4" height="4" rx="0.5" stroke="currentColor" strokeWidth="1.2"/>
@@ -50,7 +50,7 @@ const CHANNEL_ICONS: Record<Channel, React.ReactNode> = {
 };
 
 const CHANNEL_LABELS: Record<Channel, string> = {
-  email: 'Email', sms: 'SMS', push: 'Push', instagram: 'Instagram', offline: 'Offline',
+  email: 'Email', sms: 'SMS', push: 'Push', instagram: 'Instagram', partner: 'Partner',
 };
 
 export default function ChannelSelector({ available, selected, onChange, rationale }: ChannelSelectorProps) {
@@ -62,7 +62,7 @@ export default function ChannelSelector({ available, selected, onChange, rationa
     }
   };
 
-  const ALL_CHANNELS: Channel[] = ['email', 'sms', 'push', 'instagram', 'offline'];
+  const ALL_CHANNELS: Channel[] = ['email', 'sms', 'push', 'instagram', 'partner'];
 
   return (
     <div>

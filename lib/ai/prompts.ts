@@ -42,7 +42,7 @@ Expected format (generate only the requested channels):
       "meta": "..."
     },
     {
-      "channel": "offline",
+      "channel": "partner",
       "title": "Campaign name (3-6 words, readable on a flyer)",
       "caption": "Punchy flyer tagline (max 8 words)",
       "body": "Ambassador briefing in English: who to target, what to say, where to go. Include 3-5 specific distribution points based on the segment's geographic profile (areas, cities, venue types — running stores, gyms, parkrun events, sports expos, etc.). Write as practical field instructions for the ambassador.",
@@ -53,7 +53,7 @@ Expected format (generate only the requested channels):
   ]
 }
 The "meta" field describes in one line the context or intent of the asset.
-For the "offline" channel: utmCampaign must be a short slug (e.g. cph26_loyal_finishers), all text fields must be in English.`;
+For the "partner" channel: utmCampaign must be a short slug (e.g. cph26_loyal_finishers), all text fields must be in English.`;
 
 export const SYSTEM_PROMPTS: Record<string, Record<string, string>> = {
   gate0: {

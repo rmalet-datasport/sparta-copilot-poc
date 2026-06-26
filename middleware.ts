@@ -25,9 +25,9 @@ export function middleware(request: NextRequest) {
   }
 
   const accessCookie = request.cookies.get('demo_access')
-  const secret = process.env.DEMO_COOKIE_SECRET ?? ''
+  const secret = process.env.DEMO_COOKIE_SECRET
 
-  if (!accessCookie || !timingSafeEqual(accessCookie.value, secret)) {
+  if (!secret || !accessCookie || !timingSafeEqual(accessCookie.value, secret)) {
     const url = request.nextUrl.clone()
     url.pathname = '/access'
     return NextResponse.redirect(url)

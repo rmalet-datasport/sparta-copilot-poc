@@ -28,7 +28,12 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const { password } = await request.json()
+  const { password } = await request.json().catch(() => ({}))
+
+  const cookieSecret = process.env.DEMO_COOKIE_SECRET
+  if (!cookieSecret) {
+    return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
+  }
 
   if (password !== process.env.DEMO_PASSWORD) {
     return NextResponse.json({ error: 'Incorrect password' }, { status: 401 })
@@ -36,7 +41,7 @@ export async function POST(request: NextRequest) {
 
   const response = NextResponse.json({ success: true })
 
-  response.cookies.set('demo_access', process.env.DEMO_COOKIE_SECRET!, {
+  response.cookies.set('demo_access', cookieSecret, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',

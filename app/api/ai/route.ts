@@ -2,12 +2,20 @@ import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
 import { SYSTEM_PROMPTS, buildUserPrompt, buildRegeneratePrompt } from '@/lib/ai/prompts';
 import { SEGMENT_SIZES } from '@/lib/constants';
+import { isRateLimited } from '@/lib/rate-limit';
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown'
+  if (isRateLimited(ip, 20, 60_000)) {
+    return new Response(JSON.stringify({ error: 'Too many requests. Please wait a minute.' }), {
+      status: 429,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
   try {
     const body = await req.json();
     const { gate, segment, channels, customInstructions, channelToRegenerate, segmentDescription, historicalExamples, selectedRaces } = body;

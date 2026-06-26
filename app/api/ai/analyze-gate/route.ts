@@ -1,7 +1,8 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { formatStatsForPrompt, formatStatsForSubPool } from '@/lib/db/segment-stats'
 import { athletes } from '@/lib/db/athletes'
+import { isRateLimited } from '@/lib/rate-limit'
 
 const client = new Anthropic()
 
@@ -56,7 +57,11 @@ const COLORS = [
   { color: '#7C3AED', colorBg: '#F5F3FF' },
 ]
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown'
+  if (isRateLimited(ip, 20, 60_000)) {
+    return NextResponse.json({ error: 'Too many requests. Please wait a minute.' }, { status: 429 })
+  }
   try {
     const body = await req.json().catch(() => ({}))
     const athleteIds: string[] | undefined = body?.athleteIds

@@ -199,6 +199,52 @@ if (!cookie) {
   if (hit429) ok(`rate limit triggered at attempt ${attempts}`)
 }
 
+// 10. REAL AI CALL — all 7 channels (requires ANTHROPIC_API_KEY)
+// Validates that max_tokens is sufficient: truncated JSON would fail JSON.parse.
+// Also confirms each channel returns a well-shaped asset from a live Anthropic response.
+console.log('\n[10] Real Anthropic call — all 7 channels, full JSON integrity')
+const HAS_API_KEY = !!process.env.ANTHROPIC_API_KEY
+if (!cookie) {
+  skip('no cookie from step 5')
+} else if (!HAS_API_KEY) {
+  skip('ANTHROPIC_API_KEY not set — set it to run live Anthropic tests')
+} else {
+  const res = await r('/api/ai', {
+    cookie,
+    body: {
+      gate: 'gate3',
+      segment: 'champion_ambassador',
+      channels: ['email', 'sms', 'push', 'instagram', 'linkedin', 'facebook', 'partner'],
+    },
+  })
+  check('real call → 200', res.status === 200, `status=${res.status}`)
+  if (res.status === 200) {
+    let json
+    try {
+      json = JSON.parse(await res.text())
+      ok('response is valid JSON (not truncated)')
+    } catch (e) {
+      ko('response is valid JSON (not truncated)', e.message.slice(0, 80))
+    }
+    if (json) {
+      check('7 assets returned', json?.assets?.length === 7, `got ${json?.assets?.length}`)
+      const byChannel = Object.fromEntries((json.assets ?? []).map(a => [a.channel, a]))
+      const SHAPES = {
+        email:     a => a?.subject !== undefined,
+        sms:       a => a?.body !== undefined,
+        push:      a => a?.title !== undefined && a?.body !== undefined,
+        instagram: a => a?.caption !== undefined,
+        linkedin:  a => a?.title !== undefined && a?.body !== undefined,
+        facebook:  a => a?.title !== undefined && a?.body !== undefined,
+        partner:   a => a?.utmCampaign !== undefined && a?.distributionPoints !== undefined,
+      }
+      for (const [ch, shapeFn] of Object.entries(SHAPES)) {
+        check(`${ch} asset shape (live)`, shapeFn(byChannel[ch]), JSON.stringify(byChannel[ch] ?? {}).slice(0, 80))
+      }
+    }
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 console.log(`\n${'─'.repeat(50)}`)
 console.log(`${pass + fail} checks  —  \x1b[32m${pass} passed\x1b[0m  /  \x1b[31m${fail} failed\x1b[0m\n`)

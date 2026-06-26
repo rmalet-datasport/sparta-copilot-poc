@@ -133,6 +133,58 @@ if (!cookie) {
   if (hit429) ok(`rate limit triggered at attempt ${attempts}`)
 }
 
+// 9. DRY-RUN campaign generation (no Anthropic call)
+// Uses _dryRun: true — routes through full auth + validation but skips the Anthropic call.
+console.log('\n[9] Dry-run campaign generation (no Anthropic call)')
+if (!cookie) {
+  skip('no cookie from step 5')
+} else {
+  // Valid gate/segment combinations — one per gate
+  const DRY_RUN_CASES = [
+    { gate: 'gate0', segment: 'past_finishers' },
+    { gate: 'gate1', segment: 'ambassador' },
+    { gate: 'gate2', segment: 'confirmed_engaged' },
+    { gate: 'gate3', segment: 'loyal_finisher' },
+    { gate: 'gate1', segment: 'custom_segment' },
+  ]
+  for (const { gate, segment } of DRY_RUN_CASES) {
+    const res = await r('/api/ai', { cookie, body: { gate, segment, channels: ['email', 'push'], _dryRun: true } })
+    check(`${gate}/${segment}: 200`, res.status === 200, `status=${res.status}`)
+    if (res.status === 200) {
+      const json = JSON.parse(await res.text())
+      check(`${gate}/${segment}: assets array`, Array.isArray(json?.assets), JSON.stringify(json).slice(0, 80))
+      check(`${gate}/${segment}: 2 assets`, json?.assets?.length === 2, `got ${json?.assets?.length}`)
+      check(`${gate}/${segment}: email asset shape`, json?.assets?.[0]?.subject !== undefined, JSON.stringify(json?.assets?.[0]).slice(0, 80))
+    }
+  }
+
+  // Invalid gate → 400 (validation runs before dry-run check)
+  const badGate = await r('/api/ai', { cookie, body: { gate: 'gate9', segment: 'foo', channels: ['email'], _dryRun: true } })
+  check('unknown gate → 400 even with _dryRun', badGate.status === 400, `status=${badGate.status}`)
+
+  // Invalid channel → 400
+  const badCh = await r('/api/ai', { cookie, body: { gate: 'gate1', segment: 'ambassador', channels: ['whatsapp'], _dryRun: true } })
+  check('unknown channel → 400', badCh.status === 400, `status=${badCh.status}`)
+
+  // channelToRegenerate path
+  const regen = await r('/api/ai', { cookie, body: { gate: 'gate1', segment: 'ambassador', channelToRegenerate: 'email', customInstructions: 'Test', _dryRun: true } })
+  check('channelToRegenerate dry-run → 200', regen.status === 200, `status=${regen.status}`)
+  if (regen.status === 200) {
+    const json = JSON.parse(await regen.text())
+    check('channelToRegenerate: 1 asset', json?.assets?.length === 1, `got ${json?.assets?.length}`)
+  }
+
+  // All 4 channels in one call
+  const allCh = await r('/api/ai', { cookie, body: { gate: 'gate2', segment: 'waitlist_hot', channels: ['email', 'sms', 'push', 'instagram'], _dryRun: true } })
+  check('4 channels dry-run → 200', allCh.status === 200, `status=${allCh.status}`)
+  if (allCh.status === 200) {
+    const json = JSON.parse(await allCh.text())
+    check('4 channels: 4 assets', json?.assets?.length === 4, `got ${json?.assets?.length}`)
+    const channels = json?.assets?.map(a => a.channel).sort().join(',')
+    check('4 channels: correct channel names', channels === 'email,instagram,push,sms', `got ${channels}`)
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 console.log(`\n${'─'.repeat(50)}`)
 console.log(`${pass + fail} checks  —  \x1b[32m${pass} passed\x1b[0m  /  \x1b[31m${fail} failed\x1b[0m\n`)

@@ -157,7 +157,8 @@ export type Athlete = {
 export function filterAthletes(
   filters: FilterCondition[],
   baseSegmentIds?: string[],
-  segmentField?: string
+  segmentField?: string,
+  baseAthleteIds?: Set<string>   // prioritaire sur baseSegmentIds si fourni
 ): Athlete[]
 ```
 
@@ -173,7 +174,7 @@ function getGate0Segment(a: Athlete): string {
 }
 ```
 
-**Champs filtrables (9 champs)** :
+**Champs filtrables (11 champs)** :
 
 | FilterField | Type | Description |
 |---|---|---|
@@ -186,22 +187,30 @@ function getGate0Segment(a: Athlete): string {
 | `total_editions_max` | number | totalEditionsRaced ≤ valeur |
 | `engagement_min` | number | engagement.score ≥ valeur |
 | `city_contains` | text | city.includes(valeur) |
+| `distance` | select | 'Marathon 42K' \| 'Half Marathon 21K' |
+| `hasInsurance` | boolean | 'true' \| 'false' |
 
 ---
 
 ## Statistiques DB (`lib/db/segment-stats.ts`)
 
-Utilisé par `/api/ai/suggest-segment` pour calibrer intelligemment les filtres.
+Utilisé par `/api/ai/suggest-segment` et `/api/ai/analyze-gate` pour calibrer les filtres.
 
 ```ts
+// Stats de la DB complète (500 athletes)
 export function formatStatsForPrompt(): string
-// Retourne une string avec :
+
+// Stats d'un sous-pool arbitraire (utilisé par analyze-gate quand athleteIds est fourni)
+export function formatStatsForSubPool(pool: Athlete[]): string
+
+// Les deux retournent une string avec :
 // - Engagement : p25, médiane, p75, p90
 // - Âge : p25, médiane, p75
 // - Éditions courues : distribution 0 / 1 / 2-3 / 4+
 // - % athletes retournants
 // - % femmes / hommes
 // - Distribution nationalités (top pays)
+// - Distribution distances (Marathon 42K / Half Marathon 21K)
 ```
 
 ---

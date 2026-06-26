@@ -224,11 +224,17 @@ Comportement :
 // app/api/ai/route.ts
 model: "claude-sonnet-4-6"
 max_tokens: 1024
-stream: true
+stream: false
 // Paramètres du body :
+gate: string                   // 'gate0' | 'gate1' | 'gate2' | 'gate3'
+segment: string                // ex: 'ambassador', 'custom_segment'
+channels: Channel[]            // ['email', 'sms', 'push', 'instagram'] — validés (400 si inconnu)
 segmentDescription?: string    // injecté dans le user prompt pour les segments custom
 historicalExamples?: BrandExample[]  // exemples filtrés par BrandHistoryContext
 selectedRaces?: Race[]         // courses à promouvoir (sélecteur dans CampaignGenerator)
+channelToRegenerate?: string   // si présent : régénère ce channel seul (buildRegeneratePrompt)
+customInstructions?: string    // instructions libres pour la régénération
+_dryRun?: boolean              // court-circuite Anthropic, retourne un fixture — pour les tests
 ```
 
 ### Route parse-segment : NL → filtres
@@ -277,8 +283,13 @@ Parser la réponse côté client avec un try/catch.
 En cas d'erreur de parsing, afficher un message d'erreur propre sans crash.
 
 ### Streaming
-Activé uniquement pour la génération de campagne (`/api/ai/route.ts`).
-Les routes `parse-segment` et `suggest-segment` ne streament pas.
+Aucune route ne streame actuellement. Toutes les routes utilisent `await client.messages.create()`.
+
+### Tests sans tokens Anthropic
+Le flag `_dryRun: true` dans le body de `/api/ai` court-circuite l'appel Anthropic
+et retourne un fixture `{ assets: [...] }` dans le même format que la vraie réponse.
+La validation complète s'exécute quand même (gate inconnu → 400, channel invalide → 400).
+Voir `scripts/test-routes.mjs` groupe [9] et `docs/TESTING.md` pour les commandes.
 
 ---
 

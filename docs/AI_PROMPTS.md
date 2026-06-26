@@ -7,6 +7,7 @@
 | `POST /api/ai` | Génération campagne marketing | Oui | JSON assets |
 | `POST /api/ai/parse-segment` | NL → filtres structurés | Non | JSON filtres |
 | `POST /api/ai/suggest-segment` | Objectif métier → profil segment | Non | JSON portrait + filtres + insights |
+| `POST /api/ai/analyze-gate` | Pool athletes → sous-segments IA | Non | JSON segments (3–4) |
 
 ---
 
@@ -49,9 +50,74 @@ La clé `custom_segment` existe pour chaque gate et est enrichie via `segmentDes
 
 ### User prompt (buildUserPrompt)
 ```ts
-buildUserPrompt({ channels, segmentDescription? })
-// Produit : "Génère des assets pour ces channels : email, sms\n${segmentDescription}"
+buildUserPrompt({
+  channels,
+  segmentDescription?,
+  historicalExamples?,   // BrandExample[] — injecte un bloc d'exemples passés
+  selectedRaces?,        // Race[] — 0 = neutre, 1 = message spécifique, 2+ = message ombrelle
+})
 ```
+
+### Régénération d'un channel seul (buildRegeneratePrompt)
+```ts
+buildRegeneratePrompt(channel, instructions, historicalExamples?, selectedRaces?)
+// Demande à Claude de ne régénérer que l'asset du channel indiqué,
+// en tenant compte des instructions libres et du contexte courses.
+```
+
+### Exemples historiques (buildHistoricalExamplesBlock)
+```ts
+buildHistoricalExamplesBlock(examples: BrandExample[]): string
+// Formate les exemples en bloc texte inséré dans le prompt.
+// Claude est instruit de s'en inspirer stylistiquement sans copier mot pour mot.
+```
+
+---
+
+---
+
+## Route 4 : Analyse de gate (`/api/ai/analyze-gate/route.ts`)
+
+### Configuration
+```ts
+model: "claude-sonnet-4-6"
+max_tokens: 1200
+stream: false
+```
+
+### Input
+```ts
+{
+  athleteIds?: string[]   // IDs des athletes du pool courant
+  parentLabel?: string    // label du segment parent (contexte pour le prompt)
+}
+```
+
+Si `athleteIds` est fourni → stats calculées sur le sous-pool via `formatStatsForSubPool()`.
+Sinon → stats de la DB complète via `formatStatsForPrompt()`.
+
+### Output
+```ts
+{
+  segments: AIRawSegment[]  // 3–4 sous-segments
+}
+
+type AIRawSegment = {
+  id: string
+  name: string
+  description: string
+  suggestedChannels: string[]
+  channelRationale: string
+  filters: FilterCondition[]
+  color: string       // hex couleur principale
+  colorBg: string     // hex couleur de fond clair
+}
+```
+
+### Comportement dans AISubSegments.tsx
+- Utilisée par le widget "Découvrir des sous-segments" affiché dans le panel droit
+- Résultat affiché comme liste cliquable : cliquer crée un `CustomSegment` avec les filtres
+- Les filtres du sous-segment sélectionné sont mergés avec les filtres du parent si disponibles
 
 ---
 

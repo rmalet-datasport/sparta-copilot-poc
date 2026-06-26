@@ -8,6 +8,18 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+const VALID_CHANNELS = new Set(['email', 'sms', 'push', 'instagram'])
+
+function buildDryRunAsset(channel: string) {
+  switch (channel) {
+    case 'email':     return { channel, subject: '[DRY RUN] Test subject', body: '[DRY RUN] Test body', meta: 'dry-run fixture' }
+    case 'sms':       return { channel, body: '[DRY RUN] Test SMS body', meta: 'dry-run fixture' }
+    case 'push':      return { channel, title: '[DRY RUN] Test push title', body: '[DRY RUN] Test push body', meta: 'dry-run fixture' }
+    case 'instagram': return { channel, caption: '[DRY RUN] Test caption', hashtags: '#test #dryrun', meta: 'dry-run fixture' }
+    default:          return { channel, body: '[DRY RUN]', meta: 'dry-run fixture' }
+  }
+}
+
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown'
   if (isRateLimited(ip, 20, 60_000)) {
@@ -18,7 +30,7 @@ export async function POST(req: NextRequest) {
   }
   try {
     const body = await req.json();
-    const { gate, segment, channels, customInstructions, channelToRegenerate, segmentDescription, historicalExamples, selectedRaces } = body;
+    const { gate, segment, channels, customInstructions, channelToRegenerate, segmentDescription, historicalExamples, selectedRaces, _dryRun } = body;
 
     const systemPrompt = SYSTEM_PROMPTS[gate as string]?.[segment as string];
 
@@ -27,6 +39,22 @@ export async function POST(req: NextRequest) {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
+    }
+
+    const channelList: string[] = channelToRegenerate ? [channelToRegenerate] : (channels ?? [])
+    const invalidChannels = channelList.filter(c => !VALID_CHANNELS.has(c))
+    if (invalidChannels.length > 0) {
+      return new Response(JSON.stringify({ error: `Unknown channel(s): ${invalidChannels.join(', ')}` }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
+    if (_dryRun) {
+      const assets = channelList.map(buildDryRunAsset)
+      return new Response(JSON.stringify({ assets }), {
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+      })
     }
 
     const segmentSize = (SEGMENT_SIZES as Record<string, Record<string, number>>)[gate as string]?.[segment as string] ?? 1000;

@@ -6,7 +6,7 @@
 Les routes IA sont testées via des inputs invalides qui déclenchent une erreur 400
 avant l'appel API — ce qui permet de tester auth, validation et rate limiting.
 
-**Ce que le script vérifie (9 groupes) :**
+**Ce que le script vérifie (10 groupes) :**
 1. Page protégée sans auth → redirect vers `/access`
 2. Route API protégée sans auth → bloquée
 3. Mauvais mot de passe → 401
@@ -16,6 +16,7 @@ avant l'appel API — ce qui permet de tester auth, validation et rate limiting.
 7. Validations input sur les routes IA → 400 avant Anthropic
 8. Rate limiting sur `/api/ai/parse-segment` → 429 après 20 req/min/IP
 9. **Génération campagne dry-run** → valide gate/segment/channels sans appel Anthropic
+10. **Appel Anthropic réel** → intégrité JSON sur les 7 channels (nécessite `ANTHROPIC_API_KEY`)
 
 ### Groupe 9 — Dry-run (`_dryRun: true`)
 
@@ -29,7 +30,19 @@ Cas testés automatiquement :
 - Gate inconnu avec `_dryRun` → toujours 400 (validation avant le flag)
 - Channel invalide (`whatsapp`) → 400
 - `channelToRegenerate` → 200 + 1 seul asset
-- 4 channels simultanés → 200 + 4 assets avec bons noms
+- **7 channels simultanés** → 200 + shape vérifiée channel par channel (`subject`, `caption`, `utmCampaign`, etc.)
+
+### Groupe 10 — Appel Anthropic réel (`ANTHROPIC_API_KEY` requis)
+
+Ce test fait un vrai appel Anthropic avec les 7 channels (`email`, `sms`, `push`, `instagram`,
+`linkedin`, `facebook`, `partner`) pour valider deux choses critiques :
+
+1. **Intégrité JSON** : si `max_tokens` est trop bas, Claude tronque le JSON → `JSON.parse` lève
+   une `SyntaxError` et le check échoue immédiatement.
+2. **Shape des assets** : chaque channel retourne les bons champs depuis une vraie réponse IA.
+
+Ce test est **intentionnellement exclu du pre-commit hook** (coût en tokens). À lancer manuellement
+avant une démo ou après tout changement sur `max_tokens` ou les prompts.
 
 ---
 
@@ -79,7 +92,24 @@ $env:BASE_URL = "https://sparta-copilot.lab.datasport.com"; $env:DEMO_PASSWORD =
 | Variable | Défaut | Description |
 |---|---|---|
 | `BASE_URL` | `http://localhost:3000` | URL cible du serveur à tester |
-| `DEMO_PASSWORD` | _(vide)_ | Mot de passe de la démo — requis pour les tests 5–8 |
+| `DEMO_PASSWORD` | _(vide)_ | Requis pour les tests [5]–[9] et [10] |
+| `ANTHROPIC_API_KEY` | _(vide)_ | Requis pour le test [10] uniquement (appel Anthropic réel) |
+
+**Combinaisons :**
+
+| Env vars | Tests qui tournent |
+|---|---|
+| aucune | [1]–[4] |
+| `DEMO_PASSWORD` | [1]–[9] |
+| `DEMO_PASSWORD` + `ANTHROPIC_API_KEY` | [1]–[10] (complet) |
+
+```powershell
+# Tests sans Anthropic (pre-commit / quotidien)
+$env:DEMO_PASSWORD = "xxx"; node scripts/test-routes.mjs
+
+# Tests complets avec Anthropic (avant démo ou après changement de prompts)
+$env:DEMO_PASSWORD = "xxx"; $env:ANTHROPIC_API_KEY = "sk-ant-..."; node scripts/test-routes.mjs
+```
 
 ---
 

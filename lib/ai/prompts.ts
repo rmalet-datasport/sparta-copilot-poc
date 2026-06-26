@@ -404,6 +404,7 @@ ${FORMAT_INSTRUCTION}`,
 };
 
 import type { BrandExample } from '@/lib/types/brandHistory';
+import type { Race } from '@/lib/constants';
 
 export function buildHistoricalExamplesBlock(examples: BrandExample[]): string {
   if (examples.length === 0) return '';
@@ -441,11 +442,20 @@ export function buildUserPrompt(params: {
     avgEngagement?: number;
   };
   historicalExamples?: BrandExample[];
+  selectedRaces?: Race[];
 }): string {
-  const { channels, customInstructions, segmentDescription, segmentStats, historicalExamples } = params;
+  const { channels, customInstructions, segmentDescription, segmentStats, historicalExamples, selectedRaces } = params;
   const parts: string[] = [];
 
   parts.push(`Génère des assets marketing pour les channels suivants : ${channels.join(', ')}.`);
+
+  if (selectedRaces && selectedRaces.length === 1) {
+    const r = selectedRaces[0];
+    parts.push(`\nObjectif de campagne : promouvoir le ${r.name} ${r.distance}. Tous les messages doivent être centrés sur cet événement spécifiquement.`);
+  } else if (selectedRaces && selectedRaces.length > 1) {
+    const list = selectedRaces.map(r => `${r.name} ${r.distance}`).join(', ');
+    parts.push(`\nObjectif de campagne : promouvoir plusieurs courses — ${list}. Adopte un message ombrelle qui présente ces différentes distances comme un programme cohérent, sans se focaliser sur une seule.`);
+  }
 
   if (segmentDescription) {
     parts.push(`\n${segmentDescription}`);
@@ -471,11 +481,20 @@ export function buildUserPrompt(params: {
   return parts.join('\n');
 }
 
-export function buildRegeneratePrompt(channel: string, customInstructions: string, historicalExamples?: BrandExample[]): string {
+export function buildRegeneratePrompt(channel: string, customInstructions: string, historicalExamples?: BrandExample[], selectedRaces?: Race[]): string {
   const channelExamples = historicalExamples?.filter(e => !e.channel || e.channel === channel) ?? [];
   const exBlock = buildHistoricalExamplesBlock(channelExamples);
 
-  return `Régénère uniquement l'asset pour le channel "${channel}".
+  let raceContext = '';
+  if (selectedRaces && selectedRaces.length === 1) {
+    const r = selectedRaces[0];
+    raceContext = `\nObjectif de campagne : promouvoir le ${r.name} ${r.distance}.`;
+  } else if (selectedRaces && selectedRaces.length > 1) {
+    const list = selectedRaces.map(r => `${r.name} ${r.distance}`).join(', ');
+    raceContext = `\nObjectif de campagne : promouvoir — ${list}.`;
+  }
+
+  return `Régénère uniquement l'asset pour le channel "${channel}".${raceContext}
 Instructions spécifiques : ${customInstructions}
 ${exBlock}
 Garde le même ton et contexte que les autres assets générés.

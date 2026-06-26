@@ -4,6 +4,7 @@ import { useState } from 'react';
 import AssetCard from './AssetCard';
 import { useCampaignHistory } from '@/lib/context/CampaignHistoryContext';
 import { useBrandHistory } from '@/lib/context/BrandHistoryContext';
+import { RACES, type Race } from '@/lib/constants';
 
 interface Asset {
   channel: string;
@@ -59,6 +60,7 @@ export default function CampaignGenerator({ gate, segment, channels, segmentDesc
   const [customInstructions, setCustomInstructions] = useState('');
   const [regenChannel, setRegenChannel] = useState<string | null>(null);
   const [savedChannels, setSavedChannels] = useState<Set<string>>(new Set());
+  const [selectedRaces, setSelectedRaces] = useState<Race[]>([]);
   const { saveAsset } = useCampaignHistory();
   const { getRelevantExamples } = useBrandHistory();
 
@@ -83,6 +85,7 @@ export default function CampaignGenerator({ gate, segment, channels, segmentDesc
           channelToRegenerate: opts?.channelToRegenerate,
           segmentDescription,
           historicalExamples,
+          selectedRaces,
         }),
       });
 
@@ -180,6 +183,69 @@ export default function CampaignGenerator({ gate, segment, channels, segmentDesc
           </div>
         );
       })()}
+
+      {/* Race selector */}
+      {status !== 'generating' && (
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 11, fontWeight: 570, color: 'var(--fg-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+            Promote events
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {(['main', 'satellite'] as const).map(type => (
+              <div key={type}>
+                <div style={{ fontSize: 10, color: 'var(--fg-3)', marginBottom: 4, letterSpacing: '0.04em' }}>
+                  {type === 'main' ? 'Main events' : 'Satellite events'}
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {RACES.filter(r => r.type === type).map(race => {
+                    const checked = selectedRaces.some(r => r.id === race.id);
+                    return (
+                      <button
+                        key={race.id}
+                        onClick={() => setSelectedRaces(prev =>
+                          checked ? prev.filter(r => r.id !== race.id) : [...prev, race]
+                        )}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 6,
+                          padding: '5px 10px',
+                          borderRadius: 'var(--radius-md)',
+                          border: `1.5px solid ${checked ? 'var(--primary)' : 'var(--border-1)'}`,
+                          background: checked ? 'color-mix(in srgb, var(--primary) 8%, var(--bg-1))' : 'var(--bg-1)',
+                          color: checked ? 'var(--primary)' : 'var(--fg-2)',
+                          fontSize: 12,
+                          fontWeight: checked ? 570 : 400,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        <span style={{
+                          width: 14, height: 14, borderRadius: 3,
+                          border: `1.5px solid ${checked ? 'var(--primary)' : 'var(--fg-3)'}`,
+                          background: checked ? 'var(--primary)' : 'transparent',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          flexShrink: 0, transition: 'all 0.15s ease',
+                        }}>
+                          {checked && (
+                            <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
+                              <path d="M1.5 4.5l2 2 4-4" stroke="white" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          )}
+                        </span>
+                        {race.name} <span style={{ opacity: 0.7 }}>{race.distance}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+          {selectedRaces.length > 1 && (
+            <div style={{ marginTop: 8, fontSize: 11, color: 'var(--fg-3)', fontStyle: 'italic' }}>
+              Multi-event selection — campaign will use a broader message covering all selected races.
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Generate button */}
       <button

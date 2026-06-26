@@ -79,6 +79,20 @@ export const KPI = {
   },
 };
 
+export interface Race {
+  id: string;
+  name: string;
+  distance: string;
+  type: 'main' | 'satellite';
+}
+
+export const RACES: Race[] = [
+  { id: 'marathon_42k', name: 'Copenhagen Marathon', distance: '42K', type: 'main' },
+  { id: 'half_marathon_21k', name: 'Copenhagen Half Marathon', distance: '21K', type: 'main' },
+  { id: 'cph_city_run_10k', name: 'CPH City Run', distance: '10K', type: 'satellite' },
+  { id: 'cph_city_run_5k', name: 'CPH City Run', distance: '5K', type: 'satellite' },
+];
+
 export const CHANNELS = ['email', 'sms', 'push', 'instagram', 'offline'] as const;
 export type Channel = typeof CHANNELS[number];
 

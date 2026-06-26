@@ -50,7 +50,7 @@ sparta-copilot/
 │   │   └── BrandHistoryContext.tsx      (exemples historiques + parsing xlsx/csv)
 │   ├── ai/
 │   │   └── prompts.ts                   (system prompts + buildHistoricalExamplesBlock)
-│   └── constants.ts                     (EVENT, SEGMENT_SIZES, KPI, REREGISTRATION_RATES)
+│   └── constants.ts                     (EVENT, SEGMENT_SIZES, KPI, REREGISTRATION_RATES, RACES)
 ├── components/
 │   ├── layout/
 │   │   ├── Sidebar.tsx
@@ -228,6 +228,7 @@ stream: true
 // Paramètres du body :
 segmentDescription?: string    // injecté dans le user prompt pour les segments custom
 historicalExamples?: BrandExample[]  // exemples filtrés par BrandHistoryContext
+selectedRaces?: Race[]         // courses à promouvoir (sélecteur dans CampaignGenerator)
 ```
 
 ### Route parse-segment : NL → filtres
@@ -266,8 +267,8 @@ via `buildSegmentDescription(segment)` dans le user prompt.
 Ne jamais écrire les prompts directement dans les composants.
 
 ### Helpers prompts (`lib/ai/prompts.ts`)
-- `buildUserPrompt(params)` — construit le user prompt ; accepte `historicalExamples?: BrandExample[]`
-- `buildRegeneratePrompt(channel, instructions, historicalExamples?)` — régénération channel seul
+- `buildUserPrompt(params)` — construit le user prompt ; accepte `historicalExamples?: BrandExample[]` et `selectedRaces?: Race[]` (0 = comportement neutre, 1 = message spécifique, 2+ = message ombrelle)
+- `buildRegeneratePrompt(channel, instructions, historicalExamples?, selectedRaces?)` — régénération channel seul, intègre aussi le contexte courses
 - `buildHistoricalExamplesBlock(examples)` — formate les exemples historiques en bloc texte injecté dans le prompt
 
 ### Format de réponse (génération campagne)
@@ -278,6 +279,30 @@ En cas d'erreur de parsing, afficher un message d'erreur propre sans crash.
 ### Streaming
 Activé uniquement pour la génération de campagne (`/api/ai/route.ts`).
 Les routes `parse-segment` et `suggest-segment` ne streament pas.
+
+---
+
+## Sélecteur de courses (cross-sell)
+
+`CampaignGenerator` expose un sélecteur "Promote events" avant le bouton Generate.
+
+### Courses disponibles (`lib/constants.ts` → `RACES`)
+| id | name | distance | type |
+|---|---|---|---|
+| `marathon_42k` | Copenhagen Marathon | 42K | main |
+| `half_marathon_21k` | Copenhagen Half Marathon | 21K | main |
+| `cph_city_run_10k` | CPH City Run | 10K | satellite |
+| `cph_city_run_5k` | CPH City Run | 5K | satellite |
+
+### Comportement
+- Rien coché par défaut — le client choisit ce qu'il veut promouvoir
+- Les courses sont groupées en deux catégories visuelles : Main events / Satellite events
+- Le prompt s'adapte selon la sélection :
+  - **0 courses cochées** : comportement actuel, pas de contexte course spécifique
+  - **1 course cochée** : prompt spécifique à cette course
+  - **2+ courses cochées** : prompt ombrelle, message générique couvrant toutes les courses sélectionnées
+- `selectedRaces` est passé à l'API dans les deux cas (génération + régénération channel seul)
+- Le hint "multi-event = message ombrelle" s'affiche quand 2+ courses sont sélectionnées
 
 ---
 

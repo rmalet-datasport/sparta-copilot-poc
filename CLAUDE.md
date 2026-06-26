@@ -291,6 +291,14 @@ et retourne un fixture `{ assets: [...] }` dans le même format que la vraie ré
 La validation complète s'exécute quand même (gate inconnu → 400, channel invalide → 400).
 Voir `scripts/test-routes.mjs` groupe [9] et `docs/TESTING.md` pour les commandes.
 
+### Pre-commit hook
+`scripts/pre-commit.mjs` tourne automatiquement avant chaque `git commit` :
+1. TypeScript (`npx tsc --noEmit`) — toujours, bloquant
+2. Route health checks (`scripts/test-routes.mjs`) — seulement si `localhost:3000` répond
+
+Installé automatiquement via `prepare` à chaque `npm install`.
+Installer manuellement : `node scripts/setup-hooks.mjs`
+
 ---
 
 ## Sélecteur de courses (cross-sell)

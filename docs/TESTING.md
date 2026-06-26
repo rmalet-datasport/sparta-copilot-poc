@@ -1,4 +1,4 @@
-# TESTING.md — Health checks et tests de routes
+# TESTING.md — Health checks, tests de routes et pre-commit hook
 
 ## Script de test
 
@@ -89,6 +89,60 @@ $env:BASE_URL = "https://sparta-copilot.vercel.app"; $env:DEMO_PASSWORD = "xxx";
 ```
 
 En fin de run : `N checks — X passed / Y failed`. Exit code 1 si au moins un échec.
+
+---
+
+---
+
+## Pre-commit hook
+
+Un hook git s'exécute automatiquement avant chaque `git commit`. Il enchaîne deux étapes :
+
+### Étape 1 — TypeScript (toujours, bloquant)
+```
+npx tsc --noEmit
+```
+Si des erreurs de type sont trouvées → le commit est bloqué. Pas de serveur requis.
+
+### Étape 2 — Route health checks (conditionnel)
+- **Si `localhost:3000` répond** → `node scripts/test-routes.mjs` est lancé. Échec = commit bloqué.
+- **Si le serveur n'est pas démarré** → warning non-bloquant, le commit passe quand même.
+
+Pour avoir les tests auth-dépendants (groupes 5–9) lors des commits, définir `DEMO_PASSWORD`
+dans le profil PowerShell (`$PROFILE`) ou dans une variable d'env de session :
+```powershell
+$env:DEMO_PASSWORD = "votre_mot_de_passe"
+```
+
+### Installation (automatique)
+
+Le hook s'installe automatiquement à chaque `npm install` via le script `prepare` :
+```powershell
+npm install   # installe aussi .git/hooks/pre-commit
+```
+
+Pour l'installer manuellement sans relancer `npm install` :
+```powershell
+node scripts/setup-hooks.mjs
+```
+
+Pour tester le hook sans faire de commit :
+```powershell
+node scripts/pre-commit.mjs
+# ou
+npm run test:precommit
+```
+
+### Fichiers concernés
+
+| Fichier | Rôle |
+|---|---|
+| `scripts/pre-commit.mjs` | Logique du hook (TypeScript + route tests) |
+| `scripts/setup-hooks.mjs` | Installe le hook dans `.git/hooks/pre-commit` |
+| `package.json` → `prepare` | Déclenche `setup-hooks.mjs` à chaque `npm install` |
+
+> **Note CI** : `setup-hooks.mjs` détecte l'absence de `.git/hooks/` (Vercel, GitHub Actions)
+> et se termine silencieusement sans erreur.
 
 ---
 

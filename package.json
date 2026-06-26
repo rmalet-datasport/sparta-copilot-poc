@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:local": "node scripts/test-routes.mjs"
+    "test:local": "node scripts/test-routes.mjs",
+    "test:precommit": "node scripts/pre-commit.mjs",
+    "prepare": "node scripts/setup-hooks.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0",

@@ -1,0 +1,20 @@
+[extend]
+useDefault = true
+
+[[rules]]
+id = "datasport-api-key"
+description = "DataSport API Key"
+regex = '''ds_(?:live|test)_[a-zA-Z0-9]{32}'''
+tags = ["datasport"]
+
+[[rules]]
+id = "generic-high-entropy"
+description = "High entropy string in env/config files"
+regex = '''(?i)(?:password|secret|token|key|api_key)\s*[:=]\s*['"]?[a-zA-Z0-9/+]{20,}['"]?'''
+tags = ["generic"]
+
+[[rules]]
+id = "generic-high-entropy-inline"
+description = "High entropy string embedded in code or JSX (e.g. hardcoded in component)"
+regex = '''(?i)(?:password|secret|token|key)[_a-z0-9]*\s*=\s*[a-zA-Z0-9/+]{20,}'''
+tags = ["generic"]

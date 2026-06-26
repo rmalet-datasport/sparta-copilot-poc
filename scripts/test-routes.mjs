@@ -156,7 +156,7 @@ if (!cookie) {
     check('channelToRegenerate: 1 asset', json?.assets?.length === 1, `got ${json?.assets?.length}`)
   }
 
-  // All 4 channels in one call
+  // All 4 original channels in one call
   const allCh = await r('/api/ai', { cookie, body: { gate: 'gate2', segment: 'waitlist_hot', channels: ['email', 'sms', 'push', 'instagram'], _dryRun: true } })
   check('4 channels dry-run → 200', allCh.status === 200, `status=${allCh.status}`)
   if (allCh.status === 200) {
@@ -164,6 +164,28 @@ if (!cookie) {
     check('4 channels: 4 assets', json?.assets?.length === 4, `got ${json?.assets?.length}`)
     const channels = json?.assets?.map(a => a.channel).sort().join(',')
     check('4 channels: correct channel names', channels === 'email,instagram,push,sms', `got ${channels}`)
+  }
+
+  // LinkedIn + Facebook channels
+  const socialCh = await r('/api/ai', { cookie, body: { gate: 'gate0', segment: 'external_prospects', channels: ['linkedin', 'facebook'], _dryRun: true } })
+  check('linkedin+facebook dry-run → 200', socialCh.status === 200, `status=${socialCh.status}`)
+  if (socialCh.status === 200) {
+    const json = JSON.parse(await socialCh.text())
+    check('linkedin+facebook: 2 assets', json?.assets?.length === 2, `got ${json?.assets?.length}`)
+    const liAsset = json?.assets?.find(a => a.channel === 'linkedin')
+    const fbAsset = json?.assets?.find(a => a.channel === 'facebook')
+    check('linkedin asset has title', liAsset?.title !== undefined, JSON.stringify(liAsset ?? {}).slice(0, 80))
+    check('facebook asset has title', fbAsset?.title !== undefined, JSON.stringify(fbAsset ?? {}).slice(0, 80))
+  }
+
+  // All 6 valid channels in one call
+  const allSix = await r('/api/ai', { cookie, body: { gate: 'gate0', segment: 'international_targets', channels: ['email', 'sms', 'push', 'instagram', 'linkedin', 'facebook'], _dryRun: true } })
+  check('6 channels dry-run → 200', allSix.status === 200, `status=${allSix.status}`)
+  if (allSix.status === 200) {
+    const json = JSON.parse(await allSix.text())
+    check('6 channels: 6 assets', json?.assets?.length === 6, `got ${json?.assets?.length}`)
+    const channels = json?.assets?.map(a => a.channel).sort().join(',')
+    check('6 channels: correct channel names', channels === 'email,facebook,instagram,linkedin,push,sms', `got ${channels}`)
   }
 }
 

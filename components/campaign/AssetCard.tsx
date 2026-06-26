@@ -29,6 +29,8 @@ const CHANNEL_COLORS: Record<string, { color: string; bg: string }> = {
   sms:       { color: '#16A34A', bg: '#F0FDF4' },
   push:      { color: '#7C3AED', bg: '#F5F3FF' },
   instagram: { color: '#EA580C', bg: '#FFF7ED' },
+  linkedin:  { color: '#0077B5', bg: '#E8F4FB' },
+  facebook:  { color: '#1877F2', bg: '#EBF3FF' },
   partner:   { color: '#0E7490', bg: '#ECFEFF' },
 };
 
@@ -59,6 +61,20 @@ const CHANNEL_ICONS: Record<string, React.ReactNode> = {
       <circle cx="10.2" cy="3.8" r="0.8" fill="currentColor"/>
     </svg>
   ),
+  linkedin: (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" strokeWidth="1.3"/>
+      <path d="M4 6v4.5M4 4.5v.01" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+      <path d="M7 10.5V8c0-1.1.9-2 2-2s2 .9 2 2v2.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+      <path d="M7 6v4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+    </svg>
+  ),
+  facebook: (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" strokeWidth="1.3"/>
+      <path d="M8.5 4.5H7.5C6.67 4.5 6 5.17 6 6v.5H5V8h1v4h2V8h1.5L9.8 6.5H8V6c0-.28.22-.5.5-.5h1V4.5z" fill="currentColor"/>
+    </svg>
+  ),
   partner: (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
       <rect x="1.5" y="1.5" width="4" height="4" rx="0.5" stroke="currentColor" strokeWidth="1.2"/>
@@ -72,15 +88,25 @@ const CHANNEL_ICONS: Record<string, React.ReactNode> = {
   ),
 };
 
-const IMAGE_CHANNELS = ['email', 'instagram'];
+const IMAGE_CHANNELS = ['email', 'instagram', 'linkedin', 'facebook'];
 
 const IMAGE_SPECS: Record<string, { dims: string; ratio: string }> = {
   email:     { dims: '600×300 px', ratio: 'Email banner' },
   instagram: { dims: '1080×1080 px', ratio: 'Square · 1080×1920 px for stories' },
+  linkedin:  { dims: '1200×628 px', ratio: 'Landscape feed' },
+  facebook:  { dims: '1200×630 px', ratio: 'Landscape · 1080×1920 px for stories' },
 };
 
-function InstagramStoryPreview({ caption, hashtags, imageUrl }: { caption?: string; hashtags?: string; imageUrl?: string | null }) {
+function SocialStoryPreview({ caption, hashtags, imageUrl, platform }: { caption?: string; hashtags?: string; imageUrl?: string | null; platform: 'instagram' | 'facebook' }) {
   const hasImage = !!imageUrl;
+  const gradients = {
+    instagram: 'linear-gradient(160deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)',
+    facebook:  'linear-gradient(160deg, #1877F2 0%, #0a5fc4 60%, #0d47a1 100%)',
+  };
+  const handles = {
+    instagram: 'copenhagen_marathon',
+    facebook: 'CopenhagenMarathon',
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 0 8px' }}>
@@ -91,7 +117,7 @@ function InstagramStoryPreview({ caption, hashtags, imageUrl }: { caption?: stri
         borderRadius: 28,
         overflow: 'hidden',
         position: 'relative',
-        background: hasImage ? '#000' : 'linear-gradient(160deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)',
+        background: hasImage ? '#000' : gradients[platform],
         boxShadow: '0 12px 40px rgba(0,0,0,0.35), 0 0 0 2px rgba(255,255,255,0.08)',
         flexShrink: 0,
       }}>
@@ -146,7 +172,7 @@ function InstagramStoryPreview({ caption, hashtags, imageUrl }: { caption?: stri
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 9, fontWeight: 600, color: 'white', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              copenhagen_marathon
+              {handles[platform]}
             </div>
             <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.7)', lineHeight: 1.2 }}>
               Now
@@ -232,9 +258,68 @@ function InstagramStoryPreview({ caption, hashtags, imageUrl }: { caption?: stri
   );
 }
 
+function SocialFeedPreview({ title, body, hashtags, imageUrl, platform }: {
+  title?: string; body?: string; hashtags?: string; imageUrl?: string | null;
+  platform: 'linkedin' | 'facebook';
+}) {
+  const cfg = platform === 'linkedin'
+    ? { color: '#0077B5', bg: '#E8F4FB', gradient: 'linear-gradient(135deg, #0077B5, #00a0dc)', name: 'Copenhagen Marathon', subtitle: 'Official Event Page · Promoted', avatarRadius: 4, reactions: ['👍 Like', '💬 Comment', '🔄 Repost', '➤ Send'], dims: '1200×628 px', aspect: '1200/628', bgPage: '#F3F2EF' }
+    : { color: '#1877F2', bg: '#EBF3FF', gradient: 'linear-gradient(135deg, #1877F2, #42a5f5)', name: 'Copenhagen Marathon', subtitle: 'Just now · 🌐', avatarRadius: 50, reactions: ['👍 Like', '💬 Comment', '↗ Share'], dims: '1200×630 px', aspect: '1200/630', bgPage: '#F0F2F5' };
+
+  return (
+    <div style={{ padding: '16px 16px 8px', background: cfg.bgPage, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div style={{ width: '100%', maxWidth: 440, background: 'white', borderRadius: 8, boxShadow: '0 0 0 1px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+        {/* Profile header */}
+        <div style={{ padding: '12px 12px 8px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+          <div style={{ width: 40, height: 40, borderRadius: cfg.avatarRadius, background: cfg.gradient, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M9 10.5l4.5-5.5H4.5L9 10.5z" fill="white"/>
+            </svg>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', lineHeight: 1.3 }}>{cfg.name}</div>
+            <div style={{ fontSize: 11, color: '#666', lineHeight: 1.4 }}>{cfg.subtitle}</div>
+          </div>
+          {platform === 'linkedin' && (
+            <span style={{ fontSize: 12, color: cfg.color, fontWeight: 600, border: `1px solid ${cfg.color}`, borderRadius: 20, padding: '3px 10px', flexShrink: 0 }}>+ Follow</span>
+          )}
+        </div>
+        {/* Text */}
+        <div style={{ padding: '0 12px 10px' }}>
+          {title && <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', lineHeight: 1.5, marginBottom: 4 }}>{title}</div>}
+          {body && (
+            <div style={{ fontSize: 12, color: '#333', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+              {body}
+            </div>
+          )}
+          {hashtags && <div style={{ fontSize: 12, color: cfg.color, marginTop: 4, lineHeight: 1.5 }}>{hashtags}</div>}
+        </div>
+        {/* Image */}
+        {imageUrl ? (
+          <img src={imageUrl} alt="" style={{ width: '100%', aspectRatio: cfg.aspect, objectFit: 'cover', display: 'block' }} />
+        ) : (
+          <div style={{ width: '100%', aspectRatio: cfg.aspect, background: `linear-gradient(135deg, ${cfg.bg}, ${cfg.color}22)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: 11, color: cfg.color, opacity: 0.7 }}>{cfg.dims}</span>
+          </div>
+        )}
+        {/* Reactions */}
+        <div style={{ padding: '2px 12px 8px', borderTop: '1px solid #e8e8e8', display: 'flex' }}>
+          {cfg.reactions.map((r, i) => (
+            <div key={i} style={{ flex: 1, padding: '7px 2px', fontSize: 11, color: '#666', textAlign: 'center', fontWeight: 500 }}>{r}</div>
+          ))}
+        </div>
+      </div>
+      <div style={{ marginTop: 8, fontSize: 10, color: 'var(--fg-3)' }}>
+        Feed Preview · {cfg.dims}
+      </div>
+    </div>
+  );
+}
+
 export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave, isSaved, savedImageUrl }: AssetCardProps) {
   const [showRegen, setShowRegen] = useState(false);
   const [showStoryPreview, setShowStoryPreview] = useState(false);
+  const [showFeedPreview, setShowFeedPreview] = useState(false);
   const [instructions, setInstructions] = useState('');
   const [localImageUrl, setLocalImageUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -257,6 +342,8 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
   const style = CHANNEL_COLORS[asset.channel] ?? { color: '#6B7280', bg: '#F9FAFB' };
   const needsImage = IMAGE_CHANNELS.includes(asset.channel);
   const isInstagram = asset.channel === 'instagram';
+  const isFacebook = asset.channel === 'facebook';
+  const isLinkedIn = asset.channel === 'linkedin';
   const isOffline = asset.channel === 'partner';
   const displayImage = localImageUrl ?? savedImageUrl ?? null;
 
@@ -296,10 +383,31 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
           <span style={{ fontSize: 12, fontWeight: 570, textTransform: 'capitalize' }}>{asset.channel}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {/* Story preview toggle — instagram only */}
-          {isInstagram && (
+          {/* Feed preview toggle — linkedin & facebook */}
+          {(isLinkedIn || isFacebook) && (
             <button
-              onClick={() => setShowStoryPreview(!showStoryPreview)}
+              onClick={() => { setShowFeedPreview(!showFeedPreview); setShowStoryPreview(false); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                padding: '3px 9px', borderRadius: 'var(--radius-md)',
+                border: `1px solid ${showFeedPreview ? style.color : 'var(--border-1)'}`,
+                background: showFeedPreview ? style.bg : 'var(--bg-1)',
+                color: showFeedPreview ? style.color : 'var(--fg-2)',
+                fontSize: 11, cursor: 'pointer', transition: 'all 0.15s ease',
+              }}
+            >
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <rect x="0.5" y="0.5" width="9" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.1"/>
+                <rect x="2" y="2" width="6" height="3" rx="0.5" fill="currentColor" opacity="0.25"/>
+                <path d="M2 7h4M2 8.5h2.5" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round"/>
+              </svg>
+              Feed Preview
+            </button>
+          )}
+          {/* Story preview toggle — instagram & facebook */}
+          {(isInstagram || isFacebook) && (
+            <button
+              onClick={() => { setShowStoryPreview(!showStoryPreview); setShowFeedPreview(false); }}
               style={{
                 display: 'flex', alignItems: 'center', gap: 4,
                 padding: '3px 9px', borderRadius: 'var(--radius-md)',
@@ -360,12 +468,26 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
       </div>
 
       {/* Story preview */}
-      {showStoryPreview && isInstagram && (
+      {showStoryPreview && (isInstagram || isFacebook) && (
         <div style={{ borderBottom: '1px solid var(--border-1)', background: '#0a0a0a' }}>
-          <InstagramStoryPreview
+          <SocialStoryPreview
             caption={editedAsset.caption ?? editedAsset.body}
             hashtags={editedAsset.hashtags}
             imageUrl={displayImage}
+            platform={isFacebook ? 'facebook' : 'instagram'}
+          />
+        </div>
+      )}
+
+      {/* Feed preview */}
+      {showFeedPreview && (isLinkedIn || isFacebook) && (
+        <div style={{ borderBottom: '1px solid var(--border-1)' }}>
+          <SocialFeedPreview
+            title={editedAsset.title}
+            body={editedAsset.body}
+            hashtags={editedAsset.hashtags}
+            imageUrl={displayImage}
+            platform={isLinkedIn ? 'linkedin' : 'facebook'}
           />
         </div>
       )}
@@ -494,8 +616,8 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
         </div>
       )}
 
-      {/* Content — hidden when story preview is active, not shown for partner */}
-      {!showStoryPreview && !isOffline && (
+      {/* Content — hidden when a preview is active, not shown for partner */}
+      {!showStoryPreview && !showFeedPreview && !isOffline && (
         <div style={{ padding: '14px 16px' }}>
           <style>{`
             .sparta-editable-line {
@@ -617,7 +739,7 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
 
             {displayImage ? (
               <div>
-                {!showStoryPreview && (
+                {!showStoryPreview && !showFeedPreview && (
                   <img
                     src={displayImage}
                     alt="Visual"
@@ -629,8 +751,13 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
                     Visual applied to the story above ↑
                   </div>
                 )}
+                {showFeedPreview && (
+                  <div style={{ fontSize: 11, color: 'var(--fg-3)', padding: '2px 0 6px', fontStyle: 'italic' }}>
+                    Visual applied to the feed preview above ↑
+                  </div>
+                )}
                 {onSave && (
-                  <div style={{ display: 'flex', gap: 8, marginTop: showStoryPreview ? 0 : 8 }}>
+                  <div style={{ display: 'flex', gap: 8, marginTop: (showStoryPreview || showFeedPreview) ? 0 : 8 }}>
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       style={{ flex: 1, padding: '5px 0', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-1)', background: 'var(--bg-1)', color: 'var(--fg-2)', fontSize: 11, cursor: 'pointer' }}

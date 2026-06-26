@@ -42,6 +42,20 @@ Expected format (generate only the requested channels):
       "meta": "..."
     },
     {
+      "channel": "linkedin",
+      "title": "Headline (max 150 chars, professional tone, hook for the feed)",
+      "body": "Post body (max 1300 chars). Professional and inspiring. Corporate wellness angle, team challenge, personal achievement. No excessive emojis.",
+      "hashtags": "#Copenhagen #Marathon #Running #CorporateWellness (3-5 relevant hashtags)",
+      "meta": "..."
+    },
+    {
+      "channel": "facebook",
+      "title": "Hook sentence (max 100 chars, conversational, community-oriented)",
+      "body": "Post body (max 500 chars). Warm, community feel, FOMO, social proof, emojis welcome.",
+      "hashtags": "#CopenhagenMarathon #Running (2-4 hashtags)",
+      "meta": "..."
+    },
+    {
       "channel": "partner",
       "title": "Campaign name (3-6 words, readable on a flyer)",
       "caption": "Punchy flyer tagline (max 8 words)",

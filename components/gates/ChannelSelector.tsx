@@ -36,6 +36,20 @@ const CHANNEL_ICONS: Record<Channel, React.ReactNode> = {
       <circle cx="10.2" cy="3.8" r="0.8" fill="currentColor"/>
     </svg>
   ),
+  linkedin: (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" strokeWidth="1.3"/>
+      <path d="M4 6v4.5M4 4.5v.01" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+      <path d="M7 10.5V8c0-1.1.9-2 2-2s2 .9 2 2v2.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+      <path d="M7 6v4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+    </svg>
+  ),
+  facebook: (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" strokeWidth="1.3"/>
+      <path d="M8.5 4.5H7.5C6.67 4.5 6 5.17 6 6v.5H5V8h1v4h2V8h1.5L9.8 6.5H8V6c0-.28.22-.5.5-.5h1V4.5z" fill="currentColor"/>
+    </svg>
+  ),
   partner: (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
       <rect x="1.5" y="1.5" width="4" height="4" rx="0.5" stroke="currentColor" strokeWidth="1.2"/>
@@ -50,7 +64,7 @@ const CHANNEL_ICONS: Record<Channel, React.ReactNode> = {
 };
 
 const CHANNEL_LABELS: Record<Channel, string> = {
-  email: 'Email', sms: 'SMS', push: 'Push', instagram: 'Instagram', partner: 'Partner',
+  email: 'Email', sms: 'SMS', push: 'Push', instagram: 'Instagram', linkedin: 'LinkedIn', facebook: 'Facebook', partner: 'Partner',
 };
 
 export default function ChannelSelector({ available, selected, onChange, rationale }: ChannelSelectorProps) {
@@ -62,7 +76,7 @@ export default function ChannelSelector({ available, selected, onChange, rationa
     }
   };
 
-  const ALL_CHANNELS: Channel[] = ['email', 'sms', 'push', 'instagram', 'partner'];
+  const ALL_CHANNELS: Channel[] = ['email', 'sms', 'push', 'instagram', 'linkedin', 'facebook', 'partner'];
 
   return (
     <div>

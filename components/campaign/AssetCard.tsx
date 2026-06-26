@@ -376,7 +376,7 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
           {/* Campaign title + tagline */}
           {editedAsset.title !== undefined && (
             <div style={{ marginBottom: 10 }}>
-              <div style={{ fontSize: 10, color: 'var(--fg-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Nom de campagne</div>
+              <div style={{ fontSize: 10, color: 'var(--fg-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Campaign name</div>
               <input
                 className="sparta-editable-line"
                 value={editedAsset.title ?? ''}
@@ -387,7 +387,7 @@ export default function AssetCard({ asset, onRegenerate, isRegenerating, onSave,
           )}
           {editedAsset.caption !== undefined && (
             <div style={{ marginBottom: 14, padding: '8px 12px', background: style.bg, borderRadius: 'var(--radius-md)', border: `1px solid ${style.color}22` }}>
-              <div style={{ fontSize: 10, color: style.color, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Tagline flyer</div>
+              <div style={{ fontSize: 10, color: style.color, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Flyer tagline</div>
               <input
                 className="sparta-editable-line"
                 value={editedAsset.caption ?? ''}

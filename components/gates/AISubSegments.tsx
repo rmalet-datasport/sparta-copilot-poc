@@ -85,8 +85,8 @@ export default function AISubSegments({
   }
 
   const contextLine = isFullPool
-    ? `Pool complet Â· ${parentScaledSize.toLocaleString('en-US')} athletes`
-    : `${parentLabel} Â· ${parentScaledSize.toLocaleString('en-US')} athletes`
+    ? `Full pool · ${parentScaledSize.toLocaleString('en-US')} athletes`
+    : `${parentLabel} · ${parentScaledSize.toLocaleString('en-US')} athletes`
 
   return (
     <div style={{
@@ -102,23 +102,23 @@ export default function AISubSegments({
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
             </svg>
-            <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-1)' }}>Analyse IA</span>
+            <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-1)' }}>AI Analysis</span>
           </div>
           {status === 'done' && (
             <button
               onClick={analyze}
-              title="Re-analyser"
+              title="Re-analyze"
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-3)', padding: '2px 4px', fontSize: 11, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 3 }}
             >
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-              Relancer
+              Re-run
             </button>
           )}
         </div>
         <p style={{ margin: 0, fontSize: 11, color: 'var(--fg-3)' }}>{contextLine}</p>
       </div>
 
-      {/* Idle state â€” prominent CTA */}
+      {/* Idle state — prominent CTA */}
       {status === 'idle' && (
         <div style={{ padding: '12px 14px 14px' }}>
           <button
@@ -146,13 +146,13 @@ export default function AISubSegments({
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
             </svg>
-            DÃ©couvrir des sous-segments
+            Discover sub-segments
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
           </button>
           <p style={{ margin: '8px 0 0', fontSize: 11, color: 'var(--fg-3)', textAlign: 'center', lineHeight: 1.5 }}>
-            L&apos;IA analyse les patterns de cette population et identifie des sous-groupes actionnables
+            AI analyses patterns in this population and identifies actionable sub-groups
           </p>
         </div>
       )}
@@ -164,7 +164,7 @@ export default function AISubSegments({
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }}>
               <path d="M21 12a9 9 0 1 1-6.219-8.56" />
             </svg>
-            <span style={{ fontSize: 12, color: 'var(--fg-2)' }}>Analyse en coursâ€¦</span>
+            <span style={{ fontSize: 12, color: 'var(--fg-2)' }}>Analysis in progress…</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {[1, 2, 3].map(i => (
@@ -182,12 +182,12 @@ export default function AISubSegments({
       {/* Error */}
       {status === 'error' && (
         <div style={{ padding: '12px 14px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 12, color: 'var(--fg-3)' }}>Analyse Ã©chouÃ©e</span>
+          <span style={{ fontSize: 12, color: 'var(--fg-3)' }}>Analysis failed</span>
           <button
             onClick={analyze}
             style={{ fontSize: 12, color: 'var(--primary)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 570 }}
           >
-            RÃ©essayer â†’
+            Retry →
           </button>
         </div>
       )}
@@ -222,7 +222,7 @@ export default function AISubSegments({
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 4 }}>
                     <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-1)' }}>{seg.name}</span>
                     <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: isSelected ? seg.color : 'var(--fg-2)', flexShrink: 0 }}>
-                      ~{count.toLocaleString('fr-FR')}
+                      ~{count.toLocaleString('en-US')}
                     </span>
                   </div>
                   <p style={{ fontSize: 11, color: 'var(--fg-3)', margin: '2px 0 0', lineHeight: 1.4 }}>

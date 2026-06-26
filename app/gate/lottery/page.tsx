@@ -17,34 +17,34 @@ import { buildSegmentDescription, FILTER_FIELD_LABELS, FILTER_VALUE_OPTIONS } fr
 const SEGMENTS = [
   {
     id: 'confirmed_engaged',
-    label: 'Confirmed â€” Engaged',
+    label: 'Confirmed — Engaged',
     color: '#16A34A',
     colorBg: '#F0FDF4',
     description: 'Selected + engagement score > 60. Ready to buy upsells.',
     objective: 'Celebrate, upsell, countdown to race day.',
-    rationale: { email: 'Confirmation + upsell showcase.', push: 'Countdown & training tips â€” they are active users.' } as Partial<Record<Channel, string>>,
+    rationale: { email: 'Confirmation + upsell showcase.', push: 'Countdown & training tips — they are active users.' } as Partial<Record<Channel, string>>,
   },
   {
     id: 'confirmed_passive',
-    label: 'Confirmed â€” Passive',
+    label: 'Confirmed — Passive',
     color: '#CA8A04',
     colorBg: '#FEFCE8',
     description: 'Selected but low engagement. Risk of DNS.',
     objective: 'Reignite excitement before it fades.',
-    rationale: { email: 'Emotional storytelling.', sms: 'Upsell deadline reminder â€” creates urgency.' } as Partial<Record<Channel, string>>,
+    rationale: { email: 'Emotional storytelling.', sms: 'Upsell deadline reminder — creates urgency.' } as Partial<Record<Channel, string>>,
   },
   {
     id: 'waitlist_hot',
-    label: 'Waitlist â€” Hot',
+    label: 'Waitlist — Hot',
     color: '#EA580C',
     colorBg: '#FFF7ED',
-    description: 'Waitlist position â‰¤ 200. Real chance of being called up.',
+    description: 'Waitlist position ≤ 200. Real chance of being called up.',
     objective: 'Keep hope alive, prepare them to move fast.',
     rationale: { email: 'Regular updates on spots.', sms: 'Instant alert if a spot opens.' } as Partial<Record<Channel, string>>,
   },
   {
     id: 'waitlist_cold',
-    label: 'Waitlist â€” Cold',
+    label: 'Waitlist — Cold',
     color: '#6B7280',
     colorBg: '#F9FAFB',
     description: 'Waitlist position > 200. Unlikely to race in 2026.',
@@ -53,7 +53,7 @@ const SEGMENTS = [
   },
   {
     id: 'refused_reactivatable',
-    label: 'Refused â€” Reactivatable',
+    label: 'Refused — Reactivatable',
     color: '#DC2626',
     colorBg: '#FEF2F2',
     description: 'Refused but returning athlete. Long-term value is high.',
@@ -62,7 +62,7 @@ const SEGMENTS = [
   },
   {
     id: 'refused_lost',
-    label: 'Refused â€” Lost',
+    label: 'Refused — Lost',
     color: '#374151',
     colorBg: '#F1F5F9',
     description: 'First-time applicant, refused. Fragile relationship.',
@@ -90,10 +90,10 @@ export default function LotteryPage() {
 
   const aiParentInfo = useMemo(() => {
     if (aiParentId === '__full_pool__') {
-      return { label: 'Tous les athletes (post-loterie)', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
+      return { label: 'All athletes (post-lottery)', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
     }
     const seg = SEGMENTS.find(s => s.id === aiParentId);
-    if (!seg) return { label: 'Tous les athletes', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
+    if (!seg) return { label: 'All athletes', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
     return {
       label: seg.label,
       scaledSize: sizes[seg.id as keyof typeof sizes] ?? 0,
@@ -323,7 +323,7 @@ export default function LotteryPage() {
                           {selectedCustom.filters.map(f => {
                             const val = FILTER_VALUE_OPTIONS[f.field]?.find(o => o.value === f.value)?.label ?? f.value;
                             return `${FILTER_FIELD_LABELS[f.field]}: ${val}`;
-                          }).join(' Â· ')}
+                          }).join(' · ')}
                         </span>
                       )}
                     </>

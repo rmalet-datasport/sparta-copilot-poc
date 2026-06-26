@@ -19,13 +19,13 @@ const GATE_TOTAL = KPI.gate1.totalApplications;
 const GATE1_SEGMENTS = [
   {
     id: 'returning_marathon',
-    label: 'Returning â€” Marathon',
+    label: 'Returning — Marathon',
     color: '#16A34A',
     colorBg: '#F0FDF4',
     description: 'Athletes who participated in a previous edition, now targeting the full 42K.',
     objective: 'Reward loyalty. Reference their past race. Strong emotional hook.',
     channels: ['email', 'push'] as Channel[],
-    rationale: { email: 'Personalized message referencing past editions.', push: 'Countdown + training tips â€” active users.' } as Partial<Record<Channel, string>>,
+    rationale: { email: 'Personalized message referencing past editions.', push: 'Countdown + training tips — active users.' } as Partial<Record<Channel, string>>,
     filters: [
       { id: 'f1', field: 'isReturningAthlete', value: 'true' },
       { id: 'f2', field: 'distance', value: 'Marathon 42K' },
@@ -33,13 +33,13 @@ const GATE1_SEGMENTS = [
   },
   {
     id: 'returning_half',
-    label: 'Returning â€” Half Marathon',
+    label: 'Returning — Half Marathon',
     color: '#2563EB',
     colorBg: '#EFF6FF',
     description: 'Returning athletes applying for the half marathon distance.',
     objective: 'Acknowledge their experience. Offer upgrade path to 42K.',
     channels: ['email', 'sms'] as Channel[],
-    rationale: { email: 'Community angle â€” reference their journey.', sms: 'Early bird urgency.' } as Partial<Record<Channel, string>>,
+    rationale: { email: 'Community angle — reference their journey.', sms: 'Early bird urgency.' } as Partial<Record<Channel, string>>,
     filters: [
       { id: 'f1', field: 'isReturningAthlete', value: 'true' },
       { id: 'f2', field: 'distance', value: 'Half Marathon 21K' },
@@ -47,7 +47,7 @@ const GATE1_SEGMENTS = [
   },
   {
     id: 'new_marathon',
-    label: 'First-Time â€” Marathon',
+    label: 'First-Time — Marathon',
     color: '#EA580C',
     colorBg: '#FFF7ED',
     description: 'First-time applicants aiming for the full marathon. High ambition, higher dropout risk.',
@@ -61,7 +61,7 @@ const GATE1_SEGMENTS = [
   },
   {
     id: 'new_half',
-    label: 'First-Time â€” Half Marathon',
+    label: 'First-Time — Half Marathon',
     color: '#7C3AED',
     colorBg: '#F5F3FF',
     description: 'New applicants for the half marathon. Easier entry point, high acquisition potential.',
@@ -105,10 +105,10 @@ export default function RegistrationPage() {
 
   const aiParentInfo = useMemo(() => {
     if (aiParentId === '__full_pool__') {
-      return { label: 'Tous les athletes (prÃ©-loterie)', scaledSize: GATE_TOTAL, athleteIds: [] as string[], filters: undefined as FilterCondition[] | undefined };
+      return { label: 'All athletes (pre-lottery)', scaledSize: GATE_TOTAL, athleteIds: [] as string[], filters: undefined as FilterCondition[] | undefined };
     }
     const seg = GATE1_SEGMENTS.find(s => s.id === aiParentId);
-    if (!seg) return { label: 'Tous les athletes', scaledSize: GATE_TOTAL, athleteIds: [] as string[], filters: undefined as FilterCondition[] | undefined };
+    if (!seg) return { label: 'All athletes', scaledSize: GATE_TOTAL, athleteIds: [] as string[], filters: undefined as FilterCondition[] | undefined };
     return {
       label: seg.label,
       scaledSize: segmentSizes[seg.id] ?? 0,

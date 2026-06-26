@@ -22,7 +22,7 @@ const SEGMENTS = [
     colorBg: '#F0FDF4',
     description: 'Finisher with reRegistrationProbability > 0.7. Prime early-bird targets.',
     objective: 'Capitalize on post-race high. Convert to 2027 early bird.',
-    rationale: { email: 'Celebration + early bird.', push: 'Badge unlock â€” emotional momentum.' } as Partial<Record<Channel, string>>,
+    rationale: { email: 'Celebration + early bird.', push: 'Badge unlock — emotional momentum.' } as Partial<Record<Channel, string>>,
   },
   {
     id: 'champion_ambassador',
@@ -31,14 +31,14 @@ const SEGMENTS = [
     colorBg: '#FFF0F2',
     description: 'Finisher + personal best + engagement > 75. Natural brand amplifiers.',
     objective: 'Invite into ambassador program. Activate their social reach.',
-    rationale: { email: 'Exclusive ambassador invitation.', instagram: 'Feature them â€” they have followers.' } as Partial<Record<Channel, string>>,
+    rationale: { email: 'Exclusive ambassador invitation.', instagram: 'Feature them — they have followers.' } as Partial<Record<Channel, string>>,
   },
   {
     id: 'at_risk_returner',
     label: 'At Risk Returner',
     color: '#EA580C',
     colorBg: '#FFF7ED',
-    description: 'Finisher with reRegistrationProbability â‰¤ 0.4. At risk of not returning.',
+    description: 'Finisher with reRegistrationProbability ≤ 0.4. At risk of not returning.',
     objective: 'Create urgency before the emotional window closes.',
     rationale: { email: '"Come back" storytelling.', sms: 'Early bird offer with deadline.' } as Partial<Record<Channel, string>>,
   },
@@ -47,13 +47,13 @@ const SEGMENTS = [
     label: 'DNS',
     color: '#6B7280',
     colorBg: '#F9FAFB',
-    description: 'Did not start. Reason unknown â€” injury, life event, or dropout.',
+    description: 'Did not start. Reason unknown — injury, life event, or dropout.',
     objective: 'Gentle, empathetic touch. No pressure.',
     rationale: { email: 'Very soft message. Respect the distance.' } as Partial<Record<Channel, string>>,
   },
   {
     id: 'reconquest_dnf',
-    label: 'DNF â€” Reconquest',
+    label: 'DNF — Reconquest',
     color: '#CA8A04',
     colorBg: '#FEFCE8',
     description: 'Did not finish. The abandonment is a powerful emotional lever.',
@@ -81,10 +81,10 @@ export default function FinishPage() {
 
   const aiParentInfo = useMemo(() => {
     if (aiParentId === '__full_pool__') {
-      return { label: 'Tous les athletes (post-course)', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
+      return { label: 'All athletes (post-race)', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
     }
     const seg = SEGMENTS.find(s => s.id === aiParentId);
-    if (!seg) return { label: 'Tous les athletes', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
+    if (!seg) return { label: 'All athletes', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
     return {
       label: seg.label,
       scaledSize: sizes[seg.id as keyof typeof sizes] ?? 0,
@@ -333,7 +333,7 @@ export default function FinishPage() {
                           {selectedCustom.filters.map(f => {
                             const val = FILTER_VALUE_OPTIONS[f.field]?.find(o => o.value === f.value)?.label ?? f.value;
                             return `${FILTER_FIELD_LABELS[f.field]}: ${val}`;
-                          }).join(' Â· ')}
+                          }).join(' · ')}
                         </span>
                       )}
                     </>

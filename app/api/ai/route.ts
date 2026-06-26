@@ -8,7 +8,7 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-const VALID_CHANNELS = new Set(['email', 'sms', 'push', 'instagram', 'linkedin', 'facebook'])
+const VALID_CHANNELS = new Set(['email', 'sms', 'push', 'instagram', 'linkedin', 'facebook', 'partner'])
 
 function buildDryRunAsset(channel: string) {
   switch (channel) {
@@ -18,6 +18,7 @@ function buildDryRunAsset(channel: string) {
     case 'instagram': return { channel, caption: '[DRY RUN] Test caption', hashtags: '#test #dryrun', meta: 'dry-run fixture' }
     case 'linkedin':  return { channel, title: '[DRY RUN] LinkedIn headline', body: '[DRY RUN] LinkedIn post body', hashtags: '#test #dryrun', meta: 'dry-run fixture' }
     case 'facebook':  return { channel, title: '[DRY RUN] Facebook hook', body: '[DRY RUN] Facebook post body', hashtags: '#test #dryrun', meta: 'dry-run fixture' }
+    case 'partner':   return { channel, title: '[DRY RUN] Campaign name', caption: '[DRY RUN] Flyer tagline', body: '[DRY RUN] Ambassador briefing', utmCampaign: 'dryrun_campaign', distributionPoints: 'Running store A, Gym B, Parkrun C', meta: 'dry-run fixture' }
     default:          return { channel, body: '[DRY RUN]', meta: 'dry-run fixture' }
   }
 }

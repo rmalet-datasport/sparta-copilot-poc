@@ -166,6 +166,15 @@ if (!cookie) {
     check('4 channels: correct channel names', channels === 'email,instagram,push,sms', `got ${channels}`)
   }
 
+  // Partner channel
+  const partnerCh = await r('/api/ai', { cookie, body: { gate: 'gate3', segment: 'champion_ambassador', channels: ['partner'], _dryRun: true } })
+  check('partner dry-run → 200', partnerCh.status === 200, `status=${partnerCh.status}`)
+  if (partnerCh.status === 200) {
+    const json = JSON.parse(await partnerCh.text())
+    const pAsset = json?.assets?.[0]
+    check('partner asset has utmCampaign', pAsset?.utmCampaign !== undefined, JSON.stringify(pAsset ?? {}).slice(0, 80))
+  }
+
   // LinkedIn + Facebook channels
   const socialCh = await r('/api/ai', { cookie, body: { gate: 'gate0', segment: 'external_prospects', channels: ['linkedin', 'facebook'], _dryRun: true } })
   check('linkedin+facebook dry-run → 200', socialCh.status === 200, `status=${socialCh.status}`)

@@ -10,8 +10,8 @@ import { useSidebar } from '@/lib/context/SidebarContext';
 const GATES = [
   {
     id: 'creation',
-    label: 'Event Creation',
-    sublabel: 'Gate 0',
+    label: 'Start of Campaign',
+    sublabel: 'Journey 0',
     href: '/gate/creation',
     icon: (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -24,8 +24,8 @@ const GATES = [
   },
   {
     id: 'registration',
-    label: 'Registration',
-    sublabel: 'Gate 1',
+    label: 'Ballot Opening',
+    sublabel: 'Journey 1',
     href: '/gate/registration',
     icon: (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -38,8 +38,8 @@ const GATES = [
   },
   {
     id: 'lottery',
-    label: 'Lottery Result',
-    sublabel: 'Gate 2',
+    label: 'Lottery',
+    sublabel: 'Journey 2',
     href: '/gate/lottery',
     icon: (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -54,8 +54,8 @@ const GATES = [
   },
   {
     id: 'finish',
-    label: 'Race Finish',
-    sublabel: 'Gate 3',
+    label: 'Post Race',
+    sublabel: 'Journey 3',
     href: '/gate/finish',
     icon: (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -153,7 +153,7 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav style={{ flex: 1, padding: '4px 0' }}>
         <div style={{ padding: '4px 16px 8px', color: 'var(--color-grey-600)', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-          Gates
+          Journeys
         </div>
         {GATES.map((gate) => {
           const isActive = pathname.startsWith(gate.href);

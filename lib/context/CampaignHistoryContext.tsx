@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
 export interface CampaignAsset {
   channel: string;
@@ -29,6 +29,20 @@ export interface SavedAsset {
 interface ContextValue {
   savedAssets: SavedAsset[];
   saveAsset: (a: Omit<SavedAsset, 'id' | 'savedAt'>) => void;
+  removeAsset: (id: string) => void;
+  updateAsset: (id: string, edited: CampaignAsset, imageUrl?: string) => void;
+}
+
+const STORAGE_KEY = 'sparta_saved_assets';
+
+function loadFromStorage(): SavedAsset[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as SavedAsset[];
+  } catch {
+    return [];
+  }
 }
 
 const CampaignHistoryContext = createContext<ContextValue | null>(null);
@@ -36,15 +50,41 @@ const CampaignHistoryContext = createContext<ContextValue | null>(null);
 export function CampaignHistoryProvider({ children }: { children: ReactNode }) {
   const [savedAssets, setSavedAssets] = useState<SavedAsset[]>([]);
 
+  useEffect(() => {
+    setSavedAssets(loadFromStorage());
+  }, []);
+
   const saveAsset = (a: Omit<SavedAsset, 'id' | 'savedAt'>) => {
-    setSavedAssets(prev => [
-      { ...a, id: `asset_${prev.length}_${Math.random().toString(36).slice(2, 6)}`, savedAt: Date.now() },
-      ...prev,
-    ]);
+    setSavedAssets(prev => {
+      const next = [
+        { ...a, id: `asset_${prev.length}_${Math.random().toString(36).slice(2, 6)}`, savedAt: Date.now() },
+        ...prev,
+      ];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const removeAsset = (id: string) => {
+    setSavedAssets(prev => {
+      const next = prev.filter(a => a.id !== id);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const updateAsset = (id: string, edited: CampaignAsset, imageUrl?: string) => {
+    setSavedAssets(prev => {
+      const next = prev.map(a =>
+        a.id === id ? { ...a, asset: edited, imageUrl: imageUrl ?? a.imageUrl } : a
+      );
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
   };
 
   return (
-    <CampaignHistoryContext.Provider value={{ savedAssets, saveAsset }}>
+    <CampaignHistoryContext.Provider value={{ savedAssets, saveAsset, removeAsset, updateAsset }}>
       {children}
     </CampaignHistoryContext.Provider>
   );

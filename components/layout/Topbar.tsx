@@ -4,10 +4,10 @@ import { usePathname } from 'next/navigation';
 import { useSidebar } from '@/lib/context/SidebarContext';
 
 const GATE_LABELS: Record<string, { gate: string; label: string }> = {
-  '/gate/creation': { gate: 'Gate 0', label: 'Event Creation' },
-  '/gate/registration': { gate: 'Gate 1', label: 'Registration Opens' },
-  '/gate/lottery': { gate: 'Gate 2', label: 'Lottery Result' },
-  '/gate/finish': { gate: 'Gate 3', label: 'Race Finish' },
+  '/gate/creation': { gate: 'Journey 0', label: 'Start of Campaign' },
+  '/gate/registration': { gate: 'Journey 1', label: 'Ballot Opening' },
+  '/gate/lottery': { gate: 'Journey 2', label: 'Lottery' },
+  '/gate/finish': { gate: 'Journey 3', label: 'Post Race' },
 };
 
 export default function Topbar() {

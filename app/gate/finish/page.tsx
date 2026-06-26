@@ -81,7 +81,7 @@ export default function FinishPage() {
 
   const aiParentInfo = useMemo(() => {
     if (aiParentId === '__full_pool__') {
-      return { label: 'All athletes (post-race)', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
+      return { label: 'All athletes (Post Race)', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
     }
     const seg = SEGMENTS.find(s => s.id === aiParentId);
     if (!seg) return { label: 'All athletes', scaledSize: GATE_TOTAL, athleteIds: [] as string[] };
@@ -185,7 +185,7 @@ export default function FinishPage() {
         <div className="sparta-gate-left" style={{ flex: '0 0 360px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
             <div>
-              <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Post-race Segments</span>
+              <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Post Race Segments</span>
               <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--fg-3)' }}>{GATE_TOTAL.toLocaleString('en-US')} total athletes in this gate</span>
             </div>
             <button
@@ -302,7 +302,7 @@ export default function FinishPage() {
                 />
               </div>
               <div style={{ borderBottom: '1px solid var(--border-1)', marginBottom: 20 }} />
-              <CampaignGenerator gate="gate3" segment={selectedStatic.id} channels={channels} gateLabel="Race Finish" segmentName={selectedStatic.label} segmentColor={selectedStatic.color} segmentColorBg={selectedStatic.colorBg} />
+              <CampaignGenerator gate="gate3" segment={selectedStatic.id} channels={channels} gateLabel="Post Race" segmentName={selectedStatic.label} segmentColor={selectedStatic.color} segmentColorBg={selectedStatic.colorBg} />
             </div>
           </div>
         ) : selectedCustom ? (
@@ -350,7 +350,7 @@ export default function FinishPage() {
                 segment="custom_segment"
                 channels={channels}
                 segmentDescription={buildSegmentDescription(selectedCustom)}
-                gateLabel="Race Finish"
+                gateLabel="Post Race"
                 segmentName={selectedCustom.name}
                 segmentColor={selectedCustom.color}
                 segmentColorBg={selectedCustom.colorBg}

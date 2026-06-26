@@ -3,10 +3,10 @@
 import Link from 'next/link';
 
 const GATES = [
-  { id: 'creation', label: 'Event Creation', sub: 'Gate 0', href: '/gate/creation' },
-  { id: 'registration', label: 'Registration', sub: 'Gate 1', href: '/gate/registration' },
-  { id: 'lottery', label: 'Lottery', sub: 'Gate 2', href: '/gate/lottery' },
-  { id: 'finish', label: 'Race Finish', sub: 'Gate 3', href: '/gate/finish' },
+  { id: 'creation', label: 'Start of Campaign', sub: 'Journey 0', href: '/gate/creation' },
+  { id: 'registration', label: 'Ballot Opening', sub: 'Journey 1', href: '/gate/registration' },
+  { id: 'lottery', label: 'Lottery', sub: 'Journey 2', href: '/gate/lottery' },
+  { id: 'finish', label: 'Post Race', sub: 'Journey 3', href: '/gate/finish' },
 ];
 
 interface Props {

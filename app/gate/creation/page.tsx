@@ -145,7 +145,7 @@ export default function CreationPage() {
         <div className="sparta-gate-left" style={{ flex: '0 0 360px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
             <div>
-              <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Pre-ballot Segments</span>
+              <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Start of Campaign Segments</span>
               <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--fg-3)' }}>{GATE_TOTAL.toLocaleString('en-US')} total prospects in this gate</span>
             </div>
             <button
@@ -278,7 +278,7 @@ export default function CreationPage() {
                 <ChannelSelector available={['email', 'sms', 'push', 'instagram']} selected={channels} onChange={setChannels} rationale={{}} />
               </div>
               <div style={{ borderBottom: '1px solid var(--border-1)', marginBottom: 20 }} />
-              <CampaignGenerator gate="gate0" segment="custom_segment" channels={channels} segmentDescription={buildSegmentDescription(selectedCustom)} gateLabel="Event Creation" segmentName={selectedCustom.name} segmentColor={selectedCustom.color} segmentColorBg={selectedCustom.colorBg} />
+              <CampaignGenerator gate="gate0" segment="custom_segment" channels={channels} segmentDescription={buildSegmentDescription(selectedCustom)} gateLabel="Start of Campaign" segmentName={selectedCustom.name} segmentColor={selectedCustom.color} segmentColorBg={selectedCustom.colorBg} />
             </div>
           </div>
         ) : selected ? (
@@ -304,7 +304,7 @@ export default function CreationPage() {
                 />
               </div>
               <div style={{ borderBottom: '1px solid var(--border-1)', marginBottom: 20 }} />
-              <CampaignGenerator gate="gate0" segment={selected.id} channels={channels} gateLabel="Event Creation" segmentName={selected.label} segmentColor={selected.color} segmentColorBg={selected.colorBg} />
+              <CampaignGenerator gate="gate0" segment={selected.id} channels={channels} gateLabel="Start of Campaign" segmentName={selected.label} segmentColor={selected.color} segmentColorBg={selected.colorBg} />
             </div>
           </div>
         ) : (

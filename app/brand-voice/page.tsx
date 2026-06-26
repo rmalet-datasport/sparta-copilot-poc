@@ -4,10 +4,10 @@ import { useState, useRef } from 'react';
 import { useBrandHistory } from '@/lib/context/BrandHistoryContext';
 
 const GATE_LABELS: Record<string, string> = {
-  gate0: 'Event Creation',
-  gate1: 'Registration',
-  gate2: 'Lottery Result',
-  gate3: 'Race Finish',
+  gate0: 'Start of Campaign',
+  gate1: 'Ballot Opening',
+  gate2: 'Lottery',
+  gate3: 'Post Race',
 };
 
 const CHANNEL_COLORS: Record<string, { color: string; bg: string }> = {

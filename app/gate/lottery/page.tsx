@@ -175,7 +175,7 @@ export default function LotteryPage() {
         <div className="sparta-gate-left" style={{ flex: '0 0 380px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
             <div>
-              <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Post-lottery Segments</span>
+              <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Lottery Segments</span>
               <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--fg-3)' }}>{GATE_TOTAL.toLocaleString('en-US')} total athletes in this gate</span>
             </div>
             <button
@@ -292,7 +292,7 @@ export default function LotteryPage() {
                 />
               </div>
               <div style={{ borderBottom: '1px solid var(--border-1)', marginBottom: 20 }} />
-              <CampaignGenerator gate="gate2" segment={selectedStatic.id} channels={channels} gateLabel="Lottery Result" segmentName={selectedStatic.label} segmentColor={selectedStatic.color} segmentColorBg={selectedStatic.colorBg} />
+              <CampaignGenerator gate="gate2" segment={selectedStatic.id} channels={channels} gateLabel="Lottery" segmentName={selectedStatic.label} segmentColor={selectedStatic.color} segmentColorBg={selectedStatic.colorBg} />
             </div>
           </div>
         ) : selectedCustom ? (
@@ -340,7 +340,7 @@ export default function LotteryPage() {
                 segment="custom_segment"
                 channels={channels}
                 segmentDescription={buildSegmentDescription(selectedCustom)}
-                gateLabel="Lottery Result"
+                gateLabel="Lottery"
                 segmentName={selectedCustom.name}
                 segmentColor={selectedCustom.color}
                 segmentColorBg={selectedCustom.colorBg}

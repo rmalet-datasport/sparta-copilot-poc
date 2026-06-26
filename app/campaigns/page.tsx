@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCampaignHistory, type SavedAsset } from '@/lib/context/CampaignHistoryContext';
 import AssetCard from '@/components/campaign/AssetCard';
 
@@ -56,8 +56,11 @@ function getPreview(asset: SavedAsset['asset']): string {
 }
 
 export default function CampaignsPage() {
-  const { savedAssets } = useCampaignHistory();
+  const { savedAssets, removeAsset, updateAsset } = useCampaignHistory();
   const [selected, setSelected] = useState<SavedAsset | null>(null);
+  const [modalSaved, setModalSaved] = useState(false);
+
+  useEffect(() => { setModalSaved(false); }, [selected?.id]);
 
   return (
     <div style={{ padding: '28px', maxWidth: 1100 }}>
@@ -129,9 +132,26 @@ export default function CampaignsPage() {
                       {item.channel}
                     </span>
                   </div>
-                  <span style={{ fontSize: 10, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>
-                    {formatTime(item.savedAt)}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 10, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>
+                      {formatTime(item.savedAt)}
+                    </span>
+                    <button
+                      onClick={e => { e.stopPropagation(); removeAsset(item.id); if (selected?.id === item.id) setSelected(null); }}
+                      title="Delete"
+                      style={{
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        color: 'var(--fg-3)', padding: 2, display: 'flex', alignItems: 'center',
+                        borderRadius: 4, transition: 'color 0.15s',
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.color = '#DC2626')}
+                      onMouseLeave={e => (e.currentTarget.style.color = 'var(--fg-3)')}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                        <path d="M2 3.5h9M5 3.5V2.5h3v1M5.5 6v3.5M7.5 6v3.5M3 3.5l.5 7h6l.5-7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Body */}
@@ -223,9 +243,17 @@ export default function CampaignsPage() {
               </button>
             </div>
 
-            {/* Asset content (read-only) */}
+            {/* Asset content — éditable */}
             <div style={{ padding: '20px' }}>
-              <AssetCard asset={selected.asset} savedImageUrl={selected.imageUrl} />
+              <AssetCard
+                asset={selected.asset}
+                savedImageUrl={selected.imageUrl}
+                isSaved={modalSaved}
+                onSave={(imageUrl, editedAsset) => {
+                  updateAsset(selected.id, editedAsset ?? selected.asset, imageUrl);
+                  setModalSaved(true);
+                }}
+              />
             </div>
           </div>
         </div>

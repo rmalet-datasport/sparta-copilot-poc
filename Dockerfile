@@ -11,7 +11,9 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 
 # Install dependencies with frozen lockfile
-RUN yarn install --frozen-lockfile --production=false
+# --ignore-scripts: skip lifecycle scripts (e.g. the "prepare" git-hook installer
+# referencing scripts/setup-hooks.mjs, which is not in the Docker build context)
+RUN yarn install --frozen-lockfile --production=false --ignore-scripts
 
 # ========================================
 # Stage 2: Builder

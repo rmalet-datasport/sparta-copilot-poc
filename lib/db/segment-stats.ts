@@ -102,12 +102,12 @@ export function computeDbStats() {
 
 export function formatStatsForPrompt(): string {
   const s = computeDbStats()
-  return `Statistiques de la base athletes (${s.total} athletes, représentatifs d'un événement réel à 20 000 candidats) :
-- Engagement score : p25=${s.engagement.p25}, médiane=${s.engagement.p50}, p75=${s.engagement.p75}, p90=${s.engagement.p90}
-- Âge : p25=${s.age.p25} ans, médiane=${s.age.p50} ans, p75=${s.age.p75} ans
-- Éditions courues : 0 édition ${s.editionsRaced.dist.zero}%, 1 édition ${s.editionsRaced.dist.one}%, 2-3 éditions ${s.editionsRaced.dist.twoThree}%, 4+ éditions ${s.editionsRaced.dist.fourPlus}%
-- Athletes retournants (déjà participé) : ${s.returningPct}%
-- Genre : ${s.femalePct}% femmes, ${100 - s.femalePct}% hommes
-- Nationalités : ${s.nationalityDist}
-- Distance : ${s.marathonPct}% Marathon 42K (taux de rétention naturel ~30%), ${s.halfMarathonPct}% Half Marathon 21K (taux de rétention naturel ~50%)`
+  return `Athlete database statistics (${s.total} athletes, representative of a real event with 20,000 candidates):
+- Engagement score: p25=${s.engagement.p25}, median=${s.engagement.p50}, p75=${s.engagement.p75}, p90=${s.engagement.p90}
+- Age: p25=${s.age.p25}, median=${s.age.p50}, p75=${s.age.p75}
+- Editions raced: 0 editions ${s.editionsRaced.dist.zero}%, 1 edition ${s.editionsRaced.dist.one}%, 2-3 editions ${s.editionsRaced.dist.twoThree}%, 4+ editions ${s.editionsRaced.dist.fourPlus}%
+- Returning athletes (already participated): ${s.returningPct}%
+- Gender: ${s.femalePct}% female, ${100 - s.femalePct}% male
+- Nationalities: ${s.nationalityDist}
+- Distance: ${s.marathonPct}% Marathon 42K (natural retention rate ~30%), ${s.halfMarathonPct}% Half Marathon 21K (natural retention rate ~50%)`
 }

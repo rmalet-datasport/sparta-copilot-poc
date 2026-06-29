@@ -29,46 +29,46 @@ export interface CustomSegment {
 }
 
 export const FILTER_FIELD_LABELS: Record<FilterField, string> = {
-  gender: 'Genre',
-  age_min: 'Âge minimum',
-  age_max: 'Âge maximum',
-  nationality: 'Nationalité',
-  isReturningAthlete: 'Retournant',
-  total_editions_min: 'Éditions min.',
-  total_editions_max: 'Éditions max.',
-  engagement_min: 'Engagement min.',
-  city_contains: 'Ville',
+  gender: 'Gender',
+  age_min: 'Min age',
+  age_max: 'Max age',
+  nationality: 'Nationality',
+  isReturningAthlete: 'Returning',
+  total_editions_min: 'Min editions',
+  total_editions_max: 'Max editions',
+  engagement_min: 'Min engagement',
+  city_contains: 'City',
   distance: 'Distance',
-  hasInsurance: 'Assurance annulation',
+  hasInsurance: 'Cancellation insurance',
 }
 
 export const FILTER_VALUE_OPTIONS: Partial<Record<FilterField, { value: string; label: string }[]>> = {
   gender: [
-    { value: 'M', label: 'Homme' },
-    { value: 'F', label: 'Femme' },
-    { value: 'X', label: 'Autre' },
+    { value: 'M', label: 'Male' },
+    { value: 'F', label: 'Female' },
+    { value: 'X', label: 'Other' },
   ],
   nationality: [
-    { value: 'DK', label: 'Danemark' },
-    { value: 'SE', label: 'Suède' },
-    { value: 'DE', label: 'Allemagne' },
-    { value: 'UK', label: 'Royaume-Uni' },
-    { value: 'NL', label: 'Pays-Bas' },
-    { value: 'NO', label: 'Norvège' },
+    { value: 'DK', label: 'Denmark' },
+    { value: 'SE', label: 'Sweden' },
+    { value: 'DE', label: 'Germany' },
+    { value: 'UK', label: 'United Kingdom' },
+    { value: 'NL', label: 'Netherlands' },
+    { value: 'NO', label: 'Norway' },
     { value: 'FR', label: 'France' },
-    { value: 'US', label: 'États-Unis' },
-    { value: 'IT', label: 'Italie' },
-    { value: 'CH', label: 'Suisse' },
-    { value: 'PL', label: 'Pologne' },
-    { value: 'BE', label: 'Belgique' },
+    { value: 'US', label: 'United States' },
+    { value: 'IT', label: 'Italy' },
+    { value: 'CH', label: 'Switzerland' },
+    { value: 'PL', label: 'Poland' },
+    { value: 'BE', label: 'Belgium' },
   ],
   isReturningAthlete: [
-    { value: 'true', label: 'Oui' },
-    { value: 'false', label: 'Non' },
+    { value: 'true', label: 'Yes' },
+    { value: 'false', label: 'No' },
   ],
   hasInsurance: [
-    { value: 'true', label: 'Oui' },
-    { value: 'false', label: 'Non' },
+    { value: 'true', label: 'Yes' },
+    { value: 'false', label: 'No' },
   ],
   distance: [
     { value: 'Marathon 42K', label: 'Marathon 42K' },
@@ -88,7 +88,7 @@ export function buildSegmentDescription(segment: CustomSegment): string {
   const parts: string[] = []
 
   if (segment.baseSegmentIds.length > 0) {
-    parts.push(`Scope : ${segment.baseSegmentLabels.join(', ')}`)
+    parts.push(`Scope: ${segment.baseSegmentLabels.join(', ')}`)
   }
 
   if (segment.filters.length > 0) {
@@ -96,16 +96,16 @@ export function buildSegmentDescription(segment: CustomSegment): string {
       const valueLabel = FILTER_VALUE_OPTIONS[f.field]?.find(o => o.value === f.value)?.label ?? f.value
       return `${FILTER_FIELD_LABELS[f.field]} = ${valueLabel}`
     })
-    parts.push(`Critères : ${filterLabels.join(', ')}`)
+    parts.push(`Criteria: ${filterLabels.join(', ')}`)
   }
 
   if (segment.objective) {
-    parts.push(`Objectif : ${segment.objective}`)
+    parts.push(`Objective: ${segment.objective}`)
   }
 
   if (parts.length === 0) {
-    return `Segment personnalisé : "${segment.name}" (tous les athletes, aucun filtre)`
+    return `Custom segment: "${segment.name}" (all athletes, no filters)`
   }
 
-  return `Segment personnalisé : "${segment.name}"\n${parts.join('\n')}`
+  return `Custom segment: "${segment.name}"\n${parts.join('\n')}`
 }

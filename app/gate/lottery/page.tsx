@@ -258,7 +258,7 @@ export default function LotteryPage() {
                       <span style={{ fontSize: 12, color: 'var(--fg-1)' }}>{a.firstName} {a.lastName}</span>
                       <div style={{ display: 'flex', gap: 6 }}>
                         <span style={{ fontSize: 11, color: 'var(--fg-3)' }}>{a.nationality}</span>
-                        <span style={{ fontSize: 11, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>{a.age} ans</span>
+                        <span style={{ fontSize: 11, color: 'var(--fg-3)', fontFamily: 'var(--font-mono)' }}>{a.age} yo</span>
                       </div>
                     </div>
                   ))

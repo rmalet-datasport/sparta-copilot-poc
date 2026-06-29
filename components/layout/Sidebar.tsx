@@ -102,28 +102,17 @@ export default function Sidebar() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              background: 'var(--primary)',
-              borderRadius: 8,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M9 14l5-6.5h-4l.75-6.5-5 7.5h4L9 14Z" fill="white"/>
-            </svg>
-          </div>
+          <svg width="34" height="32" viewBox="0 0 20 19" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+            <path d="M5.90385 4.81055L14.4079 9.48282L5.88574 14.1983L5.90385 4.81055Z" fill="#F62121"/>
+            <path d="M13.0957 2.29736C9.96215 0.570086 5.96824 -0.846278 3.35091 0.570086C0.733574 1.98645 0 6.04554 0 9.50009C0 12.9546 0.661122 16.9274 3.35091 18.4042C6.04069 19.881 9.98027 18.4474 13.1048 16.7201C16.2293 14.9928 19.5168 12.471 19.5168 9.50872C19.5168 6.54645 16.2202 4.02463 13.0957 2.29736ZM4.30184 2.16781C5.9773 1.25236 8.93877 2.116 12.1357 3.89509C15.3327 5.67418 17.5696 7.67781 17.5696 9.50872C17.5696 11.3396 15.3689 13.3605 12.1357 15.1483C8.90254 16.936 5.95012 17.7392 4.28372 16.8324C2.61733 15.9255 1.91998 13.0064 1.91998 9.50009C1.91998 5.99372 2.63544 3.08327 4.30184 2.16781Z" fill="#F62121"/>
+          </svg>
           <div>
             <div style={{ color: 'var(--color-white)', fontWeight: 570, fontSize: 14, lineHeight: 1.2 }}>
               Sparta Co-Pilot
             </div>
-            <div style={{ color: 'var(--color-grey-500)', fontSize: 11, marginTop: 1 }}>
-              by Datasport
+            <div style={{ marginTop: 4 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/datasport-logo.svg" alt="Datasport" style={{ height: 9, display: 'block', filter: 'brightness(0) invert(1)', opacity: 0.4 }} />
             </div>
           </div>
         </div>

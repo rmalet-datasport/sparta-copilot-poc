@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import GateTimeline from '@/components/gates/GateTimeline';
+import SegmentCard from '@/components/gates/SegmentCard';
 import ChannelSelector from '@/components/gates/ChannelSelector';
 import CampaignGenerator from '@/components/campaign/CampaignGenerator';
 import SegmentBuilder from '@/components/gates/SegmentBuilder';
@@ -10,7 +11,10 @@ import { SEGMENT_SIZES, DEFAULT_CHANNELS, KPI, EVENT } from '@/lib/constants';
 import type { Channel } from '@/lib/constants';
 import { filterAthletes } from '@/lib/db/segment-filter';
 import type { CustomSegment } from '@/lib/types/segments';
-import { buildSegmentDescription } from '@/lib/types/segments';
+import { buildSegmentDescription, FILTER_FIELD_LABELS, FILTER_VALUE_OPTIONS } from '@/lib/types/segments';
+import SegmentStatsDrawer from '@/components/gates/SegmentStatsDrawer';
+
+type DrawerData = { name: string; description: string; color: string; criteria: { l: string; v: string }[]; athleteIds: string[]; scaledSize: number; segmentId: string }
 
 const SEGMENTS = [
   {
@@ -111,6 +115,24 @@ export default function CreationPage() {
     setChannels(['email']);
   };
 
+  const [statsDrawer, setStatsDrawer] = useState<DrawerData | null>(null);
+
+  const handleViewStats = (seg: typeof SEGMENTS[0]) => {
+    const ids = filterAthletes([], [seg.id], SEGMENT_FIELD).map(a => a.id)
+    setStatsDrawer({ name: seg.label, description: seg.description, color: seg.color, criteria: [], athleteIds: ids, scaledSize: seg.size, segmentId: seg.id })
+  }
+
+  const handleViewStatsCustom = (seg: CustomSegment) => {
+    const base = seg.baseSegmentIds.length > 0 ? seg.baseSegmentIds : undefined
+    const ids = filterAthletes(seg.filters, base, SEGMENT_FIELD).map(a => a.id)
+    setStatsDrawer({ name: seg.name, description: seg.objective ?? '', color: seg.color, criteria: seg.filters.map(f => ({ l: FILTER_FIELD_LABELS[f.field], v: FILTER_VALUE_OPTIONS[f.field]?.find(o => o.value === f.value)?.label ?? f.value })), athleteIds: ids, scaledSize: getScaledCount(seg), segmentId: seg.id })
+  }
+
+  const handleEditPredefined = (seg: typeof SEGMENTS[0]) => {
+    setEditingSegment({ id: `${seg.id}_custom`, name: seg.label, color: seg.color, colorBg: seg.colorBg, filters: [], baseSegmentIds: [seg.id], baseSegmentLabels: [seg.label], objective: seg.objective })
+    setShowBuilder(true)
+  }
+
   const getScaledCount = (seg: CustomSegment) => {
     const base = seg.baseSegmentIds.length > 0 ? seg.baseSegmentIds : undefined;
     const raw = filterAthletes(seg.filters, base, SEGMENT_FIELD).length;
@@ -142,7 +164,7 @@ export default function CreationPage() {
 
       <div className="sparta-gate-layout" style={{ display: 'flex', gap: 20 }}>
         {/* Left */}
-        <div className="sparta-gate-left" style={{ flex: '0 0 360px' }}>
+        <div className="sparta-gate-left" style={{ flex: selectedId ? '0 0 380px' : '1 1 auto', maxWidth: selectedId ? 380 : 700, transition: 'flex-basis 0.2s ease' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
             <div>
               <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Start of Campaign Segments</span>
@@ -158,33 +180,21 @@ export default function CreationPage() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {SEGMENTS.map(seg => (
-              <button
+              <SegmentCard
                 key={seg.id}
+                segment={seg.id}
+                label={seg.label}
+                size={seg.size}
+                description={seg.description}
+                color={seg.color}
+                colorBg={seg.colorBg}
+                channels={(DEFAULT_CHANNELS[seg.id] ?? ['email']) as string[]}
+                isSelected={selectedId === seg.id}
                 onClick={() => handleSelect(seg.id)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  padding: '12px 14px',
-                  background: selectedId === seg.id ? seg.colorBg : 'var(--bg-1)',
-                  border: `1.5px solid ${selectedId === seg.id ? seg.color : 'var(--border-1)'}`,
-                  borderRadius: 'var(--radius-lg)',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                <span style={{ fontSize: 20 }}>{seg.icon}</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-                    <span style={{ fontSize: 13, fontWeight: 570, color: 'var(--fg-1)' }}>{seg.label}</span>
-                    <span style={{ fontSize: 13, fontWeight: 570, fontFamily: 'var(--font-mono)', color: selectedId === seg.id ? seg.color : 'var(--fg-1)' }}>
-                      {seg.size.toLocaleString('en-US')}
-                    </span>
-                  </div>
-                  <p style={{ margin: 0, fontSize: 11, color: 'var(--fg-3)', lineHeight: 1.4 }}>{seg.description}</p>
-                </div>
-              </button>
+                onViewStats={() => handleViewStats(seg)}
+                onEdit={() => handleEditPredefined(seg)}
+                icon={seg.icon}
+              />
             ))}
 
             <AISubSegments
@@ -211,9 +221,12 @@ export default function CreationPage() {
                     </span>
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--fg-3)', marginTop: 1 }}>Custom segment</div>
+                  <div onClick={e => { e.stopPropagation(); handleViewStatsCustom(seg); }} style={{ fontSize: 12, fontWeight: 570, color: 'var(--primary)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+                    View statistics <span style={{ fontSize: 13 }}>→</span>
+                  </div>
                 </div>
                 <button
-                  onClick={e => { e.stopPropagation(); setEditingSegment(seg); }}
+                  onClick={e => { e.stopPropagation(); setEditingSegment(seg); setShowBuilder(true); }}
                   style={{ background: 'var(--bg-2)', border: '1px solid var(--border-1)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', color: 'var(--fg-2)', padding: '3px 6px', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11 }}
                 >
                   <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 9l6-6 2 2-6 6H1.5V9z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/><path d="M7 3.5l1 1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
@@ -341,6 +354,20 @@ export default function CreationPage() {
             setSelectedId(seg.id);
             setChannels(['email']);
           }}
+        />
+      )}
+
+      {statsDrawer && (
+        <SegmentStatsDrawer
+          isOpen={!!statsDrawer}
+          onClose={() => setStatsDrawer(null)}
+          segmentName={statsDrawer.name}
+          segmentDescription={statsDrawer.description}
+          segmentColor={statsDrawer.color}
+          criteria={statsDrawer.criteria}
+          athleteIds={statsDrawer.athleteIds}
+          scaledSize={statsDrawer.scaledSize}
+          onGenerateCampaign={() => { handleSelect(statsDrawer.segmentId); setStatsDrawer(null); }}
         />
       )}
     </div>

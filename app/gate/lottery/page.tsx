@@ -13,11 +13,15 @@ import { getAthletesByPostLotterySegment } from '@/lib/db/athletes';
 import { filterAthletes } from '@/lib/db/segment-filter';
 import type { CustomSegment } from '@/lib/types/segments';
 import { buildSegmentDescription, FILTER_FIELD_LABELS, FILTER_VALUE_OPTIONS } from '@/lib/types/segments';
+import SegmentStatsDrawer from '@/components/gates/SegmentStatsDrawer';
+
+type DrawerData = { name: string; description: string; color: string; criteria: { l: string; v: string }[]; athleteIds: string[]; scaledSize: number; segmentId: string }
 
 const SEGMENTS = [
   {
     id: 'confirmed_engaged',
     label: 'Confirmed — Engaged',
+    icon: '🎉',
     color: '#16A34A',
     colorBg: '#F0FDF4',
     description: 'Selected + engagement score > 60. Ready to buy upsells.',
@@ -27,6 +31,7 @@ const SEGMENTS = [
   {
     id: 'confirmed_passive',
     label: 'Confirmed — Passive',
+    icon: '😴',
     color: '#CA8A04',
     colorBg: '#FEFCE8',
     description: 'Selected but low engagement. Risk of DNS.',
@@ -36,6 +41,7 @@ const SEGMENTS = [
   {
     id: 'waitlist_hot',
     label: 'Waitlist — Hot',
+    icon: '🔥',
     color: '#EA580C',
     colorBg: '#FFF7ED',
     description: 'Waitlist position ≤ 200. Real chance of being called up.',
@@ -45,6 +51,7 @@ const SEGMENTS = [
   {
     id: 'waitlist_cold',
     label: 'Waitlist — Cold',
+    icon: '❄️',
     color: '#6B7280',
     colorBg: '#F9FAFB',
     description: 'Waitlist position > 200. Unlikely to race in 2026.',
@@ -54,6 +61,7 @@ const SEGMENTS = [
   {
     id: 'refused_reactivatable',
     label: 'Refused — Reactivatable',
+    icon: '🔁',
     color: '#DC2626',
     colorBg: '#FEF2F2',
     description: 'Refused but returning athlete. Long-term value is high.',
@@ -63,6 +71,7 @@ const SEGMENTS = [
   {
     id: 'refused_lost',
     label: 'Refused — Lost',
+    icon: '👋',
     color: '#374151',
     colorBg: '#F1F5F9',
     description: 'First-time applicant, refused. Fragile relationship.',
@@ -150,6 +159,24 @@ export default function LotteryPage() {
     if (selectedId === id) { setSelectedId(null); setChannels([]); }
   };
 
+  const [statsDrawer, setStatsDrawer] = useState<DrawerData | null>(null);
+
+  const handleViewStats = (seg: typeof SEGMENTS[0]) => {
+    const ids = getAthletesByPostLotterySegment(seg.id as any).map(a => a.id)
+    setStatsDrawer({ name: seg.label, description: seg.description, color: seg.color, criteria: [], athleteIds: ids, scaledSize: sizes[seg.id as keyof typeof sizes] ?? 0, segmentId: seg.id })
+  }
+
+  const handleViewStatsCustom = (seg: CustomSegment) => {
+    const base = seg.baseSegmentIds.length > 0 ? seg.baseSegmentIds : undefined
+    const ids = filterAthletes(seg.filters, base, SEGMENT_FIELD).map(a => a.id)
+    setStatsDrawer({ name: seg.name, description: seg.objective ?? '', color: seg.color, criteria: seg.filters.map(f => ({ l: FILTER_FIELD_LABELS[f.field], v: FILTER_VALUE_OPTIONS[f.field]?.find(o => o.value === f.value)?.label ?? f.value })), athleteIds: ids, scaledSize: getScaledCount(seg), segmentId: seg.id })
+  }
+
+  const handleEditPredefined = (seg: typeof SEGMENTS[0]) => {
+    setEditingSegment({ id: `${seg.id}_custom`, name: seg.label, color: seg.color, colorBg: seg.colorBg, filters: [], baseSegmentIds: [seg.id], baseSegmentLabels: [seg.label], objective: seg.objective })
+    setShowBuilder(true)
+  }
+
   return (
     <div className="sparta-gate-page" style={{ padding: '0 28px 28px' }}>
       <GateTimeline activeGate="lottery" />
@@ -172,7 +199,7 @@ export default function LotteryPage() {
 
       <div className="sparta-gate-layout" style={{ display: 'flex', gap: 20 }}>
         {/* Left: segment list */}
-        <div className="sparta-gate-left" style={{ flex: '0 0 380px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div className="sparta-gate-left" style={{ flex: selectedId ? '0 0 380px' : '1 1 auto', maxWidth: selectedId ? 380 : 700, display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
             <div>
               <span style={{ fontSize: 12, fontWeight: 570, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Lottery Segments</span>
@@ -199,6 +226,9 @@ export default function LotteryPage() {
               channels={(DEFAULT_CHANNELS[seg.id] ?? ['email']) as string[]}
               isSelected={selectedId === seg.id}
               onClick={() => handleSelect(seg.id)}
+              onViewStats={() => handleViewStats(seg)}
+              onEdit={() => handleEditPredefined(seg)}
+              icon={seg.icon}
             />
           ))}
 
@@ -225,6 +255,7 @@ export default function LotteryPage() {
                   <span style={{ fontSize: 13, fontWeight: 570, fontFamily: 'var(--font-mono)', color: selectedId === seg.id ? seg.color : 'var(--fg-1)' }}>{getScaledCount(seg).toLocaleString('en-US')}</span>
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--fg-3)', marginTop: 1 }}>Custom segment</div>
+                <div onClick={e => { e.stopPropagation(); handleViewStatsCustom(seg) }} style={{ fontSize: 11, fontWeight: 570, color: 'var(--primary)', marginTop: 4, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>View statistics →</div>
               </div>
               <button onClick={e => { e.stopPropagation(); setEditingSegment(seg); }} style={{ background: 'var(--bg-2)', border: '1px solid var(--border-1)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', color: 'var(--fg-2)', padding: '3px 6px', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11 }}>
                 <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 9l6-6 2 2-6 6H1.5V9z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/><path d="M7 3.5l1 1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/></svg>
@@ -370,6 +401,20 @@ export default function LotteryPage() {
           initialSegment={editingSegment ?? undefined}
           onClose={() => { setShowBuilder(false); setEditingSegment(null); }}
           onSave={handleSaveCustom}
+        />
+      )}
+
+      {statsDrawer && (
+        <SegmentStatsDrawer
+          isOpen={!!statsDrawer}
+          onClose={() => setStatsDrawer(null)}
+          segmentName={statsDrawer.name}
+          segmentDescription={statsDrawer.description}
+          segmentColor={statsDrawer.color}
+          criteria={statsDrawer.criteria}
+          athleteIds={statsDrawer.athleteIds}
+          scaledSize={statsDrawer.scaledSize}
+          onGenerateCampaign={() => { handleSelect(statsDrawer.segmentId); setStatsDrawer(null); }}
         />
       )}
     </div>

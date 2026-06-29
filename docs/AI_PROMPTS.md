@@ -4,7 +4,7 @@
 
 | Route | Usage | Streaming | Output |
 |---|---|---|---|
-| `POST /api/ai` | Génération campagne marketing | Oui | JSON assets |
+| `POST /api/ai` | Génération campagne marketing | Non | JSON assets |
 | `POST /api/ai/parse-segment` | NL → filtres structurés | Non | JSON filtres |
 | `POST /api/ai/suggest-segment` | Objectif métier → profil segment | Non | JSON portrait + filtres + insights |
 | `POST /api/ai/analyze-gate` | Pool athletes → sous-segments IA | Non | JSON segments (3–4) |
@@ -17,7 +17,7 @@
 ```ts
 model: "claude-sonnet-4-6"
 max_tokens: 1024
-stream: true
+stream: false
 ```
 
 ### Input

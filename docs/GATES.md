@@ -17,16 +17,35 @@ dynamiquement via filtres manuels ou IA.
 ```
 [KPI strip — 4 métriques clés]
 
-Colonne gauche (380px fixe)                   Colonne droite (flex 1)
+Colonne gauche                                Colonne droite (flex 1)
 ─────────────────────────────                 ──────────────────────
-[LABEL] [total athletes] [+ Créer]            [Panel campagne du segment sélectionné]
-[Segment Card 1]                              ou
+[LABEL] [total athletes] [+ Create a segment] [Panel campagne du segment sélectionné]
+[Segment Card 1]  (emoji + Edit + stats)      ou
 [Segment Card 2]                              [Empty state si aucun sélectionné]
 [...]
+[Discover AI sub-segments]
 [Segment custom 1] (si créé)
-[Segment custom 2] (si créé)
 [Sample athletes du segment sélectionné]
 ```
+
+**Largeur dynamique de la colonne gauche :**
+- Aucun segment sélectionné → colonne gauche `flex: 1 1 auto`, max 700px (pleine largeur)
+- Segment sélectionné → colonne gauche `flex: 0 0 380px` (rétrécit pour laisser place au panel campagne)
+
+**Segment Cards — anatomie :**
+- Emoji icon à gauche (spécifique à chaque segment)
+- Label + bouton Edit (en haut à droite) + compteur
+- Description
+- Lien "View statistics →" (rouge) → ouvre le drawer de statistiques
+- Tags channels recommandés
+
+**Drawer statistiques (SegmentStatsDrawer) :**
+- Panneau fixe 540px qui glisse depuis la droite avec scrim overlay
+- Header : nom du segment, critères sous forme de pills
+- KPI grid : total athletes, re-apply likelihood, avg editions, returning share
+- Charts : nationalités (barres), distance (donut), returning (donut), éditions (barres), âge + genre
+- Section readiness + bouton "Generate Campaign"
+- Bouton Edit ouvre le SegmentBuilder pré-rempli avec le segment prédéfini en scope
 
 ---
 
@@ -41,12 +60,12 @@ Maximiser le volume et la qualité des candidatures avant la fermeture du ballot
 
 ### Segments prédéfinis (vue agrégée)
 
-| Segment | Description | Taille UI | Dérivation depuis la DB |
-|---|---|---|---|
-| `past_finishers` | Finishers éditions précédentes non réinscrits | 5,200 | `isReturningAthlete && totalEditionsRaced > 0` |
-| `past_refused` | Refusés éditions précédentes | 8,400 | fallback (ni finisher, ni prospect, ni international) |
-| `international_targets` | Audiences DE, UK, NL, NO | 12,000 | `nationality in ['DE','UK','NL','NO']` |
-| `external_prospects` | Prospects partenaires importés | 1,600 | `externalProspect === true` |
+| Segment | Emoji | Description | Taille UI | Dérivation depuis la DB |
+|---|---|---|---|---|
+| `past_finishers` | 🏅 | Finishers éditions précédentes non réinscrits | 5,200 | `isReturningAthlete && totalEditionsRaced > 0` |
+| `past_refused` | 🔄 | Refusés éditions précédentes | 8,400 | fallback (ni finisher, ni prospect, ni international) |
+| `international_targets` | 🌍 | Audiences DE, UK, NL, NO | 12,000 | `nationality in ['DE','UK','NL','NO']` |
+| `external_prospects` | 🤝 | Prospects partenaires importés | 1,600 | `externalProspect === true` |
 
 **Total gate 0** : 27,200 prospects (somme des 4 segments)
 
@@ -81,14 +100,16 @@ Maintenir l'engagement des candidats pendant l'attente du tirage.
 
 ### Segments prédéfinis
 
-Champ DB : `preLotterySegment`
+> Ces segments sont **basés sur des filtres** (pas sur un champ DB `preLotterySegment`).
+> Chaque segment est défini par une combinaison de `isReturningAthlete` + `distance`.
+> `filterAthletes()` reçoit les filtres directement — pas de `athleteSegmentField` pour gate 1.
 
-| Segment | Taille UI | Description | Objectif campagne |
-|---|---|---|---|
-| `ambassador` | 3,200 | Haute valeur × haute probabilité | Fidéliser, faire parrainer |
-| `to_reactivate` | 2,800 | Haute valeur × faible probabilité | Ré-engager, lever les freins |
-| `opportunist` | 7,500 | Faible valeur × haute probabilité | Encourager, upsell anticipé |
-| `cold_prospect` | 6,500 | Faible valeur × faible probabilité | Message léger, coût minimal |
+| Segment | Emoji | Taille UI | Filtres | Channels |
+|---|---|---|---|---|
+| `returning_marathon` 🏅 | 7,200 | `isReturningAthlete=true`, `distance=Marathon 42K` | email, push |
+| `returning_half` 🔄 | 4,800 | `isReturningAthlete=true`, `distance=Half Marathon 21K` | email, sms |
+| `new_marathon` 🏃 | 5,100 | `isReturningAthlete=false`, `distance=Marathon 42K` | email, instagram |
+| `new_half` ✨ | 2,900 | `isReturningAthlete=false`, `distance=Half Marathon 21K` | email |
 
 **Total gate 1** : 20,000 athletes
 
@@ -96,10 +117,10 @@ Champ DB : `preLotterySegment`
 
 | Segment | Channels | Rationale |
 |---|---|---|
-| ambassador | email, push | Haute valeur justifie multicanal soigné |
-| to_reactivate | email, sms | Besoin de recréer un lien fort |
-| opportunist | email | ROI modéré, pas de surcharge |
-| cold_prospect | email | ROI incertain, investissement minimal |
+| returning_marathon | email, push | Personnalisation sur les éditions passées ; push pour athletes actifs |
+| returning_half | email, sms | Communauté + urgence early bird |
+| new_marathon | email, instagram | Welcome + visuels inspirants pour nouveaux runners |
+| new_half | email | Simple, faible friction, CTA clair |
 
 ---
 
@@ -123,14 +144,14 @@ paymentStatus, postLotterySegment.
 
 Champ DB : `postLotterySegment`
 
-| Segment | Taille UI | Description | Objectif |
-|---|---|---|---|
-| `confirmed_engaged` | 8,200 | Registered + engagement > 60 | Upsells, préparation course |
-| `confirmed_passive` | 3,800 | Registered + engagement ≤ 60 | Réactiver avant la course |
-| `waitlist_hot` | 800 | Waitlist position ≤ 200 | Maintenir l'espoir |
-| `waitlist_cold` | 1,200 | Waitlist position > 200 | Message honnête, alternatives |
-| `refused_reactivatable` | 2,400 | Refused + returning athlete | Fidélisation long terme |
-| `refused_lost` | 3,600 | Refused + première candidature | Message consolation léger |
+| Segment | Emoji | Taille UI | Description | Objectif |
+|---|---|---|---|---|
+| `confirmed_engaged` | 🎉 | 8,200 | Registered + engagement > 60 | Upsells, préparation course |
+| `confirmed_passive` | 😴 | 3,800 | Registered + engagement ≤ 60 | Réactiver avant la course |
+| `waitlist_hot` | 🔥 | 800 | Waitlist position ≤ 200 | Maintenir l'espoir |
+| `waitlist_cold` | ❄️ | 1,200 | Waitlist position > 200 | Message honnête, alternatives |
+| `refused_reactivatable` | 🔁 | 2,400 | Refused + returning athlete | Fidélisation long terme |
+| `refused_lost` | 👋 | 3,600 | Refused + première candidature | Message consolation léger |
 
 **Total gate 2** : 20,000 athletes
 
@@ -164,13 +185,13 @@ Capitaliser sur l'émotion post-course et maximiser les ré-inscriptions 2027.
 
 Champ DB : `postRaceSegment`
 
-| Segment | Taille UI | Description | Objectif |
-|---|---|---|---|
-| `loyal_finisher` | 6,800 | Finisher + reRegistration > 0.7 | Early bird 2027 |
-| `champion_ambassador` | 1,400 | Finisher + personalBest + engagement > 75 | Programme ambassadeur |
-| `at_risk_returner` | 2,100 | Finisher + reRegistration ≤ 0.4 | Reconquête proactive |
-| `lost_dns` | 1,200 | Did not start | Message empathique |
-| `reconquest_dnf` | 500 | Did not finish | Narrative de revanche |
+| Segment | Emoji | Taille UI | Description | Objectif |
+|---|---|---|---|---|
+| `loyal_finisher` | 🏅 | 6,800 | Finisher + reRegistration > 0.7 | Early bird 2027 |
+| `champion_ambassador` | ⭐ | 1,400 | Finisher + personalBest + engagement > 75 | Programme ambassadeur |
+| `at_risk_returner` | ⚠️ | 2,100 | Finisher + reRegistration ≤ 0.4 | Reconquête proactive |
+| `lost_dns` | 🚫 | 1,200 | Did not start | Message empathique |
+| `reconquest_dnf` | 🔥 | 500 | Did not finish | Narrative de revanche |
 
 **Total gate 3** : 12,000 athletes
 
@@ -211,19 +232,23 @@ Bouton "+ Créer un segment" dans le header de la colonne gauche, à droite du t
 - "Tous les athletes" si aucun sélectionné
 - Scope = pool sur lequel les filtres sont appliqués
 
-**Section 5 — Filtres manuels** (9 champs disponibles)
+**Section 5 — Filtres manuels** (11 champs disponibles)
 
-| Champ | Type | Options |
-|---|---|---|
-| `gender` | select | M / F |
-| `age_min` | number | 16–80 |
-| `age_max` | number | 16–80 |
-| `nationality` | select | DK, SE, DE, UK, NL, NO, FR, US, IT, CH, PL, BE |
-| `isReturningAthlete` | select | Oui / Non |
-| `total_editions_min` | number | 0–20 |
-| `total_editions_max` | number | 0–20 |
-| `engagement_min` | number | 0–100 |
-| `city_contains` | text | recherche partielle |
+Labels et valeurs affichés en anglais dans l'UI.
+
+| Champ | Label UI | Type | Options |
+|---|---|---|---|
+| `gender` | Gender | select | Male / Female |
+| `age_min` | Min age | number | 16–80 |
+| `age_max` | Max age | number | 16–80 |
+| `nationality` | Nationality | select | Denmark, Sweden, Germany, United Kingdom, Netherlands, Norway, France, USA, Italy, Switzerland, Poland, Belgium |
+| `isReturningAthlete` | Returning | select | Yes / No |
+| `total_editions_min` | Min editions | number | 0–20 |
+| `total_editions_max` | Max editions | number | 0–20 |
+| `engagement_min` | Min engagement | number | 0–100 |
+| `city_contains` | City | text | recherche partielle |
+| `distance` | Distance | select | Marathon 42K / Half Marathon 21K |
+| `hasInsurance` | Cancellation insurance | select | Yes / No |
 
 **Section 6 — Objectif & contexte** : texte libre injecté dans le prompt de génération
 

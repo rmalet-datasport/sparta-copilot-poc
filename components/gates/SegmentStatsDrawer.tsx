@@ -103,6 +103,7 @@ export default function SegmentStatsDrawer({
 
       {/* Drawer */}
       <aside
+        className="sparta-stats-drawer"
         style={{
           position: 'fixed', top: 0, right: 0,
           height: '100vh', width: 540,
@@ -115,7 +116,7 @@ export default function SegmentStatsDrawer({
         }}
       >
         {/* Header */}
-        <div style={{ padding: '24px 28px 18px', borderBottom: '1px solid var(--border-1)', flexShrink: 0 }}>
+        <div className="sparta-stats-drawer-header" style={{ padding: '24px 28px 18px', borderBottom: '1px solid var(--border-1)', flexShrink: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
               <div style={{
@@ -154,7 +155,7 @@ export default function SegmentStatsDrawer({
         </div>
 
         {/* Scrollable content */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 30 }}>
+        <div className="sparta-stats-drawer-content" style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 30 }}>
           {!stats ? (
             <p style={{ color: 'var(--fg-3)', fontSize: 13 }}>No athlete data available for this segment.</p>
           ) : (
@@ -180,7 +181,7 @@ export default function SegmentStatsDrawer({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {stats.nationalities.map((n, i) => (
                     <div key={n.label} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <div style={{ fontSize: 13, color: 'var(--fg-2)', width: 130, flexShrink: 0 }}>{n.label}</div>
+                      <div className="sparta-nat-label" style={{ fontSize: 13, color: 'var(--fg-2)', width: 130, flexShrink: 0 }}>{n.label}</div>
                       <div style={{ flex: 1, height: 8, background: 'var(--bg-2)', borderRadius: 99, overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: n.bar + '%', background: NAT_PALETTE[i] ?? 'var(--border-1)', borderRadius: 99 }} />
                       </div>
@@ -315,7 +316,7 @@ export default function SegmentStatsDrawer({
         </div>
 
         {/* Footer */}
-        <div style={{ padding: '16px 28px', borderTop: '1px solid var(--border-1)', display: 'flex', gap: 12, flexShrink: 0, background: 'var(--bg-1)' }}>
+        <div className="sparta-stats-drawer-footer" style={{ padding: '16px 28px', borderTop: '1px solid var(--border-1)', display: 'flex', gap: 12, flexShrink: 0, background: 'var(--bg-1)' }}>
           <button
             onClick={onClose}
             style={{ flexShrink: 0, padding: '11px 18px', border: '1px solid var(--border-1)', background: 'var(--bg-1)', borderRadius: 6, fontFamily: 'var(--font-sans, inherit)', fontWeight: 570, fontSize: 14, cursor: 'pointer', color: 'var(--fg-1)' }}

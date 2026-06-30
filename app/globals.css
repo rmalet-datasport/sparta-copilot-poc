@@ -157,6 +157,20 @@ body {
   .sparta-gate-page {
     padding: 16px !important;
   }
+
+  /* Stats drawer: full-width on mobile */
+  .sparta-stats-drawer {
+    width: 100vw !important;
+  }
+  .sparta-stats-drawer-header,
+  .sparta-stats-drawer-content,
+  .sparta-stats-drawer-footer {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  .sparta-nat-label {
+    width: 90px !important;
+  }
 }
 
 @media (min-width: 768px) and (max-width: 1079px) {

@@ -179,30 +179,11 @@ if (!cookie) {
   }
 }
 
-// 9. RATE LIMITING on AI routes
-// Note: on a remote server, X-Forwarded-For is set by the infrastructure so the test IP
-// below is a best-effort hint for local dev only. This test intentionally exhausts the
-// rate limit — always runs LAST to avoid polluting the quota for other tests.
-console.log('\n[9] Rate limit on /api/ai/parse-segment (20 req/min/IP)')
-if (!cookie) {
-  skip('no cookie from step 5')
-} else {
-  const TEST_IP = '203.0.113.42'   // RFC 5737 TEST-NET-3 — safe for testing
-  let hit429 = false
-  let attempts = 0
-  for (let i = 0; i < 25; i++) {
-    const res = await r('/api/ai/parse-segment', { cookie, ip: TEST_IP, body: { text: '' } })
-    attempts++
-    if (res.status === 429) { hit429 = true; break }
-  }
-  check(`429 returned within 25 requests (after 20 exactly)`, hit429, `never got 429 in ${attempts} attempts`)
-  if (hit429) ok(`rate limit triggered at attempt ${attempts}`)
-}
-
-// 10. REAL AI CALL — all 7 channels (requires ANTHROPIC_API_KEY)
+// 9. REAL AI CALL — all 7 channels (requires ANTHROPIC_API_KEY)
 // Validates that max_tokens is sufficient: truncated JSON would fail JSON.parse.
 // Also confirms each channel returns a well-shaped asset from a live Anthropic response.
-console.log('\n[10] Real Anthropic call — all 7 channels, full JSON integrity')
+// Runs BEFORE the rate-limit test [10] which intentionally exhausts the quota.
+console.log('\n[9] Real Anthropic call — all 7 channels, full JSON integrity')
 const HAS_API_KEY = !!process.env.ANTHROPIC_API_KEY
 if (!cookie) {
   skip('no cookie from step 5')
@@ -243,6 +224,26 @@ if (!cookie) {
       }
     }
   }
+}
+
+// 10. RATE LIMITING on AI routes
+// Note: on a remote server, X-Forwarded-For is set by the infrastructure so the test IP
+// below is a best-effort hint for local dev only. This test intentionally exhausts the
+// rate limit — always runs LAST to avoid polluting the quota for other tests.
+console.log('\n[10] Rate limit on /api/ai/parse-segment (20 req/min/IP)')
+if (!cookie) {
+  skip('no cookie from step 5')
+} else {
+  const TEST_IP = '203.0.113.42'   // RFC 5737 TEST-NET-3 — safe for testing
+  let hit429 = false
+  let attempts = 0
+  for (let i = 0; i < 25; i++) {
+    const res = await r('/api/ai/parse-segment', { cookie, ip: TEST_IP, body: { text: '' } })
+    attempts++
+    if (res.status === 429) { hit429 = true; break }
+  }
+  check(`429 returned within 25 requests (after 20 exactly)`, hit429, `never got 429 in ${attempts} attempts`)
+  if (hit429) ok(`rate limit triggered at attempt ${attempts}`)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

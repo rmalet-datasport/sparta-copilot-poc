@@ -14,11 +14,11 @@ avant l'appel API — ce qui permet de tester auth, validation et rate limiting.
 5. Bon mot de passe → cookie `demo_access` avec flags HttpOnly + SameSite
 6. Accès authentifié → page accessible
 7. Validations input sur les routes IA → 400 avant Anthropic
-8. Rate limiting sur `/api/ai/parse-segment` → 429 après 20 req/min/IP
-9. **Génération campagne dry-run** → valide gate/segment/channels sans appel Anthropic
-10. **Appel Anthropic réel** → intégrité JSON sur les 7 channels (nécessite `ANTHROPIC_API_KEY`)
+8. **Génération campagne dry-run** → valide gate/segment/channels sans appel Anthropic
+9. **Appel Anthropic réel** → intégrité JSON sur les 7 channels (nécessite `ANTHROPIC_API_KEY`)
+10. Rate limiting sur `/api/ai/parse-segment` → 429 après 20 req/min/IP
 
-### Groupe 9 — Dry-run (`_dryRun: true`)
+### Groupe 8 — Dry-run (`_dryRun: true`)
 
 Passer `_dryRun: true` dans le body de `/api/ai` active un mode fixture :
 - La validation s'exécute normalement (gate inconnu → 400, channel invalide → 400)
@@ -32,7 +32,7 @@ Cas testés automatiquement :
 - `channelToRegenerate` → 200 + 1 seul asset
 - **7 channels simultanés** → 200 + shape vérifiée channel par channel (`subject`, `caption`, `utmCampaign`, etc.)
 
-### Groupe 10 — Appel Anthropic réel (`ANTHROPIC_API_KEY` requis)
+### Groupe 9 — Appel Anthropic réel (`ANTHROPIC_API_KEY` requis)
 
 Ce test fait un vrai appel Anthropic avec les 7 channels (`email`, `sms`, `push`, `instagram`,
 `linkedin`, `facebook`, `partner`) pour valider deux choses critiques :
@@ -55,7 +55,7 @@ $env:DEMO_PASSWORD = "votre_mot_de_passe"
 node scripts/test-routes.mjs
 ```
 
-Ou via le script npm (sans mot de passe — les tests 5–8 seront skippés) :
+Ou via le script npm (sans mot de passe — les tests 5–10 seront skippés) :
 
 ```powershell
 npm run test:local
@@ -65,25 +65,20 @@ npm run test:local
 
 ## Tester la version déployée
 
-Le script accepte une variable `BASE_URL` — il suffit de pointer vers l'URL de prod.
+URL de prod : **https://sparta-copilot.lab.datasport.com**
 
 ```powershell
-$env:BASE_URL      = "https://sparta-copilot.lab.datasport.com"
-$env:DEMO_PASSWORD = "votre_mot_de_passe"
-node scripts/test-routes.mjs
-```
-
-Pour enchaîner en une ligne PowerShell :
-
-```powershell
+# Tests sans Anthropic (groupes 1–8 + [10])
 $env:BASE_URL = "https://sparta-copilot.lab.datasport.com"; $env:DEMO_PASSWORD = "xxx"; node scripts/test-routes.mjs
+
+# Tests complets avec appel Claude réel (groupes 1–10)
+$env:BASE_URL = "https://sparta-copilot.lab.datasport.com"; $env:DEMO_PASSWORD = "xxx"; $env:ANTHROPIC_API_KEY = "sk-ant-..."; node scripts/test-routes.mjs
 ```
 
-> Le `DEMO_PASSWORD` est celui configuré dans les variables d'environnement du serveur
-> (même valeur que `DEMO_PASSWORD` dans `.env.local`).
+> Pas besoin de démarrer le serveur local — le script tape directement sur l'URL distante.
 >
-> **Note** : le test [9] (rate limiting) s'exécute en dernier car il épuise intentionnellement
-> le quota — les tests dry-run [8] doivent tourner avant pour ne pas être bloqués en 429.
+> **Note** : le test [10] (rate limiting) s'exécute en dernier car il épuise intentionnellement
+> le quota — les tests dry-run [8] et l'appel Anthropic réel [9] doivent tourner avant.
 
 ---
 
@@ -92,15 +87,15 @@ $env:BASE_URL = "https://sparta-copilot.lab.datasport.com"; $env:DEMO_PASSWORD =
 | Variable | Défaut | Description |
 |---|---|---|
 | `BASE_URL` | `http://localhost:3000` | URL cible du serveur à tester |
-| `DEMO_PASSWORD` | _(vide)_ | Requis pour les tests [5]–[9] et [10] |
-| `ANTHROPIC_API_KEY` | _(vide)_ | Requis pour le test [10] uniquement (appel Anthropic réel) |
+| `DEMO_PASSWORD` | _(vide)_ | Requis pour les tests [5]–[10] |
+| `ANTHROPIC_API_KEY` | _(vide)_ | Requis pour le test [9] uniquement (appel Anthropic réel) |
 
 **Combinaisons :**
 
 | Env vars | Tests qui tournent |
 |---|---|
 | aucune | [1]–[4] |
-| `DEMO_PASSWORD` | [1]–[9] |
+| `DEMO_PASSWORD` | [1]–[8] + [10] |
 | `DEMO_PASSWORD` + `ANTHROPIC_API_KEY` | [1]–[10] (complet) |
 
 ```powershell
@@ -141,7 +136,7 @@ Si des erreurs de type sont trouvées → le commit est bloqué. Pas de serveur 
 - **Si `localhost:3000` répond** → `node scripts/test-routes.mjs` est lancé. Échec = commit bloqué.
 - **Si le serveur n'est pas démarré** → warning non-bloquant, le commit passe quand même.
 
-Pour avoir les tests auth-dépendants (groupes 5–9) lors des commits, définir `DEMO_PASSWORD`
+Pour avoir les tests auth-dépendants (groupes 5–8 + [10]) lors des commits, définir `DEMO_PASSWORD`
 dans le profil PowerShell (`$PROFILE`) ou dans une variable d'env de session :
 ```powershell
 $env:DEMO_PASSWORD = "votre_mot_de_passe"
